@@ -1,0 +1,13 @@
+# Operating System files
+.DS_Store
+._*
+Thumbs.db
+
+# Files exceeding GitHub 100MB file limit
+uploads/17758900067676.pdf
+uploads/17758900328373.pdf
+
+# Editor & Environment
+.vscode/
+.idea/
+*.log

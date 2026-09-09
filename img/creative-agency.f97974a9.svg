@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="300" viewBox="0 0 240 300">
+    <defs>
+        <linearGradient id="s04y4a1c5a" x1=".343" y1=".618" x2="1.216" y2=".089" gradientUnits="objectBoundingBox">
+            <stop offset="0" stop-color="#ffd1cb"/>
+            <stop offset="1" stop-color="#ffd1cb" stop-opacity="0"/>
+        </linearGradient>
+    </defs>
+    <path data-name="Creative Agency" d="M77.927 300 0 259.362V146.247l84.146 40.121V76.1l84.146 40.638V0L240 37.274v117l-77.927-37.532v110.264l-84.146-40.638z" style="fill:url(#s04y4a1c5a)"/>
+</svg>

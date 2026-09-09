@@ -1,0 +1,24 @@
+User-agent: *
+
+# Global Disallows (Admin, System, and sensitive files)
+
+# Admin & system folders block
+Disallow: /admin/
+Disallow: /config/
+Disallow: /includes/
+Disallow: /assets/
+Disallow: /uploads/temp/
+Disallow: /vendor/
+
+# PHP sensitive files block (Blocks all files ending with .php)
+Disallow: /*.php
+
+# Specific PHP pages that must be blocked (even if the general rule works)
+Disallow: /login.php
+Disallow: /register.php
+
+# Public content is not explicitly 'Allowed' because it is not globally 'Disallowed'.
+# E.g., /property-detail-for/, /projects/, /blog/ are crawlable by default.
+
+# Sitemap location
+Sitemap: https://ikanhousing.com/sitemap.xml
