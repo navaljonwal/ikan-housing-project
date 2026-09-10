@@ -8,13 +8,13 @@
     <?php include 'component/navbar.php'; ?>
 
     <!-- Premium About Hero -->
-    <header class="about-hero" data-aos="fade-down">
+    <!-- <header class="about-hero" data-aos="fade-down">
         <div class="container">
             <div class="about-badge mb-3">Since 2010</div>
             <h1 class="story-title">Crafting <span>Exclusive</span> Real Estate Legacies</h1>
             <p class="text-muted mx-auto" style="max-width: 900px !important;">Transforming Jaipur's landscape with transparency, trust, and unparalleled property expertise for over a decade.</p>
         </div>
-    </header>
+    </header> -->
 
     <!-- Founders' Story & Stats -->
     <section class="py-5 bg-white">
