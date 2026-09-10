@@ -14,81 +14,116 @@ function generateSlug($name, $con)
     return $slug;
 }
 
-// ✅ File Upload Helper (JPEG + Watermark)
-function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", "png", "webp", "pdf"], $maxMB = 5)
+// ✅ File Upload Helper (WebP Support + Watermark + Direct Fallback)
+function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", "png", "webp", "pdf", "jfif", "avif", "gif"], $maxMB = 10)
 {
-    if ($file['error'] !== 0) return "";
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) return "";
+    $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
+    if ($ext === 'jfif') $ext = 'jpg';
     if (!in_array($ext, $allowed)) return "";
-    if ($file['size'] > $maxMB * 1024 * 1024) return "";
+    if (($file['size'] ?? 0) > $maxMB * 1024 * 1024 || ($file['size'] ?? 0) <= 0) return "";
 
-    $newName = time() . rand(1000, 9999);
+    $dest = rtrim($dest, '/') . '/';
+    if (!is_dir($dest)) {
+        @mkdir($dest, 0777, true);
+    }
 
-    // Check if it's an image for processing
-    if (in_array($ext, ["jpg", "jpeg", "png", "webp"])) {
-        $newName .= ".jpg"; // Always save as JPEG
-        
-        // Create source image
-        if ($ext == 'jpg' || $ext == 'jpeg') $src = imagecreatefromjpeg($file['tmp_name']);
-        elseif ($ext == 'png') $src = imagecreatefrompng($file['tmp_name']);
-        elseif ($ext == 'webp') $src = function_exists('imagecreatefromwebp') ? imagecreatefromwebp($file['tmp_name']) : false;
-        else return "";
+    $baseName = time() . rand(1000, 9999);
 
-        if (!$src) return "";
+    if ($ext === 'pdf') {
+        $finalName = $baseName . ".pdf";
+        return @move_uploaded_file($file['tmp_name'], $dest . $finalName) ? $finalName : "";
+    }
 
-        // Apply Watermark
-        $watermark_path = "../assets/img/icon-2.png"; 
-        if (file_exists($watermark_path)) {
-            $watermark = imagecreatefrompng($watermark_path);
-            if ($watermark) {
-                $src_w = (int)imagesx($src);
-                $src_h = (int)imagesy($src);
-                $wm_w = (int)imagesx($watermark);
-                $wm_h = (int)imagesy($watermark);
+    $imageProcessed = false;
+    $finalName = "";
 
-                // Resize watermark to 18% of image width for a ultra-premium look
-                $target_wm_w = (int)($src_w * 0.18);
-                $target_wm_h = (int)($wm_h * ($target_wm_w / $wm_w));
-                
-                $final_wm = imagecreatetruecolor($target_wm_w, $target_wm_h);
-                imagealphablending($final_wm, false);
-                imagesavealpha($final_wm, true);
-                imagecopyresampled($final_wm, $watermark, 0, 0, 0, 0, $target_wm_w, $target_wm_h, $wm_w, $wm_h);
+    // Attempt GD watermark/compression if GD is available
+    if (extension_loaded('gd') && function_exists('imagecreatefromstring')) {
+        $content = @file_get_contents($file['tmp_name']);
+        if ($content !== false) {
+            $src = @imagecreatefromstring($content);
 
-                // ✅ Apply 30% "Ghost" Opacity to the Watermark for a high-end feel
-                imagealphablending($final_wm, false);
-                imagesavealpha($final_wm, true);
-                for ($x = 0; $x < $target_wm_w; $x++) {
-                    for ($y = 0; $y < $target_wm_h; $y++) {
-                        $color = imagecolorat($final_wm, $x, $y);
-                        $alpha = ($color >> 24) & 0xFF; // Original Alpha
-                        // Scale alpha to 30% translucency (Subtle watermark)
-                        $newAlpha = 127 - ((127 - $alpha) * 0.3); 
-                        $newColor = ($color & 0xFFFFFF) | ((int)$newAlpha << 24);
-                        imagesetpixel($final_wm, $x, $y, $newColor);
+            if (!$src) {
+                if (($ext === 'jpg' || $ext === 'jpeg') && function_exists('imagecreatefromjpeg')) {
+                    $src = @imagecreatefromjpeg($file['tmp_name']);
+                } elseif ($ext === 'png' && function_exists('imagecreatefrompng')) {
+                    $src = @imagecreatefrompng($file['tmp_name']);
+                } elseif ($ext === 'webp' && function_exists('imagecreatefromwebp')) {
+                    $src = @imagecreatefromwebp($file['tmp_name']);
+                } elseif ($ext === 'gif' && function_exists('imagecreatefromgif')) {
+                    $src = @imagecreatefromgif($file['tmp_name']);
+                }
+            }
+
+            if ($src) {
+                $watermark_path = "../assets/img/icon-2.png"; 
+                if (file_exists($watermark_path) && function_exists('imagecreatefrompng')) {
+                    $watermark = @imagecreatefrompng($watermark_path);
+                    if ($watermark) {
+                        $src_w = (int)imagesx($src);
+                        $src_h = (int)imagesy($src);
+                        $wm_w = (int)imagesx($watermark);
+                        $wm_h = (int)imagesy($watermark);
+
+                        if ($src_w > 80 && $src_h > 80 && $wm_w > 0 && $wm_h > 0) {
+                            $target_wm_w = max(1, (int)($src_w * 0.18));
+                            $target_wm_h = max(1, (int)($wm_h * ($target_wm_w / $wm_w)));
+
+                            $final_wm = imagecreatetruecolor($target_wm_w, $target_wm_h);
+                            imagealphablending($final_wm, false);
+                            imagesavealpha($final_wm, true);
+                            imagecopyresampled($final_wm, $watermark, 0, 0, 0, 0, $target_wm_w, $target_wm_h, $wm_w, $wm_h);
+
+                            // ✅ Apply 30% "Ghost" Opacity to Watermark
+                            for ($x = 0; $x < $target_wm_w; $x++) {
+                                for ($y = 0; $y < $target_wm_h; $y++) {
+                                    $color = imagecolorat($final_wm, $x, $y);
+                                    $alpha = ($color >> 24) & 0xFF; 
+                                    $newAlpha = 127 - ((127 - $alpha) * 0.3); 
+                                    $newColor = ($color & 0xFFFFFF) | ((int)$newAlpha << 24);
+                                    imagesetpixel($final_wm, $x, $y, $newColor);
+                                }
+                            }
+
+                            $dest_x = max(5, (int)($src_w - $target_wm_w - 40));
+                            $dest_y = max(5, (int)($src_h - $target_wm_h - 40));
+                            imagealphablending($src, true);
+                            imagecopy($src, $final_wm, $dest_x, $dest_y, 0, 0, $target_wm_w, $target_wm_h);
+                            imagedestroy($final_wm);
+                        }
+                        imagedestroy($watermark);
                     }
                 }
 
-                // Position (Bottom Right with 40px Margin for breathing room)
-                $dest_x = (int)($src_w - $target_wm_w - 40);
-                $dest_y = (int)($src_h - $target_wm_h - 40);
-
-                imagealphablending($src, true); 
-                imagecopy($src, $final_wm, $dest_x, $dest_y, 0, 0, $target_wm_w, $target_wm_h);
-                imagedestroy($watermark);
-                imagedestroy($final_wm);
+                if (function_exists('imagewebp')) {
+                    $finalName = $baseName . ".webp";
+                    if (@imagewebp($src, $dest . $finalName, 85)) {
+                        $imageProcessed = true;
+                    }
+                } elseif (function_exists('imagejpeg')) {
+                    $finalName = $baseName . ".jpg";
+                    if (@imagejpeg($src, $dest . $finalName, 90)) {
+                        $imageProcessed = true;
+                    }
+                }
+                imagedestroy($src);
             }
         }
-
-        // Save as high-quality JPEG
-        imagejpeg($src, $dest . $newName, 90);
-        imagedestroy($src);
-        return $newName;
-    } else {
-        // Fallback for PDF/Non-image
-        $newName .= "." . $ext;
-        return move_uploaded_file($file['tmp_name'], $dest . $newName) ? $newName : "";
     }
+
+    if ($imageProcessed && !empty($finalName) && file_exists($dest . $finalName)) {
+        return $finalName;
+    }
+
+    // ✅ Graceful Direct Save Fallback: Never reject a valid image if GD cannot decode/re-encode it
+    $safeExt = in_array($ext, ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"]) ? ($ext === 'jfif' ? 'jpg' : $ext) : "jpg";
+    $fallbackName = $baseName . "." . $safeExt;
+    if (@move_uploaded_file($file['tmp_name'], $dest . $fallbackName)) {
+        return $fallbackName;
+    }
+
+    return "";
 }
 
 $errors = [];
@@ -141,18 +176,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // ✅ Uploads
     $main_image = "";
-    if ($_FILES['main_image']['error'] == 0) {
-        $main_image = uploadFile($_FILES['main_image'], "../../uploads/", ["jpg", "jpeg", "png", "webp"], 2);
-        if (!$main_image) $errors[] = "Main image upload failed. Check format/size.";
+    if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] == UPLOAD_ERR_OK) {
+        $main_image = uploadFile($_FILES['main_image'], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
+        if (!$main_image) $errors[] = "Main image upload failed. Please ensure file is a valid image (JPG, PNG, WebP) under 10MB.";
     } elseif (empty($errors)) {
         // Only require main image if we're not already displaying errors
         $errors[] = "Main image is required.";
     }
 
-    $image1 = uploadFile($_FILES['image1']);
-    $image2 = uploadFile($_FILES['image2']);
-    $image3 = uploadFile($_FILES['image3']);
-    $image4 = uploadFile($_FILES['image4']);
+    $image1 = uploadFile($_FILES['image1'] ?? [], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
+    $image2 = uploadFile($_FILES['image2'] ?? [], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
+    $image3 = uploadFile($_FILES['image3'] ?? [], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
+    $image4 = uploadFile($_FILES['image4'] ?? [], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
     
     $pdf = "";
     if ($_FILES['brochure']['error'] == 0) {
@@ -191,13 +226,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // ✅ Multiple images
             if (!empty($_FILES['images']['name'][0])) {
                 foreach ($_FILES['images']['tmp_name'] as $k => $tmp) {
+                    if (empty($_FILES['images']['name'][$k])) continue;
                     $fileData = [
                         'name' => $_FILES['images']['name'][$k],
                         'tmp_name' => $tmp,
                         'error' => $_FILES['images']['error'][$k],
                         'size' => $_FILES['images']['size'][$k]
                     ];
-                    $img = uploadFile($fileData);
+                    $img = uploadFile($fileData, "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
                     if ($img) mysqli_query($con, "INSERT INTO property_img (property_id,image) VALUES ('$property_id','$img')");
                 }
             }
@@ -241,7 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     'size' => $fileSize
                                 ];
                                 
-                                $fileName = uploadFile($fileData, "../../uploads/", ["jpg", "jpeg", "png", "webp"], 20);
+                                $fileName = uploadFile($fileData, "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 20);
                                 if ($fileName) {
                                     $imgNameEsc = mysqli_real_escape_string($con, $fileName);
                                     $floorSql = "INSERT INTO floor_plane (image, property_id, subcat_id) VALUES ('$imgNameEsc', $property_id, $subcat_id)";
@@ -580,7 +616,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                             <img id="prev-main" src="../assets/img/placeholder-house.webp" class="w-100 h-100 object-fit-cover">
                                                             <div class="preview-overlay">MAIN COVER IMAGE <span class="text-danger">*</span></div>
                                                         </div>
-                                                        <input type="file" name="main_image" id="main_image" class="form-control" onchange="previewImg(this, 'prev-main')" required>
+                                                        <input type="file" name="main_image" id="main_image" class="form-control" accept="image/*" onchange="previewImg(this, 'prev-main')" required>
                                                         <div class="invalid-feedback">Main image is mandatory.</div>
                                                     </div>
                                                     <div class="col-md-9">
@@ -590,7 +626,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                                 <div class="image-upload-wrapper mb-2" style="height: 120px;">
                                                                     <img id="prev-<?=$i?>" src="../assets/img/placeholder-house.webp" class="w-100 h-100 object-fit-cover">
                                                                 </div>
-                                                                <input type="file" name="image<?=$i?>" class="form-control form-control-sm" onchange="previewImg(this, 'prev-<?=$i?>')">
+                                                                <input type="file" name="image<?=$i?>" class="form-control form-control-sm" accept="image/*" onchange="previewImg(this, 'prev-<?=$i?>')">
                                                             </div>
                                                             <?php endfor; ?>
                                                         </div>
@@ -603,7 +639,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <label class="fw-bold">Bulk Gallery Upload</label>
-                                                                    <input type="file" name="images[]" class="form-control" multiple>
+                                                                    <input type="file" name="images[]" class="form-control" accept="image/*" multiple>
                                                                 </div>
                                                             </div>
                                                         </div>

@@ -34,158 +34,242 @@ while($f = mysqli_fetch_assoc($floor_plans_res)) {
     $existing_floor_plans[$f['subcat_id']][] = $f;
 }
 
-// ✅ Improved File Upload Helper (WebP Fallback + Watermark)
-function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", "png", "webp", "pdf"], $maxMB = 5)
+// ✅ Improved File Upload Helper (WebP Support + Watermark + Direct Fallback)
+function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", "png", "webp", "pdf", "jfif", "avif", "gif"], $maxMB = 10)
 {
-    if ($file['error'] !== 0) return "";
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) return "";
+    $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
+    if ($ext === 'jfif') $ext = 'jpg';
     if (!in_array($ext, $allowed)) return "";
-    if ($file['size'] > $maxMB * 1024 * 1024) return "";
+    if (($file['size'] ?? 0) > $maxMB * 1024 * 1024 || ($file['size'] ?? 0) <= 0) return "";
 
-    $newName = time() . rand(1000, 9999);
+    $dest = rtrim($dest, '/') . '/';
+    if (!is_dir($dest)) {
+        @mkdir($dest, 0777, true);
+    }
 
-    if (in_array($ext, ["jpg", "jpeg", "png", "webp"])) {
-        $saveAsWebp = function_exists('imagewebp');
-        $newName .= ($saveAsWebp) ? ".webp" : ".jpg"; 
+    $baseName = time() . rand(1000, 9999);
 
-        if ($ext == 'jpg' || $ext == 'jpeg') $src = imagecreatefromjpeg($file['tmp_name']);
-        elseif ($ext == 'png') $src = imagecreatefrompng($file['tmp_name']);
-        elseif ($ext == 'webp') $src = function_exists('imagecreatefromwebp') ? imagecreatefromwebp($file['tmp_name']) : false;
-        else return "";
+    if ($ext === 'pdf') {
+        $finalName = $baseName . ".pdf";
+        return @move_uploaded_file($file['tmp_name'], $dest . $finalName) ? $finalName : "";
+    }
 
-        if (!$src) return "";
+    $imageProcessed = false;
+    $finalName = "";
 
-        $watermark_path = "../assets/img/icon-2.png"; 
-        if (file_exists($watermark_path)) {
-            $watermark = imagecreatefrompng($watermark_path);
-            if ($watermark) {
-                $src_w = (int)imagesx($src);
-                $src_h = (int)imagesy($src);
-                $wm_w = (int)imagesx($watermark);
-                $wm_h = (int)imagesy($watermark);
-                $target_wm_w = (int)($src_w * 0.18);
-                $target_wm_h = (int)($wm_h * ($target_wm_w / $wm_w));
-                $final_wm = imagecreatetruecolor($target_wm_w, $target_wm_h);
-                imagealphablending($final_wm, false);
-                imagesavealpha($final_wm, true);
-                imagecopyresampled($final_wm, $watermark, 0, 0, 0, 0, $target_wm_w, $target_wm_h, $wm_w, $wm_h);
+    // Attempt GD watermark/compression if GD is available
+    if (extension_loaded('gd') && function_exists('imagecreatefromstring')) {
+        $content = @file_get_contents($file['tmp_name']);
+        if ($content !== false) {
+            $src = @imagecreatefromstring($content);
 
-                // ✅ Apply 30% "Ghost" Opacity to the Watermark for a high-end feel
-                imagealphablending($final_wm, false);
-                imagesavealpha($final_wm, true);
-                for ($x = 0; $x < $target_wm_w; $x++) {
-                    for ($y = 0; $y < $target_wm_h; $y++) {
-                        $color = imagecolorat($final_wm, $x, $y);
-                        $alpha = ($color >> 24) & 0xFF; 
-                        $newAlpha = 127 - ((127 - $alpha) * 0.3); 
-                        $newColor = ($color & 0xFFFFFF) | ((int)$newAlpha << 24);
-                        imagesetpixel($final_wm, $x, $y, $newColor);
+            if (!$src) {
+                if (($ext === 'jpg' || $ext === 'jpeg') && function_exists('imagecreatefromjpeg')) {
+                    $src = @imagecreatefromjpeg($file['tmp_name']);
+                } elseif ($ext === 'png' && function_exists('imagecreatefrompng')) {
+                    $src = @imagecreatefrompng($file['tmp_name']);
+                } elseif ($ext === 'webp' && function_exists('imagecreatefromwebp')) {
+                    $src = @imagecreatefromwebp($file['tmp_name']);
+                } elseif ($ext === 'gif' && function_exists('imagecreatefromgif')) {
+                    $src = @imagecreatefromgif($file['tmp_name']);
+                }
+            }
+
+            if ($src) {
+                $watermark_path = "../assets/img/icon-2.png"; 
+                if (file_exists($watermark_path) && function_exists('imagecreatefrompng')) {
+                    $watermark = @imagecreatefrompng($watermark_path);
+                    if ($watermark) {
+                        $src_w = (int)imagesx($src);
+                        $src_h = (int)imagesy($src);
+                        $wm_w = (int)imagesx($watermark);
+                        $wm_h = (int)imagesy($watermark);
+
+                        if ($src_w > 80 && $src_h > 80 && $wm_w > 0 && $wm_h > 0) {
+                            $target_wm_w = max(1, (int)($src_w * 0.18));
+                            $target_wm_h = max(1, (int)($wm_h * ($target_wm_w / $wm_w)));
+
+                            $final_wm = imagecreatetruecolor($target_wm_w, $target_wm_h);
+                            imagealphablending($final_wm, false);
+                            imagesavealpha($final_wm, true);
+                            imagecopyresampled($final_wm, $watermark, 0, 0, 0, 0, $target_wm_w, $target_wm_h, $wm_w, $wm_h);
+
+                            // ✅ Apply 30% "Ghost" Opacity to Watermark
+                            for ($x = 0; $x < $target_wm_w; $x++) {
+                                for ($y = 0; $y < $target_wm_h; $y++) {
+                                    $color = imagecolorat($final_wm, $x, $y);
+                                    $alpha = ($color >> 24) & 0xFF; 
+                                    $newAlpha = 127 - ((127 - $alpha) * 0.3); 
+                                    $newColor = ($color & 0xFFFFFF) | ((int)$newAlpha << 24);
+                                    imagesetpixel($final_wm, $x, $y, $newColor);
+                                }
+                            }
+
+                            $dest_x = max(5, (int)($src_w - $target_wm_w - 40));
+                            $dest_y = max(5, (int)($src_h - $target_wm_h - 40));
+                            imagealphablending($src, true);
+                            imagecopy($src, $final_wm, $dest_x, $dest_y, 0, 0, $target_wm_w, $target_wm_h);
+                            imagedestroy($final_wm);
+                        }
+                        imagedestroy($watermark);
                     }
                 }
 
-                $dest_x = (int)($src_w - $target_wm_w - 40);
-                $dest_y = (int)($src_h - $target_wm_h - 40);
-                imagealphablending($src, true);
-                imagecopy($src, $final_wm, $dest_x, $dest_y, 0, 0, $target_wm_w, $target_wm_h);
-                imagedestroy($watermark);
-                imagedestroy($final_wm);
+                if (function_exists('imagewebp')) {
+                    $finalName = $baseName . ".webp";
+                    if (@imagewebp($src, $dest . $finalName, 85)) {
+                        $imageProcessed = true;
+                    }
+                } elseif (function_exists('imagejpeg')) {
+                    $finalName = $baseName . ".jpg";
+                    if (@imagejpeg($src, $dest . $finalName, 90)) {
+                        $imageProcessed = true;
+                    }
+                }
+                imagedestroy($src);
             }
         }
-        if ($saveAsWebp) {
-            imagewebp($src, $dest . $newName, 80);
-        } else {
-            imagejpeg($src, $dest . $newName, 90);
-        }
-        imagedestroy($src);
-        return $newName;
-    } else {
-        $newName .= "." . $ext;
-        return move_uploaded_file($file['tmp_name'], $dest . $newName) ? $newName : "";
     }
+
+    if ($imageProcessed && !empty($finalName) && file_exists($dest . $finalName)) {
+        return $finalName;
+    }
+
+    // ✅ Graceful Direct Save Fallback: Never reject a valid image if GD cannot decode/re-encode it
+    $safeExt = in_array($ext, ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"]) ? ($ext === 'jfif' ? 'jpg' : $ext) : "jpg";
+    $fallbackName = $baseName . "." . $safeExt;
+    if (@move_uploaded_file($file['tmp_name'], $dest . $fallbackName)) {
+        return $fallbackName;
+    }
+
+    return "";
+}
+
+function postEsc($con, $key, $default = '') {
+    return mysqli_real_escape_string($con, (string)($_POST[$key] ?? $default));
+}
+
+function priceToInt($price) {
+    $price = strtolower(trim((string)$price));
+    $price = str_replace([' ', ','], '', $price);
+    if (strpos($price, 'cr') !== false) return (int)(floatval($price) * 10000000);
+    if (strpos($price, 'lac') !== false || strpos($price, 'lakh') !== false) return (int)(floatval($price) * 100000);
+    return (int)$price;
+}
+
+function sqlDateOrNull($con, $value) {
+    $value = trim((string)$value);
+    if ($value === '' || $value === '0000-00-00') {
+        return 'NULL';
+    }
+    return "'" . mysqli_real_escape_string($con, $value) . "'";
+}
+
+function uploadedFileError($field) {
+    return $_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE;
 }
 
 // ✅ Handle Update
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $propertyname = mysqli_real_escape_string($con, $_POST['project_name']);
-    $buildername = mysqli_real_escape_string($con, $_POST['buildername']);
-    $minprice = mysqli_real_escape_string($con, $_POST['min-price']);
-    $maxprice = mysqli_real_escape_string($con, $_POST['max-price']);
-    $location = mysqli_real_escape_string($con, $_POST['location']);
-    $rera_no = mysqli_real_escape_string($con, $_POST['rera_no']);
-    $bhk = mysqli_real_escape_string($con, $_POST['bhk']);
-    $video_link = mysqli_real_escape_string($con, $_POST['video_link']);
-    $bigha = mysqli_real_escape_string($con, $_POST['bigha']);
-    $unit = mysqli_real_escape_string($con, $_POST['units']);
-    $floor = mysqli_real_escape_string($con, $_POST['floor']);
-    $block = mysqli_real_escape_string($con, $_POST['blocks']);
-    $status = mysqli_real_escape_string($con, $_POST['status']);
-    $trend = mysqli_real_escape_string($con, $_POST['trending']);
-    $project_type = mysqli_real_escape_string($con, $_POST['project_type']);
-    $launch = mysqli_real_escape_string($con, $_POST['launch_date']);
-    $possession = mysqli_real_escape_string($con, $_POST['possession_date']);
-    $furnish = mysqli_real_escape_string($con, $_POST['furnish']);
-    $construct = mysqli_real_escape_string($con, $_POST['construct']);
-    $map = mysqli_real_escape_string($con, $_POST['map']);
-    $highlight = mysqli_real_escape_string($con, $_POST['highlights']);
-    $other_key_feature = mysqli_real_escape_string($con, $_POST['other_key_feature']);
+    $propertyname = postEsc($con, 'project_name');
+    $buildername = postEsc($con, 'buildername');
+    $minprice = postEsc($con, 'min-price');
+    $maxprice = postEsc($con, 'max-price');
+    $location = postEsc($con, 'location');
+    $bhk = postEsc($con, 'bhk');
+    $video_link = postEsc($con, 'video_link');
+    $bigha = (int)($_POST['bigha'] ?? 0);
+    $unit = (int)($_POST['units'] ?? 0);
+    $floor = (int)($_POST['floor'] ?? 0);
+    $block = (int)($_POST['blocks'] ?? 0);
+    $status = (int)($_POST['status'] ?? 0);
+    $trend = (int)($_POST['trending'] ?? 0);
+    $project_type = (int)($_POST['project_type'] ?? 0);
+    $launchSql = sqlDateOrNull($con, $_POST['launch_date'] ?? '');
+    $possessionSql = sqlDateOrNull($con, $_POST['possession_date'] ?? '');
+    $furnish = postEsc($con, 'furnish');
+    $construct = postEsc($con, 'construct');
+    $map = postEsc($con, 'map');
+    $highlight = postEsc($con, 'highlights');
+    $other_key_feature = postEsc($con, 'other_key_feature');
+
+    if (($_POST['rera_type'] ?? '') === 'jda') {
+        $rera_no = 'JDA Approved';
+    } else {
+        $rera_no = postEsc($con, 'rera_no');
+    }
 
     // ✅ Required Validation
     if (!$propertyname) $errors[] = "Project name is required.";
     if (!$location) $errors[] = "Location is required.";
     if (!$buildername) $errors[] = "Builder name is required.";
-
-    // Price Conversion
-    function priceToInt($price) {
-        $price = strtolower(trim($price));
-        $price = str_replace([' ', ','], '', $price);
-        if (strpos($price, 'cr') !== false) return (int)(floatval($price) * 10000000);
-        if (strpos($price, 'lac') !== false || strpos($price, 'lakh') !== false) return (int)(floatval($price) * 100000);
-        return (int)$price;
+    if (($_POST['rera_type'] ?? '') === 'rera' && $rera_no === '') {
+        $errors[] = "RERA Number is required.";
     }
+
     $min_price_int = priceToInt($minprice);
     $max_price_int = priceToInt($maxprice);
 
     // Image Upload Handling (Processed)
     $main_image = $edit['main_image'];
-    if ($_FILES['main_image']['error'] == 0) {
-        $new_main = uploadFile($_FILES['main_image']);
-        if ($new_main) $main_image = $new_main;
-        else $errors[] = "Main Image upload failed (Max 2MB).";
+    if (uploadedFileError('main_image') == UPLOAD_ERR_OK) {
+        $new_main = uploadFile($_FILES['main_image'], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
+        if ($new_main) {
+            $main_image = $new_main;
+        } else {
+            $errors[] = "Main Image upload failed. Please ensure file is a valid image (JPG, PNG, WebP) under 10MB.";
+        }
+    } elseif (uploadedFileError('main_image') != UPLOAD_ERR_NO_FILE) {
+        $errors[] = "Main Image upload error code: " . uploadedFileError('main_image');
     }
 
     for($i=1; $i<=4; $i++) {
         $var = "image".$i;
         $db_var = "image_".$i;
         $$var = $edit[$db_var];
-        if ($_FILES[$var]['error'] == 0) {
-            $new_img = uploadFile($_FILES[$var]);
-            if ($new_img) $$var = $new_img;
-            else $errors[] = "Gallery Image $i upload failed.";
+        if (uploadedFileError($var) == UPLOAD_ERR_OK) {
+            $new_img = uploadFile($_FILES[$var], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
+            if ($new_img) {
+                $$var = $new_img;
+            } else {
+                $errors[] = "Gallery Image $i upload failed. Please ensure file is a valid image under 10MB.";
+            }
+        } elseif (uploadedFileError($var) != UPLOAD_ERR_NO_FILE) {
+            $errors[] = "Gallery Image $i upload error code: " . uploadedFileError($var);
         }
     }
 
     $pdf = $edit['brochure'];
-    if ($_FILES['brochure']['error'] == 0) {
+    $brochureErr = uploadedFileError('brochure');
+    if ($brochureErr == 0) {
         $new_pdf = uploadFile($_FILES['brochure'], "../../uploads/", ["pdf"], 200);
         if ($new_pdf) $pdf = $new_pdf;
         else $errors[] = "Brochure (PDF) upload failed. Max 200MB.";
-    } elseif ($_FILES['brochure']['error'] != 4) {
-        $errors[] = "Brochure upload error code: " . $_FILES['brochure']['error'];
+    } elseif ($brochureErr != UPLOAD_ERR_NO_FILE) {
+        $errors[] = "Brochure upload error code: " . $brochureErr;
     }
 
     if (empty($errors)) {
-        // Main Update Query
+        $id = (int)$id;
         $updateSql = "UPDATE new_property SET 
             project_name='$propertyname', builder_name='$buildername', max_price_int='$max_price_int', min_price_int='$min_price_int', 
             min_price='$minprice', max_price='$maxprice', location='$location', rera_no='$rera_no', bhk='$bhk', video_link='$video_link', 
             map='$map', highlight='$highlight', other_key_feature='$other_key_feature', bigha='$bigha', unit='$unit', floor='$floor', 
-            block='$block', status='$status', trending='$trend', project_type='$project_type', launch_date='$launch', 
-            possession_date='$possession', furnish_type='$furnish', construct_Status='$construct', main_image='$main_image', 
+            block='$block', status='$status', trending='$trend', project_type='$project_type', launch_date=$launchSql, 
+            possession_date=$possessionSql, furnish_type='$furnish', construct_Status='$construct', main_image='$main_image', 
             image_1='$image1', image_2='$image2', image_3='$image3', image_4='$image4', brochure='$pdf' 
             WHERE id=$id";
 
-        if (mysqli_query($con, $updateSql)) {
+        try {
+            $updated = mysqli_query($con, $updateSql);
+        } catch (mysqli_sql_exception $e) {
+            $updated = false;
+            $errors[] = "Database Error: " . $e->getMessage();
+        }
+
+        if ($updated) {
             // Update Amenities
             mysqli_query($con, "DELETE FROM property_amenities WHERE property_id='$id'");
             if (!empty($_POST['amenities'])) {
@@ -233,7 +317,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     'size' => $fileSize
                                 ];
                                 
-                                $fileName = uploadFile($fileData, "../../uploads/", ["jpg", "jpeg", "png", "webp"], 20);
+                                $fileName = uploadFile($fileData, "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 20);
                                 if ($fileName) {
                                     $imgNameEsc = mysqli_real_escape_string($con, $fileName);
                                     $floorSql = "INSERT INTO floor_plane (image, property_id, subcat_id) VALUES ('$imgNameEsc', $pid_int, $subcat_id)";
@@ -254,13 +338,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Add More Images (Gallery - Processed)
             if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
                 foreach ($_FILES['images']['tmp_name'] as $key => $tmp) {
+                    if (empty($_FILES['images']['name'][$key])) continue;
                     $fileData = [
                         'name' => $_FILES['images']['name'][$key],
                         'tmp_name' => $tmp,
                         'error' => $_FILES['images']['error'][$key],
                         'size' => $_FILES['images']['size'][$key]
                     ];
-                    $newName = uploadFile($fileData);
+                    $newName = uploadFile($fileData, "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
                     if ($newName) {
                         mysqli_query($con, "INSERT INTO property_img (property_id, image) VALUES ('$id', '$newName')");
                     }
@@ -269,7 +354,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             header('Location: new_property');
             exit;
-        } else {
+        } elseif (empty($errors)) {
             $errors[] = "Database Error: " . mysqli_error($con);
         }
     }
@@ -361,7 +446,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                     <div class="row">
                         <div class="col-md-12">
-                            <form name="PropertyForm" action="" enctype="multipart/form-data" method="POST">
+                            <form name="PropertyForm" id="PropertyForm" action="" enctype="multipart/form-data" method="POST" novalidate onsubmit="return validateForm()">
                                 <div class="card card-round border-0 shadow-sm overflow-hidden">
                                     <div class="card-header bg-white p-0">
                                         <ul class="nav nav-pills nav-pills-premium mb-0" id="pills-tab" role="tablist">
@@ -575,7 +660,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                             <img id="prev-main" src="../../uploads/<?= $edit['main_image'] ?>" class="w-100 h-100 object-fit-cover">
                                                             <div class="preview-overlay">CURRENT MAIN COVER</div>
                                                         </div>
-                                                        <input type="file" name="main_image" class="form-control" onchange="previewImg(this, 'prev-main')">
+                                                        <input type="file" name="main_image" class="form-control" accept="image/*" onchange="previewImg(this, 'prev-main')">
                                                     </div>
                                                     <div class="col-md-9">
                                                         <div class="row g-2 mb-3">
@@ -587,7 +672,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                                 <div class="image-upload-wrapper mb-2" style="height: 120px;">
                                                                     <img id="prev-<?=$i?>" src="<?=$src?>" class="w-100 h-100 object-fit-cover">
                                                                 </div>
-                                                                <input type="file" name="image<?=$i?>" class="form-control form-control-sm" onchange="previewImg(this, 'prev-<?=$i?>')">
+                                                                <input type="file" name="image<?=$i?>" class="form-control form-control-sm" accept="image/*" onchange="previewImg(this, 'prev-<?=$i?>')">
                                                             </div>
                                                             <?php endfor; ?>
                                                         </div>
@@ -613,7 +698,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <label class="fw-bold">Upload New Gallery Images</label>
-                                                                    <input type="file" name="images[]" class="form-control" multiple>
+                                                                    <input type="file" name="images[]" class="form-control" accept="image/*" multiple>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -662,13 +747,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="mt-4 text-center">
-                                                    <button type="submit" class="btn btn-primary btn-round px-5 py-3 shadow">
-                                                        <i class="fas fa-save me-2"></i>SAVE UPDATED LISTING
-                                                    </button>
-                                                </div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="card-footer bg-white text-center py-4">
+                                        <button type="submit" class="btn btn-primary btn-round px-5 py-3 shadow">
+                                            <i class="fas fa-save me-2"></i>SAVE UPDATED LISTING
+                                        </button>
                                     </div>
                                 </div>
                             </form>
@@ -677,126 +762,179 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </div>
 
+            <script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script>
+            <script>
+                let ckEditor1, ckEditor2;
+
+                ClassicEditor.create(document.querySelector('#editor1'))
+                    .then(editor => { ckEditor1 = editor; })
+                    .catch(err => console.error('CKEditor1 Error:', err));
+
+                ClassicEditor.create(document.querySelector('#editor2'))
+                    .then(editor => { ckEditor2 = editor; })
+                    .catch(err => console.error('CKEditor2 Error:', err));
+
+                function markTabError(el) {
+                    const pane = el.closest('.tab-pane');
+                    if (!pane) return;
+                    const tabBtn = document.querySelector(`[data-bs-target="#${pane.id}"]`);
+                    if (tabBtn) tabBtn.style.borderBottom = "3px solid red";
+                }
+
+                function validateForm() {
+                    const form = document.getElementById('PropertyForm');
+                    let isValid = true;
+
+                    document.querySelectorAll('.nav-link').forEach(btn => btn.style.borderBottom = "");
+
+                    form.querySelectorAll('input[required], select[required]').forEach(input => {
+                        if (input.type === 'file' || input.style.display === 'none') return;
+                        if (!String(input.value || '').trim()) {
+                            input.classList.add('is-invalid');
+                            isValid = false;
+                            markTabError(input);
+                        } else {
+                            input.classList.remove('is-invalid');
+                        }
+                    });
+
+                    const reraType = document.getElementById('rera_type').value;
+                    const reraNo = document.getElementById('rera_no');
+                    if (reraType === 'rera' && !reraNo.value.trim()) {
+                        reraNo.classList.add('is-invalid');
+                        isValid = false;
+                        markTabError(reraNo);
+                    } else {
+                        reraNo.classList.remove('is-invalid');
+                    }
+
+                    if (!isValid) {
+                        const firstBadTab = document.querySelector('.nav-link[style*="red"]');
+                        if (firstBadTab && window.bootstrap) {
+                            new bootstrap.Tab(firstBadTab).show();
+                        }
+                        alert('Please fill all mandatory fields. Check the highlighted tabs.');
+                        return false;
+                    }
+
+                    if (ckEditor1) document.querySelector('#editor1').value = ckEditor1.getData();
+                    if (ckEditor2) document.querySelector('#editor2').value = ckEditor2.getData();
+                    return true;
+                }
+
+                // Initialize AOS
+                AOS.init({
+                    duration: 800,
+                    on: 'ease-in-out',
+                    once: true
+                });
+
+                document.getElementById('rera_type').addEventListener('change', function() {
+                    document.getElementById('rera_no').style.display = this.value === 'rera' ? 'block' : 'none';
+                });
+
+                function formatPrice(val) {
+                    if(!val) return '₹ 0';
+                    return '₹ ' + val;
+                }
+                function updateVisualizer() {
+                    const min = document.getElementById('minPriceInput').value;
+                    const max = document.getElementById('maxPriceInput').value;
+                    document.getElementById('priceVisualizer').textContent = `${formatPrice(min)} - ${formatPrice(max)}`;
+                }
+                document.getElementById('minPriceInput').addEventListener('input', updateVisualizer);
+                document.getElementById('maxPriceInput').addEventListener('input', updateVisualizer);
+
+                // ✅ Floor Plan & Sub-Category Intelligence (Edited version)
+                const categorySelect = document.getElementById('category');
+                const subcatContainer = document.getElementById('subcat-container');
+                const currentSubcats = <?= json_encode($current_subcats) ?>;
+                const currentFloorPlans = <?= json_encode($existing_floor_plans) ?>;
+
+                function loadSubcategories(catId) {
+                    if(!catId) return;
+                    subcatContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
+
+                    fetch(`get_subcategories.php?cat_id=${catId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if(data.success && data.data.length > 0) {
+                                subcatContainer.innerHTML = '';
+                                data.data.forEach(sub => {
+                                    const isChecked = currentSubcats.includes(sub.id.toString()) || currentSubcats.includes(parseInt(sub.id));
+                                    const existingPlans = currentFloorPlans[sub.id] || [];
+                                    
+                                    const subRow = document.createElement('div');
+                                    subRow.className = 'subcat-item mb-3 p-3 border rounded bg-white shadow-sm';
+                                    
+                                    let existingHtml = '';
+                                    if(existingPlans.length > 0) {
+                                        existingHtml = `<div class="existing-plans row g-2 mb-2">`;
+                                        existingPlans.forEach(plan => {
+                                            existingHtml += `
+                                                <div class="col-md-3">
+                                                    <div class="position-relative border rounded overflow-hidden" style="height: 80px;">
+                                                        <img src="../../uploads/${plan.image}" class="w-100 h-100 object-fit-cover">
+                                                        <a href="delete_floorplane_img?img=${plan.image}&pid=<?= $id ?>" 
+                                                           onclick="return confirm('Delete this floor plan?')"
+                                                           class="position-absolute top-0 end-0 bg-danger text-white p-1" style="font-size:10px;">
+                                                           <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        });
+                                        existingHtml += `</div>`;
+                                    }
+
+                                    subRow.innerHTML = `
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input subcat-checkbox" type="checkbox" name="subcat[]" value="${sub.id}" id="sub-${sub.id}" ${isChecked ? 'checked' : ''}>
+                                            <label class="form-check-label fw-bold" for="sub-${sub.id}">${sub.name}</label>
+                                        </div>
+                                        ${existingHtml}
+                                        <div class="floor-upload-box ms-4" id="floor-box-${sub.id}" style="${isChecked ? 'display:block;' : 'display:none;'}">
+                                            <label class="small text-muted mb-1 d-block"><i class="fas fa-upload me-1"></i> Upload New Floor Plan for ${sub.name}</label>
+                                            <input type="file" name="images_floor[${sub.id}][]" class="form-control form-control-sm" multiple accept="image/*">
+                                        </div>
+                                    `;
+                                    subcatContainer.appendChild(subRow);
+                                });
+
+                                // Add listeners
+                                document.querySelectorAll('.subcat-checkbox').forEach(chk => {
+                                    chk.addEventListener('change', function() {
+                                        const subId = this.value;
+                                        document.getElementById(`floor-box-${subId}`).style.display = this.checked ? 'block' : 'none';
+                                    });
+                                });
+                            } else {
+                                subcatContainer.innerHTML = '<p class="text-danger small mb-0">No sub-categories found.</p>';
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            subcatContainer.innerHTML = '<p class="text-danger small mb-0">Error loading sub-categories.</p>';
+                        });
+                }
+
+                // Initialize on load
+                if(categorySelect.value) loadSubcategories(categorySelect.value);
+                
+                // Change listener
+                categorySelect.addEventListener('change', function() {
+                    loadSubcategories(this.value);
+                });
+
+                function previewImg(input, target) {
+                    if (input.files && input.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = e => document.getElementById(target).src = e.target.result;
+                        reader.readAsDataURL(input.files[0]);
+                    }
+                }
+            </script>
+
             <?php include('../components/viewFooter.php'); ?>
         </div>
     </div>
-
-    <script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script>
-    <script>
-        ClassicEditor.create(document.querySelector('#editor1')).catch(err => console.error(err));
-        ClassicEditor.create(document.querySelector('#editor2')).catch(err => console.error(err));
-        
-        // Initialize AOS
-        AOS.init({
-            duration: 800,
-            on: 'ease-in-out',
-            once: true
-        });
-
-        document.getElementById('rera_type').addEventListener('change', function() {
-            document.getElementById('rera_no').style.display = this.value === 'rera' ? 'block' : 'none';
-        });
-
-        function formatPrice(val) {
-            if(!val) return '₹ 0';
-            return '₹ ' + val;
-        }
-        function updateVisualizer() {
-            const min = document.getElementById('minPriceInput').value;
-            const max = document.getElementById('maxPriceInput').value;
-            document.getElementById('priceVisualizer').textContent = `${formatPrice(min)} - ${formatPrice(max)}`;
-        }
-        document.getElementById('minPriceInput').addEventListener('input', updateVisualizer);
-        document.getElementById('maxPriceInput').addEventListener('input', updateVisualizer);
-
-        // ✅ Floor Plan & Sub-Category Intelligence (Edited version)
-        const categorySelect = document.getElementById('category');
-        const subcatContainer = document.getElementById('subcat-container');
-        const currentSubcats = <?= json_encode($current_subcats) ?>;
-        const currentFloorPlans = <?= json_encode($existing_floor_plans) ?>;
-
-        function loadSubcategories(catId) {
-            if(!catId) return;
-            subcatContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
-
-            fetch(`get_subcategories.php?cat_id=${catId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if(data.success && data.data.length > 0) {
-                        subcatContainer.innerHTML = '';
-                        data.data.forEach(sub => {
-                            const isChecked = currentSubcats.includes(sub.id.toString()) || currentSubcats.includes(parseInt(sub.id));
-                            const existingPlans = currentFloorPlans[sub.id] || [];
-                            
-                            const subRow = document.createElement('div');
-                            subRow.className = 'subcat-item mb-3 p-3 border rounded bg-white shadow-sm';
-                            
-                            let existingHtml = '';
-                            if(existingPlans.length > 0) {
-                                existingHtml = `<div class="existing-plans row g-2 mb-2">`;
-                                existingPlans.forEach(plan => {
-                                    existingHtml += `
-                                        <div class="col-md-3">
-                                            <div class="position-relative border rounded overflow-hidden" style="height: 80px;">
-                                                <img src="../../uploads/${plan.image}" class="w-100 h-100 object-fit-cover">
-                                                <a href="delete_floorplane_img?img=${plan.image}&pid=<?= $id ?>" 
-                                                   onclick="return confirm('Delete this floor plan?')"
-                                                   class="position-absolute top-0 end-0 bg-danger text-white p-1" style="font-size:10px;">
-                                                   <i class="fas fa-trash"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    `;
-                                });
-                                existingHtml += `</div>`;
-                            }
-
-                            subRow.innerHTML = `
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input subcat-checkbox" type="checkbox" name="subcat[]" value="${sub.id}" id="sub-${sub.id}" ${isChecked ? 'checked' : ''}>
-                                    <label class="form-check-label fw-bold" for="sub-${sub.id}">${sub.name}</label>
-                                </div>
-                                ${existingHtml}
-                                <div class="floor-upload-box ms-4" id="floor-box-${sub.id}" style="${isChecked ? 'display:block;' : 'display:none;'}">
-                                    <label class="small text-muted mb-1 d-block"><i class="fas fa-upload me-1"></i> Upload New Floor Plan for ${sub.name}</label>
-                                    <input type="file" name="images_floor[${sub.id}][]" class="form-control form-control-sm" multiple accept="image/*">
-                                </div>
-                            `;
-                            subcatContainer.appendChild(subRow);
-                        });
-
-                        // Add listeners
-                        document.querySelectorAll('.subcat-checkbox').forEach(chk => {
-                            chk.addEventListener('change', function() {
-                                const subId = this.value;
-                                document.getElementById(`floor-box-${subId}`).style.display = this.checked ? 'block' : 'none';
-                            });
-                        });
-                    } else {
-                        subcatContainer.innerHTML = '<p class="text-danger small mb-0">No sub-categories found.</p>';
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    subcatContainer.innerHTML = '<p class="text-danger small mb-0">Error loading sub-categories.</p>';
-                });
-        }
-
-        // Initialize on load
-        if(categorySelect.value) loadSubcategories(categorySelect.value);
-        
-        // Change listener
-        categorySelect.addEventListener('change', function() {
-            loadSubcategories(this.value);
-        });
-
-        function previewImg(input, target) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => document.getElementById(target).src = e.target.result;
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-    </script>
-</body>
-</html>
