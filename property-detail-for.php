@@ -2,18 +2,42 @@
 include 'config.php'; // database connection file
 
 // Get property slug from URL
-$slug = isset($_GET['slug']) ? mysqli_real_escape_string($con, $_GET['slug']) : '';
+$slug = isset($_GET['slug']) ? mysqli_real_escape_string($con, trim($_GET['slug'])) : '';
 
-// Fetch property data using slug
-$sql = "SELECT * FROM new_property WHERE slug = '$slug' LIMIT 1";
-$result = mysqli_query($con, $sql);
-$property = mysqli_fetch_assoc($result);
+$property = null;
+if (!empty($slug)) {
+  // Fetch property data using slug
+  $sql = "SELECT * FROM new_property WHERE slug = '$slug' LIMIT 1";
+  $result = mysqli_query($con, $sql);
+  if ($result && mysqli_num_rows($result) > 0) {
+    $property = mysqli_fetch_assoc($result);
+  }
+}
 
-// If no data found, redirect or show error
+// If no property found by slug, fallback to latest active property
 if (!$property) {
-  echo "Property not found!";
+  $sql = "SELECT * FROM new_property WHERE status = 1 ORDER BY id DESC LIMIT 1";
+  $result = mysqli_query($con, $sql);
+  if ($result && mysqli_num_rows($result) > 0) {
+    $property = mysqli_fetch_assoc($result);
+  }
+}
+
+// If still none, fallback to latest any property
+if (!$property) {
+  $sql = "SELECT * FROM new_property ORDER BY id DESC LIMIT 1";
+  $result = mysqli_query($con, $sql);
+  if ($result && mysqli_num_rows($result) > 0) {
+    $property = mysqli_fetch_assoc($result);
+  }
+}
+
+// If no data found at all
+if (!$property) {
+  echo "<div style='text-align:center; padding:60px 20px; font-family:sans-serif;'><h2>No Property Available</h2><p>Please add properties from the admin panel.</p></div>";
   exit;
 }
+$slug = $property['slug'] ?? '';
 
 // Trending Properties (alag query)
 $similar_query = "SELECT * FROM new_property WHERE status = 1 AND trending = 1 ORDER BY RAND()";
@@ -71,8 +95,55 @@ if ($property['construct_Status'] == 0) {
   $constructText = 'Not specified';
 }
 
-$flats = '';
 $flats = 'Flat';
+
+// 💎 Clean Display Helpers
+$raw_min_price = trim($property['min_price'] ?? '');
+$raw_max_price = trim($property['max_price'] ?? '');
+$min_price_display = $raw_min_price;
+if (!empty($min_price_display) && !preg_match('/^[₹\s]|Rs/u', $min_price_display)) {
+  $min_price_display = '₹' . $min_price_display;
+}
+$max_price_display = $raw_max_price;
+if (!empty($max_price_display) && !preg_match('/^[₹\s]|Rs/u', $max_price_display)) {
+  $max_price_display = '₹' . $max_price_display;
+}
+
+if (!empty($min_price_display) && !empty($max_price_display)) {
+  $price_range_display = $min_price_display . ' – ' . $max_price_display;
+} elseif (!empty($min_price_display)) {
+  $price_range_display = $min_price_display;
+} elseif (!empty($max_price_display)) {
+  $price_range_display = $max_price_display;
+} else {
+  $price_range_display = 'Price on Request';
+}
+
+// Clean RERA ID
+$raw_desc_content = $property['other_key_feature'] ?? '';
+$rera_display = trim($property['rera_no'] ?? '');
+if (empty($rera_display) || strtoupper($rera_display) === 'N/A' || $rera_display === '0') {
+  if (preg_match('/RAJ\/P\/\d+\/\d+/i', $raw_desc_content, $rera_matches)) {
+    $rera_display = $rera_matches[0];
+  } else {
+    $rera_display = 'N/A';
+  }
+}
+
+// Clean Possession Date
+$possession_display = trim($property['possession_date'] ?? '');
+if (!empty($possession_display) && $possession_display !== '0000-00-00' && strtotime($possession_display) !== false) {
+  $possession_display = date('F Y', strtotime($possession_display));
+} else {
+  $possession_display = 'Contact for Details';
+}
+
+// Clean Carpet & Build-up Area
+$carpet_val = (int)($property['bigha'] ?? 0);
+$carpet_display = ($carpet_val > 0) ? $carpet_val . ' sq.ft' : 'On Request';
+
+$buildup_val = (int)($property['unit'] ?? 0);
+$buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
 ?>
 
 
@@ -109,8 +180,8 @@ $flats = 'Flat';
             <span style="color:#64748b;"><i class="fa fa-map-marker-alt" style="color:#c02a7c; margin-right:5px;"></i> <?= htmlspecialchars($property['location']) ?></span>
           </p>
           <div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
-            <span class="<?= ($property['rera_no'] != 'JDA Approved') ? 'badge bg-light text-success border' : 'jda-badge' ?>" style="padding: 8px 14px; font-size: 13px; font-weight: 700; border-radius: 8px;">
-                <?= ($property['rera_no'] != 'JDA Approved') ? '✔ RERA Approved' : '✔ JDA Approved' ?>
+            <span class="<?= ($rera_display !== 'N/A') ? 'badge bg-light text-success border' : 'badge bg-light text-secondary border' ?>" style="padding: 8px 14px; font-size: 13px; font-weight: 700; border-radius: 8px;">
+                <?= ($rera_display !== 'N/A') ? '✔ RERA: ' . htmlspecialchars($rera_display) : '✔ Verified Property' ?>
             </span>
             <span class="badge bg-light text-secondary border" style="padding: 8px 14px; font-size: 13px; font-weight: 700; border-radius: 8px;">
               <i class="fa fa-calendar-alt me-1" style="color:#c02a7c;"></i>
@@ -127,7 +198,7 @@ $flats = 'Flat';
         </div>
         <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
           <div class="price-label">Estimated Price</div>
-          <div class="header-price" style="color: #c02a7c;">₹<?= htmlspecialchars($property['min_price']) ?> – <?= htmlspecialchars($property['max_price']) ?></div>
+          <div class="header-price" style="color: #c02a7c; white-space: nowrap;"><?= htmlspecialchars($price_range_display) ?></div>
         </div>
       </div>
 
@@ -207,33 +278,35 @@ $flats = 'Flat';
     </div>
   </section>
 
-  <!-- Hidden Popup Slider (Kept Intact) -->
-  <div id="popup" class="popup popup-v">
-    <div class="popup-content">
-      <span class="close" onclick="document.getElementById('popup').style.display='none'">&times;</span>
-      <div class="popup-slider">
-        <?php foreach ($images as $img): ?>
-          <div class="popup-slide">
-            <img src="uploads/<?php echo trim($img); ?>" alt="Property Image" loading="lazy">
-          </div>
-        <?php endforeach; ?>
-      </div>
-      <a class="prevv">❮</a>
-      <a class="nextt">❯</a>
-    </div>
-  </div>
   <section class="property-section py-4">
     <div class="container">
       <div class="row g-4">
 
         <!-- Left Side -->
-        <div class="col-12  col-lg-8">
+        <div class="col-12 col-lg-8">
           <div class="col-md-12 rtyu">
             <div class="detl-rd" data-aos="fade-down" data-aos-duration="1000">
-              <!-- <img style="width: 90px;" src="uploads/<?php echo htmlspecialchars($property['logo']); ?>" alt="error in loading image"> -->
-              <!-- <img style="width: 90px;" src="uploads/<?php echo htmlspecialchars($property['logo']); ?>" alt="error in loading image"> -->
-              <h3 class="vh">About Project</h3>
-              <p style="color: #475569; line-height: 1.8; font-size: 15px;"><?php echo $property['other_key_feature']; ?></p>
+              <h3 class="vh mb-3">About Project</h3>
+              <div class="property-rich-desc">
+                <?php 
+                $desc = trim($property['other_key_feature'] ?? '');
+                if (!empty($desc)) {
+                  // Clean SEO & prompt meta blocks that leaked into description
+                  $desc = preg_replace('/<h[1-6][^>]*>.*?SEO.*?<\/h[1-6]>/si', '', $desc);
+                  $desc = preg_replace('/<p[^>]*>.*?\(Targeting.*?<\/p>/si', '', $desc);
+                  $desc = preg_replace('/<p[^>]*>.*?Title:.*?<\/p>/si', '', $desc);
+                  $desc = preg_replace('/<p[^>]*>.*?Meta(?:&nbsp;|\s)*Description:.*?<\/p>/si', '', $desc);
+                  // Remove empty 3rd table column cells
+                  $desc = str_replace('<td>&nbsp;</td>', '', $desc);
+                  $desc = str_replace('<td></td>', '', $desc);
+                  // Clean empty paragraphs
+                  $desc = preg_replace('/<p[^>]*>(&nbsp;|\s)*<\/p>/si', '', $desc);
+                  echo $desc;
+                } else {
+                  echo '<p class="text-muted">Detailed project description will be updated soon.</p>';
+                }
+                ?>
+              </div>
 
               <!-- Premium Brochure Action Card -->
               <div class="brochure-card-premium mt-4 p-4 d-flex align-items-center gap-4 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 20px; border: 1px solid #e2e8f0;">
@@ -244,17 +317,35 @@ $flats = 'Flat';
                   <h5 style="font-weight: 800; color: #0f172a; margin-bottom: 4px;">Project Brochure</h5>
                   <p style="color: #64748b; font-size: 13px; margin: 0; font-weight: 500;">Download complete project details, floor plans & specifications.</p>
                 </div>
-                <a href="uploads/<?= htmlspecialchars($property['brochure']); ?>" class="btn-premium-brochure" download style="background: #c02a7c; color: white; padding: 12px 25px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(192, 42, 124, 0.3);">
-                  <i class="fa-solid fa-download me-2"></i> Download
-                </a>
+                <?php if (!empty($property['brochure']) && file_exists('uploads/' . trim($property['brochure']))): ?>
+                  <a href="uploads/<?= htmlspecialchars(trim($property['brochure'])); ?>" class="btn-premium-brochure" download style="background: #c02a7c; color: white; padding: 12px 25px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(192, 42, 124, 0.3);">
+                    <i class="fa-solid fa-download me-2"></i> Download
+                  </a>
+                <?php else: ?>
+                  <a href="#sidebarContactForm" class="btn-premium-brochure" style="background: #c02a7c; color: white; padding: 12px 25px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(192, 42, 124, 0.3);">
+                    <i class="fa-solid fa-envelope me-2"></i> Request Brochure
+                  </a>
+                <?php endif; ?>
               </div>
             </div>
           </div>
+          
           <div class="why-box mb-4 mt-4" data-aos="fade-down" data-aos-duration="1000">
-            <h3>Highlights</h3>
-            <ul class="rfvg">
-              <li><?php echo $property['highlight'] ?></li>
-            </ul>
+            <h3 class="mb-3">Highlights</h3>
+            <div class="property-highlights-box">
+              <?php 
+              $hl = trim($property['highlight'] ?? '');
+              if (!empty($hl)) {
+                if (stripos($hl, '<li') !== false || stripos($hl, '<p') !== false) {
+                  echo $hl;
+                } else {
+                  echo '<ul><li>' . nl2br($hl) . '</li></ul>';
+                }
+              } else {
+                echo '<p class="text-muted">Highlights not specified for this property.</p>';
+              }
+              ?>
+            </div>
           </div>
 
           <section class="project-overview" data-aos="fade-down" data-aos-duration="1000">
@@ -289,28 +380,28 @@ $flats = 'Flat';
                 <div class="overview-icon-container"><i class="fa fa-vector-square"></i></div>
                 <div>
                   <p class="ov-title">Carpet Area</p>
-                  <p class="ov-val"><?= htmlspecialchars($property['bigha']) ?> sq.ft</p>
+                  <p class="ov-val"><?= htmlspecialchars($carpet_display) ?></p>
                 </div>
               </div>
               <div class="overview-card-premium">
                 <div class="overview-icon-container"><i class="fa fa-ruler-combined"></i></div>
                 <div>
                   <p class="ov-title">Build-up Area</p>
-                  <p class="ov-val"><?= htmlspecialchars($property['unit']) ?> sq.ft</p>
+                  <p class="ov-val"><?= htmlspecialchars($buildup_display) ?></p>
                 </div>
               </div>
               <div class="overview-card-premium">
                 <div class="overview-icon-container"><i class="fa fa-coins"></i></div>
                 <div>
                   <p class="ov-title">Price Range</p>
-                  <p class="ov-val"><?= htmlspecialchars($property['min_price']) ?> - <?= htmlspecialchars($property['max_price']) ?></p>
+                  <p class="ov-val"><?= htmlspecialchars($price_range_display) ?></p>
                 </div>
               </div>
               <div class="overview-card-premium">
                 <div class="overview-icon-container"><i class="fa fa-clock"></i></div>
                 <div>
                   <p class="ov-title">Possession</p>
-                  <p class="ov-val"><?= htmlspecialchars($property['possession_date']) ?></p>
+                  <p class="ov-val"><?= htmlspecialchars($possession_display) ?></p>
                 </div>
               </div>
               <div class="overview-card-premium">
@@ -324,7 +415,7 @@ $flats = 'Flat';
                 <div class="overview-icon-container"><i class="fa fa-file-contract"></i></div>
                 <div>
                   <p class="ov-title"><?= ($property['rera_no'] != "JDA Approved") ? "RERA ID" : "JDA" ?></p>
-                  <p class="ov-val"><?= ($property['rera_no'] != "JDA Approved") ? htmlspecialchars($property['rera_no']) : "Approved" ?></p>
+                  <p class="ov-val"><?= ($property['rera_no'] != "JDA Approved") ? htmlspecialchars($rera_display) : "Approved" ?></p>
                 </div>
               </div>
             </div>
@@ -369,28 +460,43 @@ $flats = 'Flat';
             </script>
           </section>
 
+          <?php
+          $property_id = (int) $property['id'];
+          $amenity_querry = "SELECT amenity.name, amenity.icon
+           FROM amenity 
+           INNER JOIN property_amenities 
+           on amenity.id=property_amenities.amenity_id 
+           WHERE property_amenities.property_id= $property_id";
+          $amenity_result = mysqli_query($con, $amenity_querry);
+          $amenities = [];
+          while ($row_amenity = mysqli_fetch_assoc($amenity_result)) {
+            $amenities[] = $row_amenity;
+          }
+          if (empty($amenities)) {
+            // Intelligent fallback: check if amenity names are mentioned in description or highlights
+            $all_amenities_q = mysqli_query($con, "SELECT name, icon FROM amenity WHERE status = 1");
+            if ($all_amenities_q) {
+              $search_blob = ($property['other_key_feature'] ?? '') . ' ' . ($property['highlight'] ?? '');
+              while ($am_row = mysqli_fetch_assoc($all_amenities_q)) {
+                if (stripos($search_blob, $am_row['name']) !== false) {
+                  $amenities[] = $am_row;
+                }
+              }
+            }
+          }
+          ?>
+          <?php if (!empty($amenities)): ?>
           <div class="amenities-section" data-aos="fade-down" data-aos-duration="1000">
             <h3 class="vh mb-4">Project Amenities</h3>
 
             <div class="amenities-premium-grid" id="amenitiesGrid">
               <?php
-              $property_id = (int) $property['id'];
-              $amenity_querry = "SELECT amenity.name , amenity.icon
-               FROM amenity 
-               INNER JOIN property_amenities 
-               on amenity.id=property_amenities.amenity_id 
-               WHERE property_amenities.property_id= $property_id";
-              $amenity_result = mysqli_query($con, $amenity_querry);
-              $amenities = [];
-              while ($row_amenity = mysqli_fetch_assoc($amenity_result)) {
-                $amenities[] = $row_amenity;
-              }
               foreach ($amenities as $index => $am):
                 $hidden_class = ($index >= 9) ? 'amenity-hidden d-none' : '';
                 ?>
                 <div class="amenity-premium-badge <?= $hidden_class ?>">
-                  <img src="uploads/<?php echo $am['icon']; ?>" alt="icon">
-                  <span><?php echo $am['name'] ?></span>
+                  <img src="uploads/<?php echo htmlspecialchars($am['icon']); ?>" alt="icon">
+                  <span><?php echo htmlspecialchars($am['name']); ?></span>
                 </div>
                 <?php
               endforeach;
@@ -417,151 +523,67 @@ $flats = 'Flat';
                 });
               }
             </script>
-
           </div>
+          <?php endif; ?>
 
-          <!-- <div class="floor-plan-container">
-
-            <div class="bhk-buttons">
-              <button class="bhk-btn active" data-target="slider-2bhk">2 BHK</button>
-              <button class="bhk-btn" data-target="slider-3bhk">3 BHK</button>
-              <button class="bhk-btn" data-target="slider-4bhk">4 BHK</button>
-            </div>
-
-            <div class="swiper bhk-slider active" id="slider-2bhk">
-              <div class="swiper-wrapper">
-                <div class="swiper-slide"><img src="images/2bhk1.jpg" alt="2 BHK 1"></div>
-                <div class="swiper-slide"><img src="images/2bhk2.jpg" alt="2 BHK 2"></div>
-                <div class="swiper-slide"><img src="images/2bhk3.jpg" alt="2 BHK 3"></div>
-              </div>
-
-              <div class="swiper-button-next"></div>
-              <div class="swiper-button-prev"></div>
-              <div class="swiper-pagination"></div>
-            </div>
-
-
-            <div class="swiper bhk-slider" id="slider-3bhk">
-              <div class="swiper-wrapper">
-                <div class="swiper-slide"><img src="images/3bhk1.jpg" alt="3 BHK 1"></div>
-                <div class="swiper-slide"><img src="images/3bhk2.jpg" alt="3 BHK 2"></div>
-                <div class="swiper-slide"><img src="images/3bhk3.jpg" alt="3 BHK 3"></div>
-              </div>
-
-              <div class="swiper-button-next"></div>
-              <div class="swiper-button-prev"></div>
-              <div class="swiper-pagination"></div>
-            </div>
-
-
-            <div class="swiper bhk-slider" id="slider-4bhk">
-              <div class="swiper-wrapper">
-                <div class="swiper-slide"><img src="images/4bhk1.jpg" alt="4 BHK 1"></div>
-                <div class="swiper-slide"><img src="images/4bhk2.jpg" alt="4 BHK 2"></div>
-                <div class="swiper-slide"><img src="images/4bhk3.jpg" alt="4 BHK 3"></div>
-              </div>
-
-              <div class="swiper-button-next"></div>
-              <div class="swiper-button-prev"></div>
-              <div class="swiper-pagination"></div>
-            </div>
-          </div> -->
-
-          <!-- <section class="floor-plan-section">
-            <div class="container">
-              <h5 class="section-title">Floor Plan</h5>
-
-         
-              <div class="bhk-options">
-                <?php
-                $bhk_querry = "SELECT sub_category.name 
-                FROM sub_category
-                INNER JOIN property_subcat
-                ON sub_category.id=property_subcat.subcat_id
-                WHERE property_subcat.property_id=$property_id";
-
-                $bhk_result = mysqli_query($con, $bhk_querry);
-                $bhks = [];
-                while ($row_bhk = mysqli_fetch_assoc($bhk_result)) {
-                  $bhks[] = $row_bhk;
-                }
-                foreach ($bhks as $bh):
-                  ?>
-                  <button class="bhk-btn"
-                    data-bhk="<?php echo htmlspecialchars($bh['name']) ?>"><?php echo htmlspecialchars($bh['name']) ?></button>
-                  <?php
-                endforeach;
-                ?>
-              </div>
-
-           
-              <div class="area-tabs" id="areaTabs">
-             
-              </div>
-              <div class="floor-plan-image">
-                <img id="floorPlanImage" src="uploads/e-1.jpeg" alt="2D Floor Plan">
-
-          
-                <div class="floating-controls">
-                  <button class="control-btn" id="zoomIn"><i class="fa fa-search-plus"></i></button>
-                  <button class="control-btn" id="zoomOut"><i class="fa fa-search-minus"></i></button>
-                  <button class="control-btn" id="shareBtn"><i class="fa fa-share"></i></button>
-                </div>
-
-           
-                <div class="nav-arrows">
-                  <button class="arrow-btn" id="prevPlan"><i class="fa fa-chevron-left"></i></button>
-                  <button class="arrow-btn" id="nextPlan"><i class="fa fa-chevron-right"></i></button>
-                </div>
-              </div>
-
-             
-              <div class="room-details" id="roomDetails">
-            
-              </div>
-
-        
-              <p class="note">Is the pricing & floor plan helpful? 👍 👎</p>
-            </div>
-          </section>   -->
-
-
+          <?php
+          $video_url = trim($property['video_link'] ?? '');
+          $embed_url = '';
+          if (!empty($video_url)) {
+            if (strpos($video_url, 'embed') !== false) {
+              $embed_url = $video_url;
+            } elseif (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $video_url, $match)) {
+              $embed_url = 'https://www.youtube.com/embed/' . $match[1];
+            }
+          }
+          $video_file = trim($property['video_file'] ?? '');
+          $has_video_file = !empty($video_file) && file_exists(__DIR__ . '/uploads/' . $video_file);
+          ?>
+          <?php if (!empty($embed_url) || $has_video_file || count($images) > 1): ?>
           <section class="media-showcase" data-aos="fade-down" data-aos-duration="1000">
             <div class="media-container">
               <h5 class="media-title">Photos & Videos: <span>Tour this project virtually</span></h5>
               <p class="media-subtitle">Project Tour & Photos</p>
 
               <div class="media-grid">
-                <!-- Featured Video -->
+                <!-- Featured Video File (Dynamic from Admin Upload) -->
+                <?php if ($has_video_file): ?>
                 <div class="media-item media-video video-wide">
-                  <a href="uploads/project-tour.mp4" target="_blank">
-                    <iframe width="100%" height="auto"
-                      src="https://www.youtube.com/embed/rDw0GYl9msY?si=nKamJCU0iplgXALq" title="YouTube video player"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
-                    </iframe>
-                    <div class="video-play-icon">
-                      <i class="fa fa-play-circle"></i>
-                    </div>
-                  </a>
+                  <video controls playsinline class="w-100 h-100" style="object-fit: cover; border-radius: 12px; background: #000; min-height: 280px;">
+                    <source src="uploads/<?= htmlspecialchars($video_file) ?>">
+                    Your browser does not support the video tag.
+                  </video>
                 </div>
+                <?php endif; ?>
+
+                <!-- Featured YouTube Video (Dynamic from Admin) -->
+                <?php if (!empty($embed_url)): ?>
+                <div class="media-item media-video video-wide">
+                  <iframe src="<?= htmlspecialchars($embed_url) ?>" title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+                  </iframe>
+                </div>
+                <?php endif; ?>
 
                 <!-- Images from PHP -->
                 <?php
                 $total_images = count($images);
                 foreach ($images as $index => $img) {
-                  if ($index < 1) {  // Show first image
+                  $clean_img = trim($img);
+                  if (empty($clean_img)) continue;
+                  if ($index < 1) { // Show first image
                     ?>
                     <div class="media-item">
-                      <a href="uploads/<?= htmlspecialchars(trim($img)) ?>" target="_blank">
-                        <img src="uploads/<?= htmlspecialchars(trim($img)) ?>" alt="Project Photo">
+                      <a href="uploads/<?= htmlspecialchars($clean_img) ?>" target="_blank">
+                        <img src="uploads/<?= htmlspecialchars($clean_img) ?>" alt="Project Photo">
                       </a>
                     </div>
                   <?php } elseif ($index == 3) { // Last image shows +count ?>
                     <div class="media-item more-photos view-more" onclick="document.getElementById('popup').style.display='block'" style="cursor:pointer;">
                       <div class="gallery-small view-more"
-                        style="background-image: url('uploads/<?php echo trim($images[2]); ?>');">
+                        style="background-image: url('uploads/<?= htmlspecialchars($clean_img); ?>');">
                         <div class="overlay overlay-v">+ View More</div>
                       </div>
                     </div>
@@ -571,6 +593,7 @@ $flats = 'Flat';
               </div>
             </div>
           </section>
+          <?php endif; ?>
           <?php
           $bhk_query = "
                   SELECT sub_category.id AS subcat_id, sub_category.name AS bhk_name
@@ -645,15 +668,22 @@ $flats = 'Flat';
           endif;
           ?>
 
-          <div class="fg-rdx">
-            <div class="flxx" data-aos="fade-down" data-aos-duration="1000">
-              <?php echo ($property['map']); ?>
+          <?php if (!empty(trim($property['map'] ?? ''))): ?>
+          <div class="property-map-section mt-4" data-aos="fade-down" data-aos-duration="1000">
+            <div class="map-card-premium" style="background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 20px;">
+              <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa fa-map-marked-alt" style="color: #c02a7c;"></i> Project Location & Map
+              </h4>
+              <div class="map-iframe-container">
+                <?php echo $property['map']; ?>
+              </div>
             </div>
           </div>
+          <?php endif; ?>
         </div>
 
         <!-- Right Side -->
-        <div class="col-12 col-md-4 ghjp">
+        <div class="col-12 col-lg-4 ghjp">
           <div class="sidebar-sticky">
             <div id="formMessage"></div>
             <div class="premium-contact-card">
@@ -691,6 +721,22 @@ $flats = 'Flat';
       </div>
     </div>
   </section>
+
+  <!-- Hidden Popup Slider (Safely outside content flow) -->
+  <div id="popup" class="popup popup-v" style="display:none;">
+    <div class="popup-content">
+      <span class="close" onclick="document.getElementById('popup').style.display='none'">&times;</span>
+      <div class="popup-slider">
+        <?php foreach ($images as $img): ?>
+          <div class="popup-slide">
+            <img src="uploads/<?php echo trim($img); ?>" alt="Property Image" loading="lazy">
+          </div>
+        <?php endforeach; ?>
+      </div>
+      <a class="prevv">❮</a>
+      <a class="nextt">❯</a>
+    </div>
+  </div>
 
   <?php include 'component/footer.php'; ?>
 

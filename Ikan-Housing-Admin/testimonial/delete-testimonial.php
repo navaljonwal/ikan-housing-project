@@ -7,7 +7,7 @@ if (isset($_GET['id'])) {
     $result = mysqli_query($con, $query);
 
     if ($result) {
-        header("Location: list"); // make sure this is correct
+        header("Location: list.php");
         exit();
     } else {
         echo "Error deleting: " . mysqli_error($con);

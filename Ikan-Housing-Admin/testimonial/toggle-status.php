@@ -3,17 +3,18 @@ include('../components/auth.php');
 include('../../config.php');
 
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-$current_status = isset($_GET['status']) ? $_GET['status'] : 'Inactive';
+$current_status = isset($_GET['status']) ? intval($_GET['status']) : 0;
 
-// Toggle status
-$new_status = ($current_status == 'Active') ? 'Inactive' : 'Active';
+// Toggle status (1 for active, 0 for inactive)
+$new_status = ($current_status == 1) ? 0 : 1;
 
-$updateQuery = "UPDATE testimonial SET status = '$new_status' WHERE id = $id";
+$updateQuery = "UPDATE testimonial SET status = $new_status WHERE id = $id";
 
 if (mysqli_query($con, $updateQuery)) {
-    header("Location: list");
+    header("Location: list.php");
     exit();
 } else {
     echo "Error updating status: " . mysqli_error($con);
 }
 ?>
+

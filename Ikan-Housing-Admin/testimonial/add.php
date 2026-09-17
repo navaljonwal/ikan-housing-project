@@ -19,7 +19,8 @@ function generateSlug($name, $con) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = mysqli_real_escape_string($con, $_POST['name']);
     $about_testimonial = mysqli_real_escape_string($con, $_POST['about_our_testimonial']);
-    $status = mysqli_real_escape_string($con, $_POST['status']);
+    $raw_status = $_POST['status'] ?? '1';
+    $status = ($raw_status === 'Active' || $raw_status === '1' || $raw_status == 1) ? 1 : 0;
 
     $slug = generateSlug($name, $con);
 
@@ -122,9 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="form-group">
                       <label for="status">Status</label>
                       <select name="status" class="form-control form-control-lg" required>
-                        <option value="">Select Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
+                        <option value="1" selected>Active</option>
+                        <option value="0">Inactive</option>
                       </select>
                     </div>
 

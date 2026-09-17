@@ -6,12 +6,21 @@ $limit = 10;
 $page = isset($_GET['page']) ? $_GET['page'] : 1;
 $start = ($page - 1) * $limit;
 
+// Handle status toggle if requested
+if (isset($_GET['toggle_id']) && isset($_GET['status'])) {
+    $tid = intval($_GET['toggle_id']);
+    $new_status = ($_GET['status'] == 1) ? 0 : 1;
+    mysqli_query($con, "UPDATE testimonial SET status = $new_status WHERE id = $tid");
+    header("Location: list.php");
+    exit();
+}
+
 // Search
 $search = '';
 $searchQuery = '';
 if (!empty($_GET['search'])) {
     $search = mysqli_real_escape_string($con, $_GET['search']);
-    $searchQuery = "WHERE name LIKE '%$search%' OR about_our_testimonial LIKE '%$search%'";
+    $searchQuery = "WHERE name LIKE '%$search%' OR `desc` LIKE '%$search%'";
 }
 
 // Count total
@@ -69,8 +78,8 @@ $result = mysqli_query($con, $query);
                   $sr_no = $start + 1;
                   while ($row = mysqli_fetch_assoc($result)) {
                       $statusText = $row['status'] == 1 ? 'Active' : 'Inactive';
-                        $statusUrl = "list.php?id={$row['id']}&status={$row['status']}";
-                        $statusClass = $row['status'] == 1 ? 'btn-success' : 'btn-warning';
+                      $statusUrl = "toggle-status.php?id={$row['id']}&status={$row['status']}";
+                      $statusClass = $row['status'] == 1 ? 'btn-success' : 'btn-warning';
 
                     echo "<tr>
                             <td>{$sr_no}</td>

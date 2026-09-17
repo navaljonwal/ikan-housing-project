@@ -50,8 +50,8 @@ function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", 
 
     $baseName = time() . rand(1000, 9999);
 
-    if ($ext === 'pdf') {
-        $finalName = $baseName . ".pdf";
+    if ($ext === 'pdf' || in_array($ext, ['mp4', 'webm', 'ogg', 'mov', 'mkv'])) {
+        $finalName = $baseName . "." . $ext;
         return @move_uploaded_file($file['tmp_name'], $dest . $finalName) ? $finalName : "";
     }
 
@@ -251,15 +251,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors[] = "Brochure upload error code: " . $brochureErr;
     }
 
+    $video_file = $edit['video_file'] ?? '';
+    $videoErr = uploadedFileError('video_file');
+    if ($videoErr == 0) {
+        $new_video = uploadFile($_FILES['video_file'], "../../uploads/", ["mp4", "webm", "ogg", "mov", "mkv"], 100);
+        if ($new_video) $video_file = $new_video;
+        else $errors[] = "Video upload failed. Max 100MB (MP4, WebM, MOV).";
+    } elseif ($videoErr != UPLOAD_ERR_NO_FILE) {
+        $errors[] = "Video upload error code: " . $videoErr;
+    }
+
     if (empty($errors)) {
         $id = (int)$id;
         $updateSql = "UPDATE new_property SET 
             project_name='$propertyname', builder_name='$buildername', max_price_int='$max_price_int', min_price_int='$min_price_int', 
             min_price='$minprice', max_price='$maxprice', location='$location', rera_no='$rera_no', bhk='$bhk', video_link='$video_link', 
-            map='$map', highlight='$highlight', other_key_feature='$other_key_feature', bigha='$bigha', unit='$unit', floor='$floor', 
-            block='$block', status='$status', trending='$trend', project_type='$project_type', launch_date=$launchSql, 
-            possession_date=$possessionSql, furnish_type='$furnish', construct_Status='$construct', main_image='$main_image', 
-            image_1='$image1', image_2='$image2', image_3='$image3', image_4='$image4', brochure='$pdf' 
+            video_file='$video_file', map='$map', highlight='$highlight', other_key_feature='$other_key_feature', bigha='$bigha', 
+            unit='$unit', floor='$floor', block='$block', status='$status', trending='$trend', project_type='$project_type', 
+            launch_date=$launchSql, possession_date=$possessionSql, furnish_type='$furnish', construct_Status='$construct', 
+            main_image='$main_image', image_1='$image1', image_2='$image2', image_3='$image3', image_4='$image4', brochure='$pdf' 
             WHERE id=$id";
 
         try {
@@ -586,9 +596,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                             </div>
                                                         </div>
                                                         <div class="mt-4">
-                                                                <label class="fw-bold small text-muted">Video Walkthrough (YouTube Link)</label>
-                                                                <input type="text" name="video_link" class="form-control bg-light" value="<?= htmlspecialchars($_POST['video_link'] ?? $edit['video_link'] ?? '') ?>">
+                                                            <div class="row g-3">
+                                                                <div class="col-md-6">
+                                                                    <label class="fw-bold small text-muted">Video Walkthrough (YouTube Link)</label>
+                                                                    <input type="text" name="video_link" class="form-control bg-light" value="<?= htmlspecialchars($_POST['video_link'] ?? $edit['video_link'] ?? '') ?>">
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="fw-bold small text-muted">Or Upload Video File (MP4, WebM)</label>
+                                                                    <input type="file" name="video_file" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="form-control bg-light">
+                                                                    <?php if (!empty($edit['video_file'])): ?>
+                                                                        <small class="text-success d-block mt-1">
+                                                                            <i class="fa fa-check-circle"></i> Current Video: <strong><?= htmlspecialchars($edit['video_file']) ?></strong>
+                                                                        </small>
+                                                                    <?php else: ?>
+                                                                        <small class="text-muted d-block mt-1">Supported: MP4, WebM, MOV (Max 100MB)</small>
+                                                                    <?php endif; ?>
+                                                                </div>
                                                             </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -711,27 +736,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                 <div class="row g-4">
                                                     <div class="col-md-12">
                                                         <div class="card card-round border shadow-none bg-white p-3 mb-4">
-                                                            <h6 class="fw-bold mb-3"><i class="fas fa-spa me-2 text-success"></i>Toggle Amenities</h6>
-                                                            <div class="row g-2" style="max-height: 200px; overflow-y: auto;">
+                                                            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                                                <h6 class="fw-bold mb-0"><i class="fas fa-spa me-2 text-success"></i>Toggle Amenities & Features</h6>
+                                                                <div class="input-group input-group-sm" style="max-width: 300px;">
+                                                                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                                                    <input type="text" id="searchAmenitiesEdit" class="form-control border-start-0" placeholder="Search amenities...">
+                                                                </div>
+                                                            </div>
+                                                            <div class="row g-2" id="amenitiesContainerEdit" style="max-height: 250px; overflow-y: auto;">
                                                                 <?php
                                                                 $current_amenities = [];
                                                                 $ca_res = mysqli_query($con, "SELECT amenity_id FROM property_amenities WHERE property_id=$id");
                                                                 while($caa = mysqli_fetch_assoc($ca_res)) $current_amenities[] = $caa['amenity_id'];
 
-                                                                $amenRes = mysqli_query($con, "SELECT * FROM amenity WHERE status = 1");
+                                                                $amenRes = mysqli_query($con, "SELECT * FROM amenity WHERE status = 1 ORDER BY name ASC");
                                                                 while ($a = mysqli_fetch_assoc($amenRes)): 
                                                                     $checked = in_array($a['id'], $current_amenities) ? 'checked' : '';
                                                                 ?>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-3 col-sm-6 amenity-item-col">
                                                                     <div class="form-check p-0">
                                                                         <input class="btn-check" type="checkbox" name="amenities[]" value="<?=$a['id']?>" id="amen-<?=$a['id']?>" <?= $checked ?>>
                                                                         <label class="btn btn-outline-secondary btn-sm w-100 text-start py-2" for="amen-<?=$a['id']?>">
-                                                                            <i class="fas <?= $checked ? 'fa-check-circle' : 'fa-circle' ?> me-1 opacity-50"></i> <?=$a['name']?>
+                                                                            <i class="fas <?= $checked ? 'fa-check-circle' : 'fa-circle' ?> me-1 opacity-50"></i> <span class="amenity-name"><?=$a['name']?></span>
                                                                         </label>
                                                                     </div>
                                                                 </div>
                                                                 <?php endwhile; ?>
                                                             </div>
+                                                            <script>
+                                                                document.getElementById('searchAmenitiesEdit')?.addEventListener('input', function() {
+                                                                    const val = this.value.toLowerCase().trim();
+                                                                    document.querySelectorAll('#amenitiesContainerEdit .amenity-item-col').forEach(col => {
+                                                                        const name = col.querySelector('.amenity-name')?.innerText.toLowerCase() || '';
+                                                                        col.style.display = name.includes(val) ? '' : 'none';
+                                                                    });
+                                                                });
+                                                            </script>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 mb-3">

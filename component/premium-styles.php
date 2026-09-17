@@ -445,4 +445,270 @@
 .popup-v .close:hover {
     background: #ef4444;
 }
+
+/* 🛡️ Content Containment & Overflow Prevention for Admin Data */
+.property-rich-desc {
+    color: #475569;
+    line-height: 1.8;
+    font-size: 15px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+.property-rich-desc * {
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+.property-rich-desc p {
+    margin-bottom: 14px;
+    line-height: 1.8;
+}
+.property-rich-desc img {
+    height: auto !important;
+    border-radius: 8px;
+}
+
+/* 📊 Polished Responsive Table for Admin Content */
+.property-rich-desc table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    margin: 18px 0 24px 0 !important;
+    background: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02) !important;
+}
+.property-rich-desc table tr:nth-child(even) {
+    background: #f8fafc !important;
+}
+.property-rich-desc table td,
+.property-rich-desc table th {
+    padding: 12px 18px !important;
+    font-size: 14px !important;
+    color: #334155 !important;
+    border: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    vertical-align: middle !important;
+}
+.property-rich-desc table tr:last-child td {
+    border-bottom: none !important;
+}
+.property-rich-desc table td:first-child,
+.property-rich-desc table th:first-child {
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    width: 30% !important;
+    background: #f8fafc !important;
+    border-right: 1px solid #e2e8f0 !important;
+}
+
+/* Headings inside Admin Content */
+.property-rich-desc h1,
+.property-rich-desc h2,
+.property-rich-desc h3,
+.property-rich-desc h4,
+.property-rich-desc h5 {
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin-top: 24px !important;
+    margin-bottom: 12px !important;
+    line-height: 1.3 !important;
+}
+.property-rich-desc h1 { font-size: 22px !important; }
+.property-rich-desc h2 { font-size: 20px !important; }
+.property-rich-desc h3 { font-size: 18px !important; }
+.property-rich-desc h4, .property-rich-desc h5 { font-size: 16px !important; }
+
+/* Lists inside Admin Content */
+.property-rich-desc ul,
+.property-rich-desc ol {
+    padding-left: 20px !important;
+    margin-bottom: 16px !important;
+}
+.property-rich-desc li {
+    margin-bottom: 8px !important;
+    line-height: 1.7 !important;
+    color: #475569 !important;
+}
+
+/* Highlights Box Modern Card Layout */
+.property-highlights-box {
+    margin-top: 10px;
+}
+.property-highlights-box ul {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin: 0 !important;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+}
+.property-highlights-box ul li {
+    position: relative;
+    list-style: none !important;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px 12px 38px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+    line-height: 1.5;
+    margin: 0 !important;
+}
+.property-highlights-box ul li::before {
+    content: "✓";
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #c02a7c;
+    font-weight: 800;
+    font-size: 14px;
+}
+
+/* Google Map responsive containment */
+.map-iframe-container {
+    position: relative;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 380px !important;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #f1f5f9;
+}
+.map-iframe-container iframe,
+.flxx iframe {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    border-radius: 14px;
+}
+
+/* Floor Plan container & buttons */
+.rd-flore-pland {
+    margin-top: 25px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+.rd-bhk-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.rd-bhk-buttons button {
+    padding: 10px 22px;
+    border: 1px solid #e2e8f0;
+    border-radius: 30px;
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.rd-bhk-buttons button.active {
+    background: #c02a7c;
+    color: #ffffff;
+    border-color: #c02a7c;
+    box-shadow: 0 4px 12px rgba(192, 42, 124, 0.25);
+}
+.rd-slider {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    display: none;
+    background: #f8fafc;
+    min-height: 300px;
+}
+.rd-slider.active {
+    display: block;
+}
+.rd-slides {
+    display: flex;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+}
+.rd-slides img {
+    width: 100%;
+    flex: 0 0 100%;
+    max-height: 480px;
+    object-fit: contain;
+    border-radius: 12px;
+    background: #ffffff;
+}
+.rd-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(15, 23, 42, 0.7);
+    color: #ffffff;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: background 0.3s ease;
+}
+.rd-arrow:hover {
+    background: #c02a7c;
+}
+.rd-arrow.rd-left { left: 15px; }
+.rd-arrow.rd-right { right: 15px; }
+
+/* Media item video fix */
+.media-item iframe {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    border-radius: 8px;
+}
+
+/* 📌 Sticky Sidebar and Layout Containment */
+.property-section {
+    position: relative !important;
+    overflow: visible !important;
+}
+.property-section .container,
+.property-section .row {
+    overflow: visible !important;
+}
+.col-12.col-lg-4.ghjp {
+    position: relative !important;
+    overflow: visible !important;
+    align-self: stretch !important;
+    height: auto !important;
+}
+@media (min-width: 992px) {
+    .sidebar-sticky {
+        position: -webkit-sticky !important;
+        position: sticky !important;
+        top: 90px !important;
+        z-index: 20 !important;
+    }
+}
+
+.header-price {
+    white-space: nowrap !important;
+}
+
+/* Table styling & empty third column suppression */
+.property-rich-desc table {
+    table-layout: auto !important;
+}
+.property-rich-desc table td:nth-child(3):empty,
+.property-rich-desc table th:nth-child(3):empty {
+    display: none !important;
+}
 </style>

@@ -30,8 +30,8 @@ function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", 
 
     $baseName = time() . rand(1000, 9999);
 
-    if ($ext === 'pdf') {
-        $finalName = $baseName . ".pdf";
+    if ($ext === 'pdf' || in_array($ext, ['mp4', 'webm', 'ogg', 'mov', 'mkv'])) {
+        $finalName = $baseName . "." . $ext;
         return @move_uploaded_file($file['tmp_name'], $dest . $finalName) ? $finalName : "";
     }
 
@@ -197,6 +197,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors[] = "Brochure upload error code: " . $_FILES['brochure']['error'];
     }
 
+    $video_file = "";
+    if (isset($_FILES['video_file']) && $_FILES['video_file']['error'] == UPLOAD_ERR_OK) {
+        $video_file = uploadFile($_FILES['video_file'], "../../uploads/", ["mp4", "webm", "ogg", "mov", "mkv"], 100);
+        if (!$video_file) $errors[] = "Video upload failed. Check format (MP4, WebM, MOV) and size (Max 100MB).";
+    }
+
     // ✅ Stop if error (Removing exit to show errors in UI)
     if (empty($errors)) {
         function priceToInt($price) {
@@ -212,11 +218,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // ✅ Insert Query
         $sql = "INSERT INTO new_property 
-        (project_name,builder_name,max_price_int,min_price_int,min_price,max_price,location,rera_no,bhk,video_link,map,highlight,other_key_feature,
+        (project_name,builder_name,max_price_int,min_price_int,min_price,max_price,location,rera_no,bhk,video_link,video_file,map,highlight,other_key_feature,
          bigha,unit,floor,block,status,trending,project_type,launch_date,possession_date,furnish_type,construct_Status,
          main_image,image_1,image_2,image_3,image_4,brochure,slug) 
         VALUES 
-        ('$propertyname','$buildername','$max_price_int','$min_price_int', '$minprice','$maxprice','$location','$rera_no','$bhk','$video_link','$map',
+        ('$propertyname','$buildername','$max_price_int','$min_price_int', '$minprice','$maxprice','$location','$rera_no','$bhk','$video_link','$video_file','$map',
         '$highlight','$other_key','$bigha','$unit','$floor','$block','$status','$trend','$project_type','$launch',
         '$possession','$furnish','$construct','$main_image','$image1','$image2','$image3','$image4','$pdf','$slug')";
 
@@ -542,8 +548,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                             </div>
                                                         </div>
                                                         <div class="mt-4">
-                                                            <label class="fw-bold small text-muted">Video Walkthrough (YouTube Link)</label>
-                                                            <input type="text" name="video_link" class="form-control bg-light" placeholder="https://youtube.com/..." value="<?= htmlspecialchars($_POST['video_link'] ?? '') ?>">
+                                                            <div class="row g-3">
+                                                                <div class="col-md-6">
+                                                                    <label class="fw-bold small text-muted">Video Walkthrough (YouTube Link)</label>
+                                                                    <input type="text" name="video_link" class="form-control bg-light" placeholder="https://youtube.com/..." value="<?= htmlspecialchars($_POST['video_link'] ?? '') ?>">
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="fw-bold small text-muted">Or Upload Video File (MP4, WebM)</label>
+                                                                    <input type="file" name="video_file" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="form-control bg-light">
+                                                                    <small class="text-muted d-block mt-1">Supported: MP4, WebM, MOV (Max 100MB)</small>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -652,23 +667,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                 <div class="row g-4">
                                                     <div class="col-md-12">
                                                         <div class="card card-round border shadow-none bg-white p-3 mb-4">
-                                                            <h6 class="fw-bold mb-3"><i class="fas fa-spa me-2 text-success"></i>Select Amenities & Features</h6>
-                                                            <div class="row g-2" style="max-height: 200px; overflow-y: auto;">
+                                                            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                                                <h6 class="fw-bold mb-0"><i class="fas fa-spa me-2 text-success"></i>Select Amenities & Features</h6>
+                                                                <div class="input-group input-group-sm" style="max-width: 300px;">
+                                                                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                                                    <input type="text" id="searchAmenitiesAdd" class="form-control border-start-0" placeholder="Search amenities...">
+                                                                </div>
+                                                            </div>
+                                                            <div class="row g-2" id="amenitiesContainerAdd" style="max-height: 250px; overflow-y: auto;">
                                                                 <?php
-                                                                $amenRes = mysqli_query($con, "SELECT * FROM amenity WHERE status = 1");
+                                                                $amenRes = mysqli_query($con, "SELECT * FROM amenity WHERE status = 1 ORDER BY name ASC");
                                                                 while ($a = mysqli_fetch_assoc($amenRes)): 
                                                                     $checked = (isset($_POST['amenities']) && in_array($a['id'], $_POST['amenities'])) ? 'checked' : '';
                                                                 ?>
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-3 col-sm-6 amenity-item-col">
                                                                     <div class="form-check p-0">
                                                                         <input class="btn-check" type="checkbox" name="amenities[]" value="<?=$a['id']?>" id="amen-<?=$a['id']?>" <?=$checked?>>
                                                                         <label class="btn btn-outline-secondary btn-sm w-100 text-start py-2" for="amen-<?=$a['id']?>">
-                                                                            <i class="fas fa-check-circle me-1 opacity-50"></i> <?=$a['name']?>
+                                                                            <i class="fas fa-check-circle me-1 opacity-50"></i> <span class="amenity-name"><?=$a['name']?></span>
                                                                         </label>
                                                                     </div>
                                                                 </div>
                                                                 <?php endwhile; ?>
                                                             </div>
+                                                            <script>
+                                                                document.getElementById('searchAmenitiesAdd')?.addEventListener('input', function() {
+                                                                    const val = this.value.toLowerCase().trim();
+                                                                    document.querySelectorAll('#amenitiesContainerAdd .amenity-item-col').forEach(col => {
+                                                                        const name = col.querySelector('.amenity-name')?.innerText.toLowerCase() || '';
+                                                                        col.style.display = name.includes(val) ? '' : 'none';
+                                                                    });
+                                                                });
+                                                            </script>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12 mb-3">

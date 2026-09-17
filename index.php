@@ -378,35 +378,78 @@ include 'component/head.php';
         <p class="text-muted">What our valued clients say about their experience with us.</p>
       </div>
 
-      <div class="swiper mySwiper">
+      <?php
+      $testim_res = mysqli_query($con, "SELECT * FROM testimonial WHERE status = 1 ORDER BY id DESC");
+      $testimonials = [];
+      if ($testim_res) {
+        while ($t_row = mysqli_fetch_assoc($testim_res)) {
+          $testimonials[] = $t_row;
+        }
+      }
+      ?>
+      <div class="swiper testimonialSwiper">
         <div class="swiper-wrapper">
-          <div class="swiper-slide h-auto pb-4 px-2">
-            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 text-center">
-              <img src="img/pr-shuu.jpeg" alt="Sr. Shubham" class="rounded-circle mx-auto mb-3" width="80" height="80" style="object-fit:cover;">
-              <h5 class="fw-bold mb-1">Sr. Shubham</h5>
-              <div class="text-warning small mb-3"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
-              <p class="text-muted small italic">"ikanvisit.com exceeded my expectations! The professionalism and expertise of their team made my home-buying process stress-free."</p>
+          <?php if (!empty($testimonials)): ?>
+            <?php foreach ($testimonials as $t): 
+              $t_img = !empty($t['image']) && file_exists('uploads/' . $t['image']) ? 'uploads/' . $t['image'] : 'img/r-clnt.jpeg';
+              $t_text = strip_tags($t['desc'] ?? '');
+            ?>
+            <div class="swiper-slide h-auto pb-4 px-2">
+              <div class="card border-0 shadow-sm rounded-4 p-4 h-100 text-center" style="background:#ffffff; border-radius:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                <img src="<?= htmlspecialchars($t_img) ?>" alt="<?= htmlspecialchars($t['name']) ?>" class="rounded-circle mx-auto mb-3" width="80" height="80" style="object-fit:cover; border: 3px solid #c02a7c;">
+                <h5 class="fw-bold mb-1" style="color:#0f172a;"><?= htmlspecialchars($t['name']) ?></h5>
+                <div class="text-warning small mb-3"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
+                <p class="text-muted small italic" style="line-height:1.6; font-size:14px;">"<?= htmlspecialchars($t_text) ?>"</p>
+              </div>
             </div>
-          </div>
-          <div class="swiper-slide h-auto pb-4 px-2">
-            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 text-center">
-              <img src="img/r-clnt.jpeg" alt="Mr. Ashish Jain" class="rounded-circle mx-auto mb-3" width="80" height="80" style="object-fit:cover;">
-              <h5 class="fw-bold mb-1">Mr. Ashish Jain</h5>
-              <div class="text-warning small mb-3"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
-              <p class="text-muted small italic">"Their team is super professional and made the site visit so smooth! The Vastu consultation was spot on! 🙌"</p>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <div class="swiper-slide h-auto pb-4 px-2">
+              <div class="card border-0 shadow-sm rounded-4 p-4 h-100 text-center">
+                <img src="img/pr-shuu.jpeg" alt="Sr. Shubham" class="rounded-circle mx-auto mb-3" width="80" height="80" style="object-fit:cover;">
+                <h5 class="fw-bold mb-1">Sr. Shubham</h5>
+                <div class="text-warning small mb-3"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
+                <p class="text-muted small italic">"ikanvisit.com exceeded my expectations! The professionalism and expertise of their team made my home-buying process stress-free."</p>
+              </div>
             </div>
-          </div>
-          <div class="swiper-slide h-auto pb-4 px-2">
-            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 text-center">
-              <img src="img/r-clnt-1.jpeg" alt="Mr. Arnim & Ms. Kriti" class="rounded-circle mx-auto mb-3" width="80" height="80" style="object-fit:cover;">
-              <h5 class="fw-bold mb-1">Mr. Arnim & Ms. Kriti</h5>
-              <div class="text-warning small mb-3"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
-              <p class="text-muted small italic">"Impressed with the knowledgeable team and valuable insights about the property. Their transparency made decision-making easy."</p>
+            <div class="swiper-slide h-auto pb-4 px-2">
+              <div class="card border-0 shadow-sm rounded-4 p-4 h-100 text-center">
+                <img src="img/r-clnt.jpeg" alt="Mr. Ashish Jain" class="rounded-circle mx-auto mb-3" width="80" height="80" style="object-fit:cover;">
+                <h5 class="fw-bold mb-1">Mr. Ashish Jain</h5>
+                <div class="text-warning small mb-3"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
+                <p class="text-muted small italic">"Their team is super professional and made the site visit so smooth! The Vastu consultation was spot on! 🙌"</p>
+              </div>
             </div>
-          </div>
+            <div class="swiper-slide h-auto pb-4 px-2">
+              <div class="card border-0 shadow-sm rounded-4 p-4 h-100 text-center">
+                <img src="img/r-clnt-1.jpeg" alt="Mr. Arnim & Ms. Kriti" class="rounded-circle mx-auto mb-3" width="80" height="80" style="object-fit:cover;">
+                <h5 class="fw-bold mb-1">Mr. Arnim & Ms. Kriti</h5>
+                <div class="text-warning small mb-3"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
+                <p class="text-muted small italic">"Impressed with the knowledgeable team and valuable insights about the property. Their transparency made decision-making easy."</p>
+              </div>
+            </div>
+          <?php endif; ?>
         </div>
-        <div class="swiper-pagination mt-4"></div>
+        <div class="swiper-pagination testimonial-pagination mt-4"></div>
       </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          if (typeof Swiper !== 'undefined' && document.querySelector('.testimonialSwiper')) {
+            new Swiper('.testimonialSwiper', {
+              slidesPerView: 1,
+              spaceBetween: 24,
+              loop: true,
+              autoplay: { delay: 4500, disableOnInteraction: false },
+              pagination: { el: '.testimonial-pagination', clickable: true },
+              breakpoints: {
+                640: { slidesPerView: 1 },
+                768: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 }
+              }
+            });
+          }
+        });
+      </script>
     </div>
   </section>
 

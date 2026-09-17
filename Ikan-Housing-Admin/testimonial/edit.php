@@ -17,7 +17,8 @@ if (!$testimonial) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = mysqli_real_escape_string($con, $_POST['name']);
     $about = mysqli_real_escape_string($con, $_POST['about_our_testimonial']);
-    $status = mysqli_real_escape_string($con, $_POST['status']);
+    $raw_status = $_POST['status'] ?? '1';
+    $status = ($raw_status === 'Active' || $raw_status === '1' || $raw_status == 1) ? 1 : 0;
     $slug = mysqli_real_escape_string($con, $_POST['slug']);
 
     // Image update logic
@@ -31,12 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 `name` = '$name',
                 `desc` = '$about',
                 `image` = '$image',
-                `status` = '$status',
+                `status` = $status,
                 `slug` = '$slug'
             WHERE id = $id";
 
     if (mysqli_query($con, $sql)) {
-        header("Location: list");
+        header("Location: list.php");
         exit();
     } else {
         echo "Update failed: " . mysqli_error($con);
@@ -89,9 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="form-group">
                         <label>Status</label>
                         <select name="status" class="form-control" required>
-                            <option value="">Select Status</option>
-                            <option value="Active" <?= $testimonial['status'] == 'Active' ? 'selected' : '' ?>>Active</option>
-                            <option value="Inactive" <?= $testimonial['status'] == 'Inactive' ? 'selected' : '' ?>>Inactive</option>
+                            <option value="1" <?= ($testimonial['status'] == 1 || $testimonial['status'] === 'Active') ? 'selected' : '' ?>>Active</option>
+                            <option value="0" <?= ($testimonial['status'] == 0 || $testimonial['status'] === 'Inactive') ? 'selected' : '' ?>>Inactive</option>
                         </select>
                     </div>
 
