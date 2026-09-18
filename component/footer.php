@@ -157,7 +157,7 @@ if (!$result) {
     }
 </style>
 
-<a href="https://api.whatsapp.com/send?phone=918955331454&text=Hello! I am interested in your properties." class="whatsapp-float" id="whatsappFloat" target="_blank">
+<a href="https://api.whatsapp.com/send?phone=917240116157&text=Hello! I am interested in your properties." class="whatsapp-float" id="whatsappFloat" target="_blank">
     <div class="whatsapp-text">Chat with Expert</div>
     <div class="whatsapp-icon">
         <i class="fa-brands fa-whatsapp"></i>
@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const projectName = document.querySelector('.project-title')?.innerText.trim();
         if (projectName) {
             const encodeMsg = encodeURIComponent("Hello! I am interested in " + projectName + ". Please share more details.");
-            waFloat.href = "https://api.whatsapp.com/send?phone=918955331454&text=" + encodeMsg;
+            waFloat.href = "https://api.whatsapp.com/send?phone=917240116157&text=" + encodeMsg;
         }
     }
 

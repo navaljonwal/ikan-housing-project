@@ -1058,7 +1058,7 @@ textarea.jv-input {
                                 <div class="jv-ci-icon"><i class="fa fa-whatsapp"></i></div>
                                 <div class="jv-ci-text">
                                     <strong>WhatsApp</strong>
-                                    <a href="https://wa.me/918955331454" target="_blank">+91 89553 31454</a>
+                                    <a href="https://wa.me/917240116157" target="_blank">+91 724 011 6157</a>
                                 </div>
                             </li>
                             <li class="jv-contact-item">
@@ -1083,7 +1083,7 @@ textarea.jv-input {
                             <a href="https://www.facebook.com/IkanHousing" target="_blank" class="jv-social-btn"><i class="fa fa-facebook"></i></a>
                             <a href="https://www.instagram.com/ikanhousing" target="_blank" class="jv-social-btn"><i class="fa fa-instagram"></i></a>
                             <a href="https://www.linkedin.com/company/ikan-housing" target="_blank" class="jv-social-btn"><i class="fa fa-linkedin"></i></a>
-                            <a href="https://wa.me/918955331454" target="_blank" class="jv-social-btn"><i class="fa fa-whatsapp"></i></a>
+                            <a href="https://wa.me/917240116157" target="_blank" class="jv-social-btn"><i class="fa fa-whatsapp"></i></a>
                         </div>
                     </div>
                 </div>

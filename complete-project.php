@@ -149,7 +149,7 @@ if (!$result) {
                             <a href="#" class="text-primarys fw-semibold "> <?= $builderRow['builder_name'] ?></a></span>
                             </div>
                                 <button class="btn btn-primary w-100 fd-rdx"
-                                  onclick="window.open('https://wa.me/918955331454?text=<?= urlencode('Hello! I am interested in your property: ' . $row['project_name']); ?>', '_blank')">Contact Us
+                                  onclick="window.open('https://wa.me/917240116157?text=<?= urlencode('Hello! I am interested in your property: ' . $row['project_name']); ?>', '_blank')">Contact Us
                                 </button>  
                               </div>
                       </div>

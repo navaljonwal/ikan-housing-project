@@ -455,7 +455,7 @@ textarea.help-input {
                         <a href="https://www.facebook.com/IkanHousing" target="_blank" class="help-social-btn"><i class="fa fa-facebook"></i></a>
                         <a href="https://www.instagram.com/ikanhousing" target="_blank" class="help-social-btn"><i class="fa fa-instagram"></i></a>
                         <a href="https://www.linkedin.com/company/ikan-housing" target="_blank" class="help-social-btn"><i class="fa fa-linkedin"></i></a>
-                        <a href="https://wa.me/918955331454" target="_blank" class="help-social-btn"><i class="fa fa-whatsapp"></i></a>
+                        <a href="https://wa.me/917240116157" target="_blank" class="help-social-btn"><i class="fa fa-whatsapp"></i></a>
                     </div>
                 </div>
             </div>

@@ -468,7 +468,7 @@ $found_count = mysqli_num_rows($result);
                         echo htmlspecialchars(!empty($builderRow['builder_name']) ? mb_strimwidth($builderRow['builder_name'], 0, 25, '...') : 'N/A');
                       ?></span>
                     </div>
-                    <button class="btn btn-primary fd-rdx px-4" onclick="window.open('https://wa.me/918955331454?text=<?= urlencode('Hello! I am interested in your property: ' . $row['project_name']); ?>', '_blank')">
+                    <button class="btn btn-primary fd-rdx px-4" onclick="window.open('https://wa.me/917240116157?text=<?= urlencode('Hello! I am interested in your property: ' . $row['project_name']); ?>', '_blank')">
                       Contact Us
                     </button>
                   </div>
