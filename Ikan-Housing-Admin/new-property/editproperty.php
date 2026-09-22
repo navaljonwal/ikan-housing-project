@@ -417,6 +417,115 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         font-weight: 800;
         color: #c02a7c; /* var(--primary-color) */
     }
+
+    /* 🌿 Premium Amenities & Features Selector */
+    .amenities-scroll-wrapper {
+        max-height: 360px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+        overflow-anchor: none;
+        padding: 12px;
+        border-radius: 14px;
+        background: #fdfafd;
+        border: 1.5px solid #f2e3ec;
+        scrollbar-width: thin;
+        scrollbar-color: #c02a7c #f0e6ed;
+    }
+    .amenities-scroll-wrapper::-webkit-scrollbar {
+        width: 6px;
+    }
+    .amenities-scroll-wrapper::-webkit-scrollbar-track {
+        background: #f8f1f5;
+        border-radius: 6px;
+    }
+    .amenities-scroll-wrapper::-webkit-scrollbar-thumb {
+        background: #c02a7c66;
+        border-radius: 6px;
+    }
+    .amenities-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+        background: #c02a7c;
+    }
+
+    .amenity-card-item {
+        position: relative;
+        width: 100%;
+        display: block;
+    }
+    .amenity-checkbox {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 2;
+        margin: 0;
+    }
+    .amenity-btn-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 14px;
+        border-radius: 10px;
+        border: 1.5px solid #e5dfe4;
+        background: #ffffff;
+        color: #372b33;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        width: 100%;
+        user-select: none;
+        margin-bottom: 0;
+        min-height: 44px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+    .amenity-card-item:hover .amenity-btn-label {
+        border-color: #c02a7c;
+        background: #fff9fc;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(192, 42, 124, 0.1);
+    }
+    .amenity-checkbox:checked + .amenity-btn-label {
+        background: #fff0f6 !important;
+        border-color: #c02a7c !important;
+        color: #c02a7c !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 8px rgba(192, 42, 124, 0.18) !important;
+    }
+    .amenity-icon-indicator {
+        font-size: 15px;
+        flex-shrink: 0;
+        color: #b5a3ad;
+        transition: all 0.2s ease;
+    }
+    .amenity-checkbox:checked + .amenity-btn-label .amenity-icon-indicator {
+        color: #c02a7c !important;
+    }
+    .amenity-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+    }
+    .amenity-quick-btn {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    .amenity-badge-selected {
+        background: #fff0f6;
+        color: #c02a7c;
+        border: 1px solid #f3c2dc;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+    }
 </style>
 <body>
     <div class="wrapper">
@@ -737,40 +846,147 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                     <div class="col-md-12">
                                                         <div class="card card-round border shadow-none bg-white p-3 mb-4">
                                                             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                                                                <h6 class="fw-bold mb-0"><i class="fas fa-spa me-2 text-success"></i>Toggle Amenities & Features</h6>
-                                                                <div class="input-group input-group-sm" style="max-width: 300px;">
-                                                                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                                                                    <input type="text" id="searchAmenitiesEdit" class="form-control border-start-0" placeholder="Search amenities...">
+                                                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                                    <h6 class="fw-bold mb-0 text-dark">
+                                                                        <i class="fas fa-spa me-2 text-primary"></i>Toggle Amenities & Features
+                                                                    </h6>
+                                                                    <span class="amenity-badge-selected" id="amenityCountBadge">
+                                                                        <i class="fas fa-check-circle me-1"></i><span id="selectedAmenityCount">0</span> of <span id="totalAmenityCount">0</span> Selected
+                                                                    </span>
                                                                 </div>
-                                                            </div>
-                                                            <div class="row g-2" id="amenitiesContainerEdit" style="max-height: 250px; overflow-y: auto;">
-                                                                <?php
-                                                                $current_amenities = [];
-                                                                $ca_res = mysqli_query($con, "SELECT amenity_id FROM property_amenities WHERE property_id=$id");
-                                                                while($caa = mysqli_fetch_assoc($ca_res)) $current_amenities[] = $caa['amenity_id'];
-
-                                                                $amenRes = mysqli_query($con, "SELECT * FROM amenity WHERE status = 1 ORDER BY name ASC");
-                                                                while ($a = mysqli_fetch_assoc($amenRes)): 
-                                                                    $checked = in_array($a['id'], $current_amenities) ? 'checked' : '';
-                                                                ?>
-                                                                <div class="col-md-3 col-sm-6 amenity-item-col">
-                                                                    <div class="form-check p-0">
-                                                                        <input class="btn-check" type="checkbox" name="amenities[]" value="<?=$a['id']?>" id="amen-<?=$a['id']?>" <?= $checked ?>>
-                                                                        <label class="btn btn-outline-secondary btn-sm w-100 text-start py-2" for="amen-<?=$a['id']?>">
-                                                                            <i class="fas <?= $checked ? 'fa-check-circle' : 'fa-circle' ?> me-1 opacity-50"></i> <span class="amenity-name"><?=$a['name']?></span>
-                                                                        </label>
+                                                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                                    <div class="btn-group btn-group-sm shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                                                                        <button type="button" class="btn btn-outline-primary amenity-quick-btn" id="selectAllAmenities">
+                                                                            <i class="fas fa-check-double me-1"></i>Select All
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-outline-secondary amenity-quick-btn" id="deselectAllAmenities">
+                                                                            <i class="fas fa-times me-1"></i>Clear All
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="input-group input-group-sm shadow-sm" style="max-width: 250px; border-radius: 8px; overflow: hidden;">
+                                                                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                                                                        <input type="text" id="searchAmenitiesEdit" class="form-control border-start-0" placeholder="Search amenities...">
+                                                                        <button class="btn btn-outline-secondary border-start-0 d-none" type="button" id="clearSearchAmenity"><i class="fas fa-times"></i></button>
                                                                     </div>
                                                                 </div>
-                                                                <?php endwhile; ?>
                                                             </div>
+
+                                                            <div class="amenities-scroll-wrapper" id="amenitiesWrapperEdit">
+                                                                <div class="row g-2" id="amenitiesContainerEdit">
+                                                                    <?php
+                                                                    $current_amenities = [];
+                                                                    $ca_res = mysqli_query($con, "SELECT amenity_id FROM property_amenities WHERE property_id=$id");
+                                                                    while($caa = mysqli_fetch_assoc($ca_res)) $current_amenities[] = $caa['amenity_id'];
+
+                                                                    $amenRes = mysqli_query($con, "SELECT * FROM amenity WHERE status = 1 ORDER BY name ASC");
+                                                                    while ($a = mysqli_fetch_assoc($amenRes)): 
+                                                                        $checked = in_array($a['id'], $current_amenities) ? 'checked' : '';
+                                                                    ?>
+                                                                    <div class="col-xl-3 col-lg-4 col-sm-6 col-12 amenity-item-col">
+                                                                        <div class="amenity-card-item">
+                                                                            <input class="amenity-checkbox" type="checkbox" name="amenities[]" value="<?=$a['id']?>" id="amen-<?=$a['id']?>" <?= $checked ?>>
+                                                                            <label class="amenity-btn-label" for="amen-<?=$a['id']?>">
+                                                                                <i class="fas <?= $checked ? 'fa-check-circle' : 'fa-circle' ?> amenity-icon-indicator"></i> 
+                                                                                <span class="amenity-name text-truncate" title="<?= htmlspecialchars($a['name']) ?>"><?= htmlspecialchars($a['name']) ?></span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <?php endwhile; ?>
+                                                                </div>
+                                                                <div id="noAmenitiesNotice" class="text-center py-4 text-muted d-none">
+                                                                    <i class="fas fa-filter me-2 opacity-50"></i>No matching amenities found.
+                                                                </div>
+                                                            </div>
+
                                                             <script>
-                                                                document.getElementById('searchAmenitiesEdit')?.addEventListener('input', function() {
-                                                                    const val = this.value.toLowerCase().trim();
-                                                                    document.querySelectorAll('#amenitiesContainerEdit .amenity-item-col').forEach(col => {
-                                                                        const name = col.querySelector('.amenity-name')?.innerText.toLowerCase() || '';
-                                                                        col.style.display = name.includes(val) ? '' : 'none';
+                                                                (function() {
+                                                                    const searchInput = document.getElementById('searchAmenitiesEdit');
+                                                                    const clearSearchBtn = document.getElementById('clearSearchAmenity');
+                                                                    const items = document.querySelectorAll('#amenitiesContainerEdit .amenity-item-col');
+                                                                    const noNotice = document.getElementById('noAmenitiesNotice');
+                                                                    const countBadge = document.getElementById('selectedAmenityCount');
+                                                                    const totalBadge = document.getElementById('totalAmenityCount');
+                                                                    const selectAllBtn = document.getElementById('selectAllAmenities');
+                                                                    const deselectAllBtn = document.getElementById('deselectAllAmenities');
+
+                                                                    if (totalBadge) totalBadge.textContent = items.length;
+
+                                                                    function updateCount() {
+                                                                        const checked = document.querySelectorAll('#amenitiesContainerEdit .amenity-checkbox:checked').length;
+                                                                        if (countBadge) countBadge.textContent = checked;
+                                                                    }
+
+                                                                    function syncIcons() {
+                                                                        document.querySelectorAll('#amenitiesContainerEdit .amenity-checkbox').forEach(chk => {
+                                                                            const icon = chk.closest('.amenity-card-item')?.querySelector('.amenity-icon-indicator');
+                                                                            if (icon) {
+                                                                                if (chk.checked) {
+                                                                                    icon.classList.remove('fa-circle');
+                                                                                    icon.classList.add('fa-check-circle');
+                                                                                } else {
+                                                                                    icon.classList.remove('fa-check-circle');
+                                                                                    icon.classList.add('fa-circle');
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                        updateCount();
+                                                                    }
+
+                                                                    syncIcons();
+
+                                                                    document.querySelectorAll('#amenitiesContainerEdit .amenity-checkbox').forEach(chk => {
+                                                                        chk.addEventListener('change', function() {
+                                                                            syncIcons();
+                                                                        });
+                                                                        chk.addEventListener('focus', function(e) {
+                                                                            try { e.target.focus({ preventScroll: true }); } catch(_) {}
+                                                                        });
                                                                     });
-                                                                });
+
+                                                                    function doSearch() {
+                                                                        const val = (searchInput?.value || '').toLowerCase().trim();
+                                                                        if (clearSearchBtn) {
+                                                                            clearSearchBtn.classList.toggle('d-none', !val);
+                                                                        }
+                                                                        let visibleCount = 0;
+                                                                        items.forEach(col => {
+                                                                            const name = col.querySelector('.amenity-name')?.innerText.toLowerCase() || '';
+                                                                            const matches = name.includes(val);
+                                                                            col.style.display = matches ? '' : 'none';
+                                                                            if (matches) visibleCount++;
+                                                                        });
+                                                                        if (noNotice) {
+                                                                            noNotice.classList.toggle('d-none', visibleCount > 0);
+                                                                        }
+                                                                    }
+
+                                                                    searchInput?.addEventListener('input', doSearch);
+                                                                    clearSearchBtn?.addEventListener('click', function() {
+                                                                        if (searchInput) searchInput.value = '';
+                                                                        doSearch();
+                                                                        searchInput?.focus();
+                                                                    });
+
+                                                                    selectAllBtn?.addEventListener('click', function() {
+                                                                        items.forEach(col => {
+                                                                            if (col.style.display !== 'none') {
+                                                                                const chk = col.querySelector('.amenity-checkbox');
+                                                                                if (chk) chk.checked = true;
+                                                                            }
+                                                                        });
+                                                                        syncIcons();
+                                                                    });
+
+                                                                    deselectAllBtn?.addEventListener('click', function() {
+                                                                        items.forEach(col => {
+                                                                            if (col.style.display !== 'none') {
+                                                                                const chk = col.querySelector('.amenity-checkbox');
+                                                                                if (chk) chk.checked = false;
+                                                                            }
+                                                                        });
+                                                                        syncIcons();
+                                                                    });
+                                                                })();
                                                             </script>
                                                         </div>
                                                     </div>
