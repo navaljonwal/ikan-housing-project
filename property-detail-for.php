@@ -1036,18 +1036,18 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
 
   <!-- 📅 Modal: Schedule a Site Visit -->
   <div class="modal fade modal-site-visit" id="siteVisitModal" tabindex="-1" aria-labelledby="siteVisitModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
           <div>
             <h5 class="modal-title mb-0" id="siteVisitModalLabel">
               <i class="fa-solid fa-calendar-check" style="color: #c02a7c; margin-right: 8px;"></i> Schedule a Free Site Visit
             </h5>
-            <p class="text-muted small mb-0 mt-1" style="font-family:'Outfit', sans-serif;">Tour <strong><?= htmlspecialchars($property['project_name']) ?></strong> with our senior property expert.</p>
+            <p class="modal-subtitle">Tour <strong><?= htmlspecialchars($property['project_name']) ?></strong> with our verified property advisor.</p>
           </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body p-4">
+        <div class="modal-body">
           <div id="siteVisitMsg" class="d-none mb-3"></div>
 
           <form id="siteVisitForm" method="POST">
@@ -1087,44 +1087,44 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
               </div>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-3">
               <label class="form-label">Preferred Time Slot *</label>
-              <div class="row g-2">
+              <div class="row g-2 slot-pills-row">
                 <div class="col-4">
                   <input type="radio" name="time_slot" id="slotMorning" value="Morning (10 AM - 1 PM)" class="slot-pill-input" checked>
                   <label for="slotMorning" class="slot-pill-label">
-                    <i class="fa-regular fa-sun text-warning mb-1" style="font-size:18px;"></i>
-                    <span>Morning</span>
-                    <span style="font-size:10px; font-weight:500; opacity:0.75;">10 AM - 1 PM</span>
+                    <i class="fa-regular fa-sun slot-icon text-warning"></i>
+                    <span class="slot-title">Morning</span>
+                    <span class="slot-time">10 AM - 1 PM</span>
                   </label>
                 </div>
                 <div class="col-4">
                   <input type="radio" name="time_slot" id="slotAfternoon" value="Afternoon (1 PM - 4 PM)" class="slot-pill-input">
                   <label for="slotAfternoon" class="slot-pill-label">
-                    <i class="fa-solid fa-sun text-primary mb-1" style="font-size:18px;"></i>
-                    <span>Afternoon</span>
-                    <span style="font-size:10px; font-weight:500; opacity:0.75;">1 PM - 4 PM</span>
+                    <i class="fa-solid fa-sun slot-icon text-primary"></i>
+                    <span class="slot-title">Afternoon</span>
+                    <span class="slot-time">1 PM - 4 PM</span>
                   </label>
                 </div>
                 <div class="col-4">
                   <input type="radio" name="time_slot" id="slotEvening" value="Evening (4 PM - 7 PM)" class="slot-pill-input">
                   <label for="slotEvening" class="slot-pill-label">
-                    <i class="fa-solid fa-moon mb-1" style="color:#c02a7c; font-size:18px;"></i>
-                    <span>Evening</span>
-                    <span style="font-size:10px; font-weight:500; opacity:0.75;">4 PM - 7 PM</span>
+                    <i class="fa-solid fa-moon slot-icon" style="color:#c02a7c;"></i>
+                    <span class="slot-title">Evening</span>
+                    <span class="slot-time">4 PM - 7 PM</span>
                   </label>
                 </div>
               </div>
             </div>
 
-            <div class="p-3 mb-4 rounded-3 d-flex align-items-center gap-3" style="background:#f0fdf4; border:1px solid #bbf7d0;">
-              <i class="fa-solid fa-shield-check text-success fs-4"></i>
-              <div style="font-size:12.5px; color:#166534; line-height:1.4;">
-                <strong>100% Free Site Visit Guarantee:</strong> Dedicated advisor, sanitized site car available upon request, and zero commission.
+            <div class="trust-guarantee-box">
+              <i class="fa-solid fa-shield-check"></i>
+              <div>
+                <strong>100% Free Site Visit:</strong> Zero brokerage, verified sales advisor & sanitized site car available.
               </div>
             </div>
 
-            <button type="submit" class="btn w-100 btn-submit-visit" id="submitSiteVisitBtn">
+            <button type="submit" class="btn btn-submit-visit" id="submitSiteVisitBtn">
               <i class="fa-solid fa-calendar-check me-2"></i> Confirm & Schedule Visit
             </button>
           </form>
