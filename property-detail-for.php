@@ -420,10 +420,22 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
               </div>
             </div>
             
-            <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
+            <div class="property-actions-toolbar mb-4">
+              <button type="button" class="btn-action-primary" data-bs-toggle="modal" data-bs-target="#siteVisitModal">
+                <i class="fa-solid fa-calendar-check"></i> Book Site Visit
+              </button>
+
+              <a href="https://wa.me/918955331454?text=<?= urlencode('Hello Ikan Housing, I am interested in ' . $property['project_name'] . ' (' . $property['location'] . '). Please share details.') ?>" target="_blank" class="btn-action-whatsapp">
+                <i class="fa-brands fa-whatsapp" style="font-size: 17px; color: #22c55e;"></i> WhatsApp
+              </a>
+
+              <button type="button" class="btn-action-secondary" id="savePropertyBtn" onclick="toggleSaveProperty();">
+                <i class="fa-regular fa-heart" style="color: #c02a7c;"></i> Save
+              </button>
+
               <div class="dropdown">
-                <button class="btn-share-premium dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="fa-solid fa-share-nodes" style="color:#c02a7c; margin-right:5px;"></i> Share
+                <button class="btn-action-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa-solid fa-share-nodes" style="color: #64748b;"></i> Share
                 </button>
                 <div class="dropdown-menu share-dropdown-menu shadow-lg border-0" style="border-radius:15px; padding:10px;">
                   <a class="dropdown-item share-dropdown-item d-flex align-items-center py-2" href="https://api.whatsapp.com/send?text=<?= urlencode('Check out this property: ' . 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>" target="_blank">
@@ -441,18 +453,6 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
                   </a>
                 </div>
               </div>
-
-              <button class="btn-share-premium" id="savePropertyBtn" onclick="toggleSaveProperty();" style="color: #c02a7c; transition: all 0.2s;">
-                <i class="fa-regular fa-heart"></i> Save
-              </button>
-
-              <button class="btn-share-premium" data-bs-toggle="modal" data-bs-target="#siteVisitModal" style="background:#fdf2f8; color:#c02a7c; border:1px solid #fbcfe8; font-weight:700;">
-                <i class="fa-solid fa-calendar-check me-1"></i> Book Site Visit
-              </button>
-
-              <a href="https://wa.me/918955331454?text=<?= urlencode('Hello Ikan Housing, I am interested in ' . $property['project_name'] . ' (' . $property['location'] . '). Please share details.') ?>" target="_blank" class="btn-share-premium" style="background:#f0fdf4; color:#15803d; border:1px solid #86efac; font-weight:700; text-decoration:none;">
-                <i class="fa-brands fa-whatsapp me-1" style="color: #22c55e;"></i> WhatsApp
-              </a>
             </div>
           </section>
 
@@ -677,16 +677,17 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
           <!-- 🧮 Interactive Home Loan EMI Calculator -->
           <section class="emi-calculator-section mt-4 mb-4" data-aos="fade-down" data-aos-duration="1000">
             <div class="emi-card-premium">
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 pb-3 border-bottom">
                 <div>
-                  <h4 style="font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <span class="emi-section-badge">MORTGAGE CALCULATOR</span>
+                  <h4 class="emi-section-title">
                     <i class="fa-solid fa-calculator" style="color: #c02a7c;"></i> Home Loan EMI Calculator
                   </h4>
-                  <p class="text-muted small mb-0 mt-1">Estimate your monthly mortgage payments with our instant loan calculator.</p>
+                  <p class="emi-section-subtitle">Plan your monthly budget with live bank interest rate estimates.</p>
                 </div>
-                <span class="badge" style="background:#fdf2f8; color:#c02a7c; font-weight:700; border:1px solid #fbcfe8; padding:6px 12px; border-radius:20px;">
-                  ⚡ Real-Time Estimate
-                </span>
+                <div class="emi-rate-pill">
+                  <i class="fa-solid fa-sparkles me-1"></i> Rates from 8.5% p.a.*
+                </div>
               </div>
 
               <div class="row g-4 align-items-stretch">
@@ -694,69 +695,69 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
                 <div class="col-12 col-lg-7">
                   <!-- Loan Amount -->
                   <div class="emi-slider-wrap">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <label class="fw-bold small text-muted text-uppercase" style="letter-spacing:0.5px;">Loan Amount</label>
-                      <span id="emiLoanAmountDisplay" class="fw-bold fs-5 text-dark" style="font-family:'Outfit', sans-serif;">₹<?= number_format($init_loan_amount) ?></span>
+                    <div class="emi-label-row">
+                      <span class="emi-label-title">Loan Amount</span>
+                      <span id="emiLoanAmountDisplay" class="emi-val-pill">₹<?= number_format($init_loan_amount) ?></span>
                     </div>
                     <input type="range" class="emi-slider" id="emiLoanInput" min="500000" max="50000000" step="50000" value="<?= $init_loan_amount ?>">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
-                      <span class="text-muted" style="font-size:11px;">₹5 L</span>
+                      <span class="text-muted" style="font-size:11px; font-weight:600;">₹5 L</span>
                       <div class="d-flex gap-1">
                         <button type="button" class="emi-quick-btn" onclick="setEmiAmount(2500000)">₹25 L</button>
                         <button type="button" class="emi-quick-btn" onclick="setEmiAmount(5000000)">₹50 L</button>
                         <button type="button" class="emi-quick-btn" onclick="setEmiAmount(7500000)">₹75 L</button>
                         <button type="button" class="emi-quick-btn" onclick="setEmiAmount(10000000)">₹1 Cr</button>
                       </div>
-                      <span class="text-muted" style="font-size:11px;">₹5 Cr</span>
+                      <span class="text-muted" style="font-size:11px; font-weight:600;">₹5 Cr</span>
                     </div>
                   </div>
 
                   <!-- Interest Rate -->
                   <div class="emi-slider-wrap">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <label class="fw-bold small text-muted text-uppercase" style="letter-spacing:0.5px;">Interest Rate (% p.a.)</label>
-                      <span id="emiRateDisplay" class="fw-bold fs-5 text-dark" style="font-family:'Outfit', sans-serif;">8.5% p.a.</span>
+                    <div class="emi-label-row">
+                      <span class="emi-label-title">Interest Rate (% p.a.)</span>
+                      <span id="emiRateDisplay" class="emi-val-pill">8.5% p.a.</span>
                     </div>
                     <input type="range" class="emi-slider" id="emiRateInput" min="6.0" max="15.0" step="0.1" value="8.5">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
-                      <span class="text-muted" style="font-size:11px;">6.0%</span>
+                      <span class="text-muted" style="font-size:11px; font-weight:600;">6.0%</span>
                       <div class="d-flex gap-1">
                         <button type="button" class="emi-quick-btn" onclick="setEmiRate(8.0)">8.0%</button>
                         <button type="button" class="emi-quick-btn" onclick="setEmiRate(8.5)">8.5%</button>
                         <button type="button" class="emi-quick-btn" onclick="setEmiRate(9.0)">9.0%</button>
                         <button type="button" class="emi-quick-btn" onclick="setEmiRate(9.5)">9.5%</button>
                       </div>
-                      <span class="text-muted" style="font-size:11px;">15.0%</span>
+                      <span class="text-muted" style="font-size:11px; font-weight:600;">15.0%</span>
                     </div>
                   </div>
 
                   <!-- Tenure -->
                   <div class="emi-slider-wrap mb-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <label class="fw-bold small text-muted text-uppercase" style="letter-spacing:0.5px;">Loan Tenure</label>
-                      <span id="emiTenureDisplay" class="fw-bold fs-5 text-dark" style="font-family:'Outfit', sans-serif;">20 Years</span>
+                    <div class="emi-label-row">
+                      <span class="emi-label-title">Loan Tenure</span>
+                      <span id="emiTenureDisplay" class="emi-val-pill">20 Years (240 M)</span>
                     </div>
                     <input type="range" class="emi-slider" id="emiTenureInput" min="1" max="30" step="1" value="20">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
-                      <span class="text-muted" style="font-size:11px;">1 Yr</span>
+                      <span class="text-muted" style="font-size:11px; font-weight:600;">1 Yr</span>
                       <div class="d-flex gap-1">
                         <button type="button" class="emi-quick-btn" onclick="setEmiTenure(10)">10 Yrs</button>
                         <button type="button" class="emi-quick-btn" onclick="setEmiTenure(15)">15 Yrs</button>
                         <button type="button" class="emi-quick-btn" onclick="setEmiTenure(20)">20 Yrs</button>
                         <button type="button" class="emi-quick-btn" onclick="setEmiTenure(25)">25 Yrs</button>
                       </div>
-                      <span class="text-muted" style="font-size:11px;">30 Yrs</span>
+                      <span class="text-muted" style="font-size:11px; font-weight:600;">30 Yrs</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Right: Calculation Results -->
+                <!-- Right: Calculation Results (Luxury Dark Slate Card) -->
                 <div class="col-12 col-lg-5">
                   <div class="emi-result-panel">
                     <div>
-                      <div class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing:0.5px;">Monthly EMI Payable</div>
+                      <div class="emi-card-lbl">Estimated Monthly EMI</div>
                       <div class="emi-highlight-amount" id="emiMonthlyDisplay">₹43,391</div>
-                      <div class="text-muted small mt-1" id="emiSubtext">per month for 20 years</div>
+                      <div class="emi-sub-duration" id="emiSubtext">per month for 20 years</div>
                     </div>
 
                     <div class="my-3">
@@ -766,28 +767,28 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
                         <div class="emi-bar-interest" id="emiInterestBar" style="width: 52%;"></div>
                       </div>
                       <div class="d-flex justify-content-between align-items-center small mt-1">
-                        <span style="color:#334155; font-weight:700;"><i class="fa-solid fa-circle me-1" style="color:#334155; font-size:9px;"></i> <span id="emiPrincipalLabel">Principal (48%)</span></span>
-                        <span style="color:#c02a7c; font-weight:700;"><i class="fa-solid fa-circle me-1" style="color:#c02a7c; font-size:9px;"></i> <span id="emiInterestLabel">Interest (52%)</span></span>
+                        <span style="color:#38bdf8; font-weight:700;"><i class="fa-solid fa-circle me-1" style="font-size:8px;"></i> <span id="emiPrincipalLabel">Principal (48%)</span></span>
+                        <span style="color:#ec4899; font-weight:700;"><i class="fa-solid fa-circle me-1" style="font-size:8px;"></i> <span id="emiInterestLabel">Interest (52%)</span></span>
                       </div>
                     </div>
 
-                    <div class="border-top pt-2">
-                      <div class="d-flex justify-content-between py-1 small">
-                        <span class="text-muted">Principal Amount:</span>
-                        <span class="fw-bold text-dark" id="emiPrincipalDisplay">₹50,00,000</span>
+                    <div class="border-top border-secondary pt-2" style="border-color: #334155 !important;">
+                      <div class="emi-breakdown-row">
+                        <span class="lbl">Principal Amount:</span>
+                        <span class="val" id="emiPrincipalDisplay">₹50,00,000</span>
                       </div>
-                      <div class="d-flex justify-content-between py-1 small">
-                        <span class="text-muted">Total Interest:</span>
-                        <span class="fw-bold text-dark" id="emiInterestDisplay">₹54,13,879</span>
+                      <div class="emi-breakdown-row">
+                        <span class="lbl">Total Interest:</span>
+                        <span class="val" id="emiInterestDisplay">₹54,13,879</span>
                       </div>
-                      <div class="d-flex justify-content-between py-1 small border-top mt-1 pt-1">
-                        <span class="fw-bold text-dark">Total Amount:</span>
-                        <span class="fw-bold text-dark" id="emiTotalPayableDisplay">₹1,04,13,879</span>
+                      <div class="emi-breakdown-row total-row">
+                        <span class="lbl" style="color:#ffffff; font-weight:700;">Total Payable:</span>
+                        <span class="val" id="emiTotalPayableDisplay">₹1,04,13,879</span>
                       </div>
                     </div>
 
-                    <div class="mt-3">
-                      <a href="#" id="emiLoanAssistanceBtn" target="_blank" class="btn-emi-cta w-100">
+                    <div>
+                      <a href="#" id="emiLoanAssistanceBtn" target="_blank" class="btn-emi-cta">
                         <i class="fa-solid fa-hand-holding-dollar me-2"></i> Apply for Home Loan
                       </a>
                     </div>
@@ -845,12 +846,12 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
               </form>
 
               <!-- Quick Action Conversion CTAs -->
-              <div class="d-flex flex-column gap-2 mt-3 pt-3 border-top">
-                <button type="button" class="btn w-100 fw-bold py-2" data-bs-toggle="modal" data-bs-target="#siteVisitModal" style="border-radius: 12px; border: 1.5px solid #c02a7c; color: #c02a7c; background: #fff5f9; font-size: 14px; transition: all 0.2s;">
-                  <i class="fa-solid fa-calendar-check me-2"></i> Book a Free Site Visit
+              <div class="sidebar-dual-actions">
+                <button type="button" class="sidebar-btn-visit" data-bs-toggle="modal" data-bs-target="#siteVisitModal">
+                  <i class="fa-solid fa-calendar-check"></i> Book Visit
                 </button>
-                <a href="https://wa.me/918955331454?text=<?= urlencode('Hello Ikan Housing, I am interested in ' . $property['project_name'] . ' (' . $property['location'] . '). Please share details.') ?>" target="_blank" class="btn w-100 fw-bold py-2 text-white" style="border-radius: 12px; background: #22c55e; font-size: 14px; text-decoration: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);">
-                  <i class="fa-brands fa-whatsapp me-2" style="font-size: 18px;"></i> Instant WhatsApp Chat
+                <a href="https://wa.me/918955331454?text=<?= urlencode('Hello Ikan Housing, I am interested in ' . $property['project_name'] . ' (' . $property['location'] . '). Please share details.') ?>" target="_blank" class="sidebar-btn-whatsapp">
+                  <i class="fa-brands fa-whatsapp" style="font-size: 16px; color: #22c55e;"></i> WhatsApp
                 </a>
               </div>
             </div>
@@ -883,10 +884,10 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
       <div class="modal-content">
         <div class="modal-header">
           <div>
-            <h5 class="modal-title fw-bold text-dark mb-0" id="siteVisitModalLabel">
+            <h5 class="modal-title fw-bold text-dark mb-0" id="siteVisitModalLabel" style="font-family:'Outfit', sans-serif;">
               <i class="fa-solid fa-calendar-check" style="color: #c02a7c; margin-right: 8px;"></i> Schedule a Site Visit
             </h5>
-            <p class="text-muted small mb-0 mt-1">Tour <strong><?= htmlspecialchars($property['project_name']) ?></strong> with our property expert.</p>
+            <p class="text-muted small mb-0 mt-1" style="font-family:'Outfit', sans-serif;">Tour <strong><?= htmlspecialchars($property['project_name']) ?></strong> with our senior property expert.</p>
           </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
@@ -899,67 +900,69 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
             <input type="hidden" name="property_slug" value="<?= htmlspecialchars($slug) ?>">
 
             <div class="mb-3">
-              <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:0.5px;">Your Full Name *</label>
+              <label class="form-label">Full Name *</label>
               <div class="input-group">
                 <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa fa-user"></i></span>
                 <input type="text" name="name" class="form-control border-start-0" placeholder="e.g. Rahul Sharma" required>
               </div>
             </div>
 
-            <div class="row g-2 mb-3">
-              <div class="col-12 col-md-6">
-                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:0.5px;">Mobile Number *</label>
-                <div class="input-group">
-                  <span class="input-group-text bg-light border-end-0 text-muted">+91</span>
-                  <input type="tel" name="phone" maxlength="10" pattern="[0-9]{10}" class="form-control border-start-0" placeholder="10-digit number" required>
-                </div>
-              </div>
-              <div class="col-12 col-md-6">
-                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:0.5px;">Email Address</label>
-                <div class="input-group">
-                  <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa fa-envelope"></i></span>
-                  <input type="email" name="email" class="form-control border-start-0" placeholder="Optional">
-                </div>
+            <div class="mb-3">
+              <label class="form-label">Mobile Number (10 Digits) *</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted fw-bold">+91</span>
+                <input type="tel" name="phone" maxlength="10" pattern="[0-9]{10}" class="form-control border-start-0" placeholder="e.g. 9829012345" required>
               </div>
             </div>
 
             <div class="mb-3">
-              <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:0.5px;">Preferred Visit Date *</label>
-              <input type="date" name="visit_date" id="visitDateInput" class="form-control" min="<?= date('Y-m-d') ?>" value="<?= date('Y-m-d', strtotime('+1 day')) ?>" required>
+              <label class="form-label">Email Address (Optional)</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa fa-envelope"></i></span>
+                <input type="email" name="email" class="form-control border-start-0" placeholder="name@example.com">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Preferred Visit Date *</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa fa-calendar-day"></i></span>
+                <input type="date" name="visit_date" id="visitDateInput" class="form-control border-start-0" min="<?= date('Y-m-d') ?>" value="<?= date('Y-m-d', strtotime('+1 day')) ?>" required>
+              </div>
             </div>
 
             <div class="mb-4">
-              <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:0.5px;">Preferred Time Slot *</label>
+              <label class="form-label">Preferred Time Slot *</label>
               <div class="row g-2">
                 <div class="col-4">
                   <input type="radio" name="time_slot" id="slotMorning" value="Morning (10 AM - 1 PM)" class="slot-pill-input" checked>
                   <label for="slotMorning" class="slot-pill-label">
-                    <i class="fa-regular fa-sun d-block mb-1 text-warning"></i> Morning<br><span style="font-size:10px; font-weight:normal; opacity:0.8;">10 AM - 1 PM</span>
+                    <i class="fa-regular fa-sun d-block mb-1 text-warning" style="font-size:16px;"></i> Morning<br><span style="font-size:10px; font-weight:normal; opacity:0.75;">10 AM - 1 PM</span>
                   </label>
                 </div>
                 <div class="col-4">
                   <input type="radio" name="time_slot" id="slotAfternoon" value="Afternoon (1 PM - 4 PM)" class="slot-pill-input">
                   <label for="slotAfternoon" class="slot-pill-label">
-                    <i class="fa-solid fa-sun d-block mb-1 text-primary"></i> Afternoon<br><span style="font-size:10px; font-weight:normal; opacity:0.8;">1 PM - 4 PM</span>
+                    <i class="fa-solid fa-sun d-block mb-1 text-primary" style="font-size:16px;"></i> Afternoon<br><span style="font-size:10px; font-weight:normal; opacity:0.75;">1 PM - 4 PM</span>
                   </label>
                 </div>
                 <div class="col-4">
                   <input type="radio" name="time_slot" id="slotEvening" value="Evening (4 PM - 7 PM)" class="slot-pill-input">
                   <label for="slotEvening" class="slot-pill-label">
-                    <i class="fa-solid fa-moon d-block mb-1" style="color:#c02a7c;"></i> Evening<br><span style="font-size:10px; font-weight:normal; opacity:0.8;">4 PM - 7 PM</span>
+                    <i class="fa-solid fa-moon d-block mb-1" style="color:#c02a7c; font-size:16px;"></i> Evening<br><span style="font-size:10px; font-weight:normal; opacity:0.75;">4 PM - 7 PM</span>
                   </label>
                 </div>
               </div>
             </div>
 
-            <div class="p-2 mb-3 rounded-3 d-flex align-items-center gap-2" style="background:#f0fdf4; border:1px solid #bbf7d0;">
-              <i class="fa-solid fa-car-side text-success fs-5"></i>
-              <div style="font-size:12px; color:#166534; line-height:1.3;">
-                <strong>Free Site Visit Assistance:</strong> Our property manager will assist with site directions and project walkthrough.
+            <div class="p-3 mb-4 rounded-3 d-flex align-items-center gap-2" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+              <i class="fa-solid fa-circle-check text-success fs-5"></i>
+              <div style="font-size:12px; color:#166534; line-height:1.4;">
+                <strong>Free Site Visit Guarantee:</strong> Verified sales advisor with on-site floor plan walkthrough and zero service charges.
               </div>
             </div>
 
-            <button type="submit" class="btn w-100 py-3 fw-bold text-white shadow-sm" id="submitSiteVisitBtn" style="background:linear-gradient(135deg, #c02a7c 0%, #991b5b 100%); border-radius:12px; font-size:15px;">
+            <button type="submit" class="btn w-100 py-3 fw-bold text-white shadow-sm" id="submitSiteVisitBtn" style="background:linear-gradient(135deg, #c02a7c 0%, #991b5b 100%); border-radius:14px; font-size:15px; border:none;">
               <i class="fa-solid fa-calendar-check me-2"></i> Confirm & Schedule Visit
             </button>
           </form>

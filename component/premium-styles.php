@@ -712,156 +712,435 @@
     display: none !important;
 }
 
-/* 🧮 Interactive Home Loan EMI Calculator Styles */
-.emi-card-premium {
-    background: #ffffff;
-    border-radius: 20px;
-    border: 1px solid #e2e8f0;
-    padding: 28px;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+/* =========================================================
+   💎 LUXURY DESIGN SYSTEM OVERRIDES (Universal & Reset)
+   ========================================================= */
+.project-overview,
+.project-overview *,
+.emi-card-premium,
+.emi-card-premium *,
+.modal-site-visit,
+.modal-site-visit *,
+.property-actions-toolbar,
+.property-actions-toolbar *,
+.sidebar-sticky,
+.sidebar-sticky * {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
+
+/* 🎯 Unified Property Action Toolbar */
+.property-actions-toolbar {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    background: #ffffff !important;
+    padding: 8px 12px !important;
+    border-radius: 18px !important;
+    border: 1.5px solid #e8edf2 !important;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04) !important;
+    flex-wrap: wrap !important;
+}
+.property-actions-toolbar .btn-action-primary {
+    background: linear-gradient(135deg, #c02a7c 0%, #991b5b 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    padding: 10px 20px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 14px rgba(192, 42, 124, 0.28) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+    text-decoration: none !important;
+}
+.property-actions-toolbar .btn-action-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(192, 42, 124, 0.4) !important;
+}
+.property-actions-toolbar .btn-action-whatsapp {
+    background: #f0fdf4 !important;
+    border: 1.5px solid #bbf7d0 !important;
+    color: #166534 !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    padding: 10px 18px !important;
+    border-radius: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+    text-decoration: none !important;
+}
+.property-actions-toolbar .btn-action-whatsapp:hover {
+    background: #dcfce7 !important;
+    border-color: #86efac !important;
+    transform: translateY(-2px) !important;
+    color: #14532d !important;
+}
+.property-actions-toolbar .btn-action-secondary {
+    background: #f8fafc !important;
+    border: 1.5px solid #e2e8f0 !important;
+    color: #334155 !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    padding: 10px 16px !important;
+    border-radius: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    text-decoration: none !important;
+}
+.property-actions-toolbar .btn-action-secondary:hover {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+.property-actions-toolbar .btn-action-saved {
+    background: #fff0f6 !important;
+    border: 1.5px solid #fbcfe8 !important;
+    color: #c02a7c !important;
+    font-weight: 700 !important;
+}
+
+/* 🧮 Interactive Home Loan EMI Calculator (Luxury Modern Theme) */
+.emi-card-premium {
+    background: #ffffff !important;
+    border-radius: 24px !important;
+    border: 1.5px solid #e8edf2 !important;
+    padding: 32px !important;
+    box-shadow: 0 15px 40px -10px rgba(15, 23, 42, 0.05) !important;
+}
+.emi-section-badge {
+    display: inline-block !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    color: #c02a7c !important;
+    margin-bottom: 4px !important;
+}
+.emi-section-title {
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+.emi-section-subtitle {
+    color: #64748b !important;
+    font-size: 14px !important;
+    margin: 4px 0 0 !important;
+}
+.emi-rate-pill {
+    background: #fdf2f8 !important;
+    color: #c02a7c !important;
+    border: 1.5px solid #fbcfe8 !important;
+    padding: 6px 14px !important;
+    border-radius: 30px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+}
+
 .emi-slider-wrap {
-    margin-bottom: 22px;
+    margin-bottom: 26px !important;
+}
+.emi-label-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-bottom: 8px !important;
+}
+.emi-label-title {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin: 0 !important;
+}
+.emi-val-pill {
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 3px 12px !important;
+    border-radius: 8px !important;
 }
 .emi-slider {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 8px;
-    border-radius: 6px;
-    background: #e2e8f0;
-    outline: none;
-    transition: background 0.2s;
-    margin: 10px 0 8px;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 100% !important;
+    height: 7px !important;
+    border-radius: 10px !important;
+    background: #e2e8f0 !important;
+    outline: none !important;
+    margin: 12px 0 10px !important;
+    cursor: pointer !important;
 }
 .emi-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #c02a7c;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(192, 42, 124, 0.4);
-    border: 2px solid #ffffff;
-    transition: transform 0.15s ease;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 50% !important;
+    background: #c02a7c !important;
+    cursor: pointer !important;
+    box-shadow: 0 0 0 4px rgba(192, 42, 124, 0.2) !important;
+    border: 2px solid #ffffff !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
 }
 .emi-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.15);
+    transform: scale(1.15) !important;
+    box-shadow: 0 0 0 6px rgba(192, 42, 124, 0.25) !important;
 }
 .emi-slider::-moz-range-thumb {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #c02a7c;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(192, 42, 124, 0.4);
-    border: 2px solid #ffffff;
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 50% !important;
+    background: #c02a7c !important;
+    cursor: pointer !important;
+    box-shadow: 0 0 0 4px rgba(192, 42, 124, 0.2) !important;
+    border: 2px solid #ffffff !important;
 }
+
 .emi-quick-btn {
-    font-size: 11px;
-    font-weight: 600;
-    background: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    padding: 3px 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    background: #f8fafc !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 20px !important;
+    padding: 4px 12px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    outline: none !important;
 }
 .emi-quick-btn:hover {
-    background: #fdf2f8;
-    color: #c02a7c;
-    border-color: #fbcfe8;
+    background: #fff0f6 !important;
+    color: #c02a7c !important;
+    border-color: #fbcfe8 !important;
+    font-weight: 700 !important;
 }
+
+/* 💎 Dark Slate Luxury Result Panel */
 .emi-result-panel {
-    background: linear-gradient(145deg, #fff5f9 0%, #fdf2f8 50%, #ffffff 100%);
-    border-radius: 16px;
-    border: 1px solid #fbcfe8;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
+    background: linear-gradient(150deg, #1e293b 0%, #0f172a 100%) !important;
+    border-radius: 20px !important;
+    border: 1px solid #334155 !important;
+    padding: 28px !important;
+    color: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.25) !important;
+}
+.emi-result-panel .emi-card-lbl {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    color: #94a3b8 !important;
+    margin-bottom: 4px !important;
 }
 .emi-highlight-amount {
-    font-family: 'Outfit', sans-serif;
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #c02a7c;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 2.4rem !important;
+    font-weight: 800 !important;
+    color: #f472b6 !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.02em !important;
+}
+.emi-sub-duration {
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+    margin-top: 4px !important;
 }
 .emi-breakup-bar {
-    display: flex;
-    height: 10px;
-    border-radius: 6px;
-    overflow: hidden;
-    margin: 16px 0 10px;
-    background: #e2e8f0;
+    display: flex !important;
+    height: 10px !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    margin: 18px 0 12px !important;
+    background: #334155 !important;
 }
 .emi-bar-principal {
-    background: #334155;
-    transition: width 0.3s ease;
+    background: #38bdf8 !important;
+    transition: width 0.3s ease !important;
 }
 .emi-bar-interest {
-    background: #c02a7c;
-    transition: width 0.3s ease;
+    background: #ec4899 !important;
+    transition: width 0.3s ease !important;
+}
+.emi-breakdown-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 6px 0 !important;
+    font-size: 13px !important;
+}
+.emi-breakdown-row .lbl {
+    color: #94a3b8 !important;
+}
+.emi-breakdown-row .val {
+    font-weight: 700 !important;
+    color: #ffffff !important;
+}
+.emi-breakdown-row.total-row {
+    border-top: 1px solid #334155 !important;
+    margin-top: 6px !important;
+    padding-top: 10px !important;
+    font-size: 14px !important;
+}
+.emi-breakdown-row.total-row .val {
+    color: #38bdf8 !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
 }
 .btn-emi-cta {
-    background: linear-gradient(135deg, #c02a7c 0%, #991b5b 100%);
+    background: linear-gradient(135deg, #c02a7c 0%, #ec4899 100%) !important;
     color: #ffffff !important;
-    font-weight: 700;
-    font-size: 14px;
-    border-radius: 12px;
-    padding: 12px 18px;
-    border: none;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 14px rgba(192, 42, 124, 0.25);
-    transition: all 0.25s ease;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    border-radius: 14px !important;
+    padding: 13px 20px !important;
+    border: none !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 18px rgba(192, 42, 124, 0.4) !important;
+    transition: all 0.25s ease !important;
+    width: 100% !important;
+    margin-top: 16px !important;
 }
 .btn-emi-cta:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(192, 42, 124, 0.35);
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(192, 42, 124, 0.5) !important;
+    color: #ffffff !important;
 }
 
 /* 📅 Site Visit Modal Styles */
+.modal-site-visit .modal-dialog {
+    max-width: 520px !important;
+}
 .modal-site-visit .modal-content {
-    border-radius: 20px;
-    border: none;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-    overflow: hidden;
+    border-radius: 24px !important;
+    border: none !important;
+    box-shadow: 0 25px 60px -10px rgba(0,0,0,0.2) !important;
+    overflow: hidden !important;
 }
 .modal-site-visit .modal-header {
-    background: #fdf2f8;
-    border-bottom: 1px solid #fce7f3;
-    padding: 20px 24px;
+    background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%) !important;
+    border-bottom: 1.5px solid #fce7f3 !important;
+    padding: 22px 28px !important;
+}
+.modal-site-visit label.form-label {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #334155 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    margin-bottom: 6px !important;
+}
+.modal-site-visit .form-control {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 14px !important;
+    height: 48px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 10px 16px !important;
+    color: #0f172a !important;
+}
+.modal-site-visit .form-control:focus {
+    border-color: #c02a7c !important;
+    box-shadow: 0 0 0 4px rgba(192, 42, 124, 0.1) !important;
 }
 .slot-pill-input {
-    display: none;
+    display: none !important;
 }
 .slot-pill-label {
-    display: block;
-    padding: 10px 14px;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #334155;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s ease;
+    display: block !important;
+    padding: 12px 10px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #334155 !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    transition: all 0.2s ease !important;
+    line-height: 1.3 !important;
+    background: #ffffff !important;
 }
 .slot-pill-input:checked + .slot-pill-label {
-    border-color: #c02a7c;
-    background: #fdf2f8;
-    color: #c02a7c;
-    box-shadow: 0 2px 8px rgba(192, 42, 124, 0.15);
+    border-color: #c02a7c !important;
+    background: #fff0f6 !important;
+    color: #c02a7c !important;
+    box-shadow: 0 4px 12px rgba(192, 42, 124, 0.15) !important;
 }
 .slot-pill-label:hover {
-    border-color: #cbd5e1;
-    background: #f8fafc;
+    border-color: #cbd5e1 !important;
+    background: #f8fafc !important;
+}
+
+/* 📱 Compact Dual Action Buttons in Sidebar */
+.sidebar-dual-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-top: 14px !important;
+    padding-top: 14px !important;
+    border-top: 1px solid #e2e8f0 !important;
+}
+.sidebar-btn-visit {
+    background: #fff0f6 !important;
+    border: 1.5px solid #fbcfe8 !important;
+    color: #c02a7c !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    padding: 10px !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+}
+.sidebar-btn-visit:hover {
+    background: #fce7f3 !important;
+    border-color: #f472b6 !important;
+    color: #991b5b !important;
+}
+.sidebar-btn-whatsapp {
+    background: #f0fdf4 !important;
+    border: 1.5px solid #bbf7d0 !important;
+    color: #166534 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    padding: 10px !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+}
+.sidebar-btn-whatsapp:hover {
+    background: #dcfce7 !important;
+    border-color: #86efac !important;
+    color: #14532d !important;
 }
 </style>
