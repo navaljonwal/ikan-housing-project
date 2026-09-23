@@ -420,10 +420,10 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
               </div>
             </div>
             
-            <div class="d-flex gap-3 mb-5 align-items-center">
+            <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
               <div class="dropdown">
                 <button class="btn-share-premium dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="fa-solid fa-share-nodes" style="color:#c02a7c; margin-right:5px;"></i> Share Property
+                  <i class="fa-solid fa-share-nodes" style="color:#c02a7c; margin-right:5px;"></i> Share
                 </button>
                 <div class="dropdown-menu share-dropdown-menu shadow-lg border-0" style="border-radius:15px; padding:10px;">
                   <a class="dropdown-item share-dropdown-item d-flex align-items-center py-2" href="https://api.whatsapp.com/send?text=<?= urlencode('Check out this property: ' . 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>" target="_blank">
@@ -442,22 +442,18 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
                 </div>
               </div>
 
-              <button class="btn-share-premium" onclick="saveProperty();" style="color: #c02a7c;">
-                <i class="fa-solid fa-heart"></i> Save
+              <button class="btn-share-premium" id="savePropertyBtn" onclick="toggleSaveProperty();" style="color: #c02a7c; transition: all 0.2s;">
+                <i class="fa-regular fa-heart"></i> Save
               </button>
-            </div>
 
-            <script>
-              function copyToClipboard() {
-                const url = window.location.href;
-                navigator.clipboard.writeText(url).then(() => {
-                  alert("Link copied to clipboard!");
-                });
-              }
-              function saveProperty() {
-                alert("Property saved to your favorites!");
-              }
-            </script>
+              <button class="btn-share-premium" data-bs-toggle="modal" data-bs-target="#siteVisitModal" style="background:#fdf2f8; color:#c02a7c; border:1px solid #fbcfe8; font-weight:700;">
+                <i class="fa-solid fa-calendar-check me-1"></i> Book Site Visit
+              </button>
+
+              <a href="https://wa.me/918955331454?text=<?= urlencode('Hello Ikan Housing, I am interested in ' . $property['project_name'] . ' (' . $property['location'] . '). Please share details.') ?>" target="_blank" class="btn-share-premium" style="background:#f0fdf4; color:#15803d; border:1px solid #86efac; font-weight:700; text-decoration:none;">
+                <i class="fa-brands fa-whatsapp me-1" style="color: #22c55e;"></i> WhatsApp
+              </a>
+            </div>
           </section>
 
           <?php
@@ -668,6 +664,139 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
           endif;
           ?>
 
+          <?php
+          // Intelligent default loan amount (80% of min_price_int or 50 Lakhs default)
+          $init_loan_amount = 5000000;
+          if (!empty($property['min_price_int']) && $property['min_price_int'] > 0) {
+              $calc_loan = round(($property['min_price_int'] * 0.8) / 100000) * 100000;
+              if ($calc_loan >= 500000 && $calc_loan <= 50000000) {
+                  $init_loan_amount = $calc_loan;
+              }
+          }
+          ?>
+          <!-- 🧮 Interactive Home Loan EMI Calculator -->
+          <section class="emi-calculator-section mt-4 mb-4" data-aos="fade-down" data-aos-duration="1000">
+            <div class="emi-card-premium">
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
+                <div>
+                  <h4 style="font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-calculator" style="color: #c02a7c;"></i> Home Loan EMI Calculator
+                  </h4>
+                  <p class="text-muted small mb-0 mt-1">Estimate your monthly mortgage payments with our instant loan calculator.</p>
+                </div>
+                <span class="badge" style="background:#fdf2f8; color:#c02a7c; font-weight:700; border:1px solid #fbcfe8; padding:6px 12px; border-radius:20px;">
+                  ⚡ Real-Time Estimate
+                </span>
+              </div>
+
+              <div class="row g-4 align-items-stretch">
+                <!-- Left: Sliders -->
+                <div class="col-12 col-lg-7">
+                  <!-- Loan Amount -->
+                  <div class="emi-slider-wrap">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <label class="fw-bold small text-muted text-uppercase" style="letter-spacing:0.5px;">Loan Amount</label>
+                      <span id="emiLoanAmountDisplay" class="fw-bold fs-5 text-dark" style="font-family:'Outfit', sans-serif;">₹<?= number_format($init_loan_amount) ?></span>
+                    </div>
+                    <input type="range" class="emi-slider" id="emiLoanInput" min="500000" max="50000000" step="50000" value="<?= $init_loan_amount ?>">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
+                      <span class="text-muted" style="font-size:11px;">₹5 L</span>
+                      <div class="d-flex gap-1">
+                        <button type="button" class="emi-quick-btn" onclick="setEmiAmount(2500000)">₹25 L</button>
+                        <button type="button" class="emi-quick-btn" onclick="setEmiAmount(5000000)">₹50 L</button>
+                        <button type="button" class="emi-quick-btn" onclick="setEmiAmount(7500000)">₹75 L</button>
+                        <button type="button" class="emi-quick-btn" onclick="setEmiAmount(10000000)">₹1 Cr</button>
+                      </div>
+                      <span class="text-muted" style="font-size:11px;">₹5 Cr</span>
+                    </div>
+                  </div>
+
+                  <!-- Interest Rate -->
+                  <div class="emi-slider-wrap">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <label class="fw-bold small text-muted text-uppercase" style="letter-spacing:0.5px;">Interest Rate (% p.a.)</label>
+                      <span id="emiRateDisplay" class="fw-bold fs-5 text-dark" style="font-family:'Outfit', sans-serif;">8.5% p.a.</span>
+                    </div>
+                    <input type="range" class="emi-slider" id="emiRateInput" min="6.0" max="15.0" step="0.1" value="8.5">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
+                      <span class="text-muted" style="font-size:11px;">6.0%</span>
+                      <div class="d-flex gap-1">
+                        <button type="button" class="emi-quick-btn" onclick="setEmiRate(8.0)">8.0%</button>
+                        <button type="button" class="emi-quick-btn" onclick="setEmiRate(8.5)">8.5%</button>
+                        <button type="button" class="emi-quick-btn" onclick="setEmiRate(9.0)">9.0%</button>
+                        <button type="button" class="emi-quick-btn" onclick="setEmiRate(9.5)">9.5%</button>
+                      </div>
+                      <span class="text-muted" style="font-size:11px;">15.0%</span>
+                    </div>
+                  </div>
+
+                  <!-- Tenure -->
+                  <div class="emi-slider-wrap mb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <label class="fw-bold small text-muted text-uppercase" style="letter-spacing:0.5px;">Loan Tenure</label>
+                      <span id="emiTenureDisplay" class="fw-bold fs-5 text-dark" style="font-family:'Outfit', sans-serif;">20 Years</span>
+                    </div>
+                    <input type="range" class="emi-slider" id="emiTenureInput" min="1" max="30" step="1" value="20">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
+                      <span class="text-muted" style="font-size:11px;">1 Yr</span>
+                      <div class="d-flex gap-1">
+                        <button type="button" class="emi-quick-btn" onclick="setEmiTenure(10)">10 Yrs</button>
+                        <button type="button" class="emi-quick-btn" onclick="setEmiTenure(15)">15 Yrs</button>
+                        <button type="button" class="emi-quick-btn" onclick="setEmiTenure(20)">20 Yrs</button>
+                        <button type="button" class="emi-quick-btn" onclick="setEmiTenure(25)">25 Yrs</button>
+                      </div>
+                      <span class="text-muted" style="font-size:11px;">30 Yrs</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right: Calculation Results -->
+                <div class="col-12 col-lg-5">
+                  <div class="emi-result-panel">
+                    <div>
+                      <div class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing:0.5px;">Monthly EMI Payable</div>
+                      <div class="emi-highlight-amount" id="emiMonthlyDisplay">₹43,391</div>
+                      <div class="text-muted small mt-1" id="emiSubtext">per month for 20 years</div>
+                    </div>
+
+                    <div class="my-3">
+                      <!-- Visual Breakdown Bar -->
+                      <div class="emi-breakup-bar">
+                        <div class="emi-bar-principal" id="emiPrincipalBar" style="width: 48%;"></div>
+                        <div class="emi-bar-interest" id="emiInterestBar" style="width: 52%;"></div>
+                      </div>
+                      <div class="d-flex justify-content-between align-items-center small mt-1">
+                        <span style="color:#334155; font-weight:700;"><i class="fa-solid fa-circle me-1" style="color:#334155; font-size:9px;"></i> <span id="emiPrincipalLabel">Principal (48%)</span></span>
+                        <span style="color:#c02a7c; font-weight:700;"><i class="fa-solid fa-circle me-1" style="color:#c02a7c; font-size:9px;"></i> <span id="emiInterestLabel">Interest (52%)</span></span>
+                      </div>
+                    </div>
+
+                    <div class="border-top pt-2">
+                      <div class="d-flex justify-content-between py-1 small">
+                        <span class="text-muted">Principal Amount:</span>
+                        <span class="fw-bold text-dark" id="emiPrincipalDisplay">₹50,00,000</span>
+                      </div>
+                      <div class="d-flex justify-content-between py-1 small">
+                        <span class="text-muted">Total Interest:</span>
+                        <span class="fw-bold text-dark" id="emiInterestDisplay">₹54,13,879</span>
+                      </div>
+                      <div class="d-flex justify-content-between py-1 small border-top mt-1 pt-1">
+                        <span class="fw-bold text-dark">Total Amount:</span>
+                        <span class="fw-bold text-dark" id="emiTotalPayableDisplay">₹1,04,13,879</span>
+                      </div>
+                    </div>
+
+                    <div class="mt-3">
+                      <a href="#" id="emiLoanAssistanceBtn" target="_blank" class="btn-emi-cta w-100">
+                        <i class="fa-solid fa-hand-holding-dollar me-2"></i> Apply for Home Loan
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <?php if (!empty(trim($property['map'] ?? ''))): ?>
           <div class="property-map-section mt-4" data-aos="fade-down" data-aos-duration="1000">
             <div class="map-card-premium" style="background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 20px;">
@@ -714,6 +843,16 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
 
                 <button type="submit" class="btn-premium-cta" id="sidebarSubmitBtn">Contact Expert</button>
               </form>
+
+              <!-- Quick Action Conversion CTAs -->
+              <div class="d-flex flex-column gap-2 mt-3 pt-3 border-top">
+                <button type="button" class="btn w-100 fw-bold py-2" data-bs-toggle="modal" data-bs-target="#siteVisitModal" style="border-radius: 12px; border: 1.5px solid #c02a7c; color: #c02a7c; background: #fff5f9; font-size: 14px; transition: all 0.2s;">
+                  <i class="fa-solid fa-calendar-check me-2"></i> Book a Free Site Visit
+                </button>
+                <a href="https://wa.me/918955331454?text=<?= urlencode('Hello Ikan Housing, I am interested in ' . $property['project_name'] . ' (' . $property['location'] . '). Please share details.') ?>" target="_blank" class="btn w-100 fw-bold py-2 text-white" style="border-radius: 12px; background: #22c55e; font-size: 14px; text-decoration: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);">
+                  <i class="fa-brands fa-whatsapp me-2" style="font-size: 18px;"></i> Instant WhatsApp Chat
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -735,6 +874,97 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
       </div>
       <a class="prevv">❮</a>
       <a class="nextt">❯</a>
+    </div>
+  </div>
+
+  <!-- 📅 Modal: Schedule a Site Visit -->
+  <div class="modal fade modal-site-visit" id="siteVisitModal" tabindex="-1" aria-labelledby="siteVisitModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title fw-bold text-dark mb-0" id="siteVisitModalLabel">
+              <i class="fa-solid fa-calendar-check" style="color: #c02a7c; margin-right: 8px;"></i> Schedule a Site Visit
+            </h5>
+            <p class="text-muted small mb-0 mt-1">Tour <strong><?= htmlspecialchars($property['project_name']) ?></strong> with our property expert.</p>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div id="siteVisitMsg" class="d-none mb-3"></div>
+
+          <form id="siteVisitForm" method="POST">
+            <input type="hidden" name="property_id" value="<?= (int)$property['id'] ?>">
+            <input type="hidden" name="property_name" value="<?= htmlspecialchars($property['project_name']) ?>">
+            <input type="hidden" name="property_slug" value="<?= htmlspecialchars($slug) ?>">
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:0.5px;">Your Full Name *</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa fa-user"></i></span>
+                <input type="text" name="name" class="form-control border-start-0" placeholder="e.g. Rahul Sharma" required>
+              </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:0.5px;">Mobile Number *</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0 text-muted">+91</span>
+                  <input type="tel" name="phone" maxlength="10" pattern="[0-9]{10}" class="form-control border-start-0" placeholder="10-digit number" required>
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:0.5px;">Email Address</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa fa-envelope"></i></span>
+                  <input type="email" name="email" class="form-control border-start-0" placeholder="Optional">
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:0.5px;">Preferred Visit Date *</label>
+              <input type="date" name="visit_date" id="visitDateInput" class="form-control" min="<?= date('Y-m-d') ?>" value="<?= date('Y-m-d', strtotime('+1 day')) ?>" required>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:0.5px;">Preferred Time Slot *</label>
+              <div class="row g-2">
+                <div class="col-4">
+                  <input type="radio" name="time_slot" id="slotMorning" value="Morning (10 AM - 1 PM)" class="slot-pill-input" checked>
+                  <label for="slotMorning" class="slot-pill-label">
+                    <i class="fa-regular fa-sun d-block mb-1 text-warning"></i> Morning<br><span style="font-size:10px; font-weight:normal; opacity:0.8;">10 AM - 1 PM</span>
+                  </label>
+                </div>
+                <div class="col-4">
+                  <input type="radio" name="time_slot" id="slotAfternoon" value="Afternoon (1 PM - 4 PM)" class="slot-pill-input">
+                  <label for="slotAfternoon" class="slot-pill-label">
+                    <i class="fa-solid fa-sun d-block mb-1 text-primary"></i> Afternoon<br><span style="font-size:10px; font-weight:normal; opacity:0.8;">1 PM - 4 PM</span>
+                  </label>
+                </div>
+                <div class="col-4">
+                  <input type="radio" name="time_slot" id="slotEvening" value="Evening (4 PM - 7 PM)" class="slot-pill-input">
+                  <label for="slotEvening" class="slot-pill-label">
+                    <i class="fa-solid fa-moon d-block mb-1" style="color:#c02a7c;"></i> Evening<br><span style="font-size:10px; font-weight:normal; opacity:0.8;">4 PM - 7 PM</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-2 mb-3 rounded-3 d-flex align-items-center gap-2" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+              <i class="fa-solid fa-car-side text-success fs-5"></i>
+              <div style="font-size:12px; color:#166534; line-height:1.3;">
+                <strong>Free Site Visit Assistance:</strong> Our property manager will assist with site directions and project walkthrough.
+              </div>
+            </div>
+
+            <button type="submit" class="btn w-100 py-3 fw-bold text-white shadow-sm" id="submitSiteVisitBtn" style="background:linear-gradient(135deg, #c02a7c 0%, #991b5b 100%); border-radius:12px; font-size:15px;">
+              <i class="fa-solid fa-calendar-check me-2"></i> Confirm & Schedule Visit
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1034,6 +1264,226 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
       rdPositions[id] = (rdPositions[id] - 1 + total) % total;
       slides.style.transform = `translateX(-${rdPositions[id] * 100}%)`;
     }
+  </script>
+
+  <!-- 🧮 Interactive Features Script: EMI Calculator, Wishlist & Site Visit Booking -->
+  <script>
+    const CURRENT_PROPERTY_NAME = <?= json_encode($property['project_name']) ?>;
+    const CURRENT_PROPERTY_SLUG = <?= json_encode($slug) ?>;
+
+    // --- 1. EMI CALCULATOR LOGIC ---
+    function formatINR(val) {
+      return '₹' + Number(Math.round(val)).toLocaleString('en-IN');
+    }
+
+    function calculateEMI() {
+      const loanInput = document.getElementById('emiLoanInput');
+      const rateInput = document.getElementById('emiRateInput');
+      const tenureInput = document.getElementById('emiTenureInput');
+      if (!loanInput || !rateInput || !tenureInput) return;
+
+      const P = parseFloat(loanInput.value) || 5000000;
+      const annualRate = parseFloat(rateInput.value) || 8.5;
+      const years = parseInt(tenureInput.value) || 20;
+
+      const N = years * 12;
+      const R = (annualRate / 12) / 100;
+
+      let emi = 0;
+      if (R > 0) {
+        emi = Math.round((P * R * Math.pow(1 + R, N)) / (Math.pow(1 + R, N) - 1));
+      } else {
+        emi = Math.round(P / N);
+      }
+
+      const totalPayment = emi * N;
+      const totalInterest = Math.max(0, totalPayment - P);
+
+      const principalPercent = Math.max(5, Math.min(95, Math.round((P / totalPayment) * 100)));
+      const interestPercent = 100 - principalPercent;
+
+      // Update Displays
+      document.getElementById('emiLoanAmountDisplay').textContent = formatINR(P);
+      document.getElementById('emiRateDisplay').textContent = annualRate.toFixed(1) + '% p.a.';
+      document.getElementById('emiTenureDisplay').textContent = years + ' Years (' + N + ' M)';
+
+      document.getElementById('emiMonthlyDisplay').textContent = formatINR(emi);
+      document.getElementById('emiSubtext').textContent = 'per month for ' + years + ' years';
+
+      document.getElementById('emiPrincipalDisplay').textContent = formatINR(P);
+      document.getElementById('emiInterestDisplay').textContent = formatINR(totalInterest);
+      document.getElementById('emiTotalPayableDisplay').textContent = formatINR(totalPayment);
+
+      const pBar = document.getElementById('emiPrincipalBar');
+      const iBar = document.getElementById('emiInterestBar');
+      if (pBar && iBar) {
+        pBar.style.width = principalPercent + '%';
+        iBar.style.width = interestPercent + '%';
+        document.getElementById('emiPrincipalLabel').textContent = 'Principal (' + principalPercent + '%)';
+        document.getElementById('emiInterestLabel').textContent = 'Interest (' + interestPercent + '%)';
+      }
+
+      // WhatsApp Loan CTA message
+      const loanBtn = document.getElementById('emiLoanAssistanceBtn');
+      if (loanBtn) {
+        const msg = "Hello Ikan Housing, I am interested in Home Loan assistance for " + CURRENT_PROPERTY_NAME + " (Loan Amount: " + formatINR(P) + ", EMI approx: " + formatINR(emi) + "/month). Please connect me with your banking advisor.";
+        loanBtn.href = "https://wa.me/918955331454?text=" + encodeURIComponent(msg);
+      }
+    }
+
+    function setEmiAmount(amount) {
+      const el = document.getElementById('emiLoanInput');
+      if (el) { el.value = amount; calculateEMI(); }
+    }
+    function setEmiRate(rate) {
+      const el = document.getElementById('emiRateInput');
+      if (el) { el.value = rate; calculateEMI(); }
+    }
+    function setEmiTenure(tenure) {
+      const el = document.getElementById('emiTenureInput');
+      if (el) { el.value = tenure; calculateEMI(); }
+    }
+
+    // Attach EMI events
+    ['emiLoanInput', 'emiRateInput', 'emiTenureInput'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', calculateEMI);
+    });
+
+    // --- 2. LOCALSTORAGE WISHLIST / SAVE LOGIC ---
+    function getSavedProperties() {
+      try {
+        return JSON.parse(localStorage.getItem('ikan_saved_properties')) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function updateSaveButtonUI() {
+      const saved = getSavedProperties();
+      const isSaved = saved.some(item => (typeof item === 'string' ? item : item.slug) === CURRENT_PROPERTY_SLUG);
+      const btn = document.getElementById('savePropertyBtn');
+      if (!btn) return;
+
+      if (isSaved) {
+        btn.innerHTML = '<i class="fa-solid fa-heart me-1" style="color:#ffffff;"></i> Saved';
+        btn.style.backgroundColor = '#c02a7c';
+        btn.style.borderColor = '#c02a7c';
+        btn.style.color = '#ffffff';
+      } else {
+        btn.innerHTML = '<i class="fa-regular fa-heart me-1" style="color:#c02a7c;"></i> Save';
+        btn.style.backgroundColor = 'transparent';
+        btn.style.borderColor = '#e2e8f0';
+        btn.style.color = '#c02a7c';
+      }
+    }
+
+    function toggleSaveProperty() {
+      let saved = getSavedProperties();
+      const index = saved.findIndex(item => (typeof item === 'string' ? item : item.slug) === CURRENT_PROPERTY_SLUG);
+
+      if (index >= 0) {
+        saved.splice(index, 1);
+        localStorage.setItem('ikan_saved_properties', JSON.stringify(saved));
+        updateSaveButtonUI();
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            toast: true, position: 'top-end', icon: 'info',
+            title: 'Removed from your favorites',
+            showConfirmButton: false, timer: 2000, timerProgressBar: true
+          });
+        }
+      } else {
+        saved.push({
+          slug: CURRENT_PROPERTY_SLUG,
+          name: CURRENT_PROPERTY_NAME,
+          saved_at: new Date().toISOString()
+        });
+        localStorage.setItem('ikan_saved_properties', JSON.stringify(saved));
+        updateSaveButtonUI();
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            toast: true, position: 'top-end', icon: 'success',
+            title: 'Property saved to your favorites! ❤️',
+            showConfirmButton: false, timer: 2500, timerProgressBar: true
+          });
+        }
+      }
+    }
+
+    function copyToClipboard() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            toast: true, position: 'top-end', icon: 'success',
+            title: 'Property link copied to clipboard!',
+            showConfirmButton: false, timer: 2000
+          });
+        } else {
+          alert("Link copied to clipboard!");
+        }
+      });
+    }
+
+    // --- 3. AJAX SITE VISIT FORM SUBMISSION ---
+    document.addEventListener('DOMContentLoaded', function() {
+      calculateEMI();
+      updateSaveButtonUI();
+
+      const siteVisitForm = $('#siteVisitForm');
+      if (siteVisitForm.length) {
+        siteVisitForm.on('submit', function(e) {
+          e.preventDefault();
+          const form = $(this);
+          const submitBtn = $('#submitSiteVisitBtn');
+          const msgBox = $('#siteVisitMsg');
+
+          msgBox.html('').removeClass('alert alert-success alert-danger d-none');
+          const originalBtnHtml = submitBtn.html();
+          submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Scheduling Visit...');
+
+          $.ajax({
+            url: 'api/schedule_visit.php',
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json',
+            success: function(res) {
+              if (res.status === 'success') {
+                msgBox.addClass('alert alert-success').html('<strong>🎉 Success!</strong> ' + res.message);
+                form[0].reset();
+                submitBtn.html('<i class="fa-solid fa-check me-2"></i>Visit Scheduled!');
+
+                if (typeof Swal !== 'undefined') {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Site Visit Confirmed!',
+                    text: res.message,
+                    confirmButtonColor: '#c02a7c',
+                    confirmButtonText: 'Great, Thank You!'
+                  });
+                }
+
+                setTimeout(function() {
+                  const modalEl = document.getElementById('siteVisitModal');
+                  if (modalEl && typeof bootstrap !== 'undefined') {
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInstance) modalInstance.hide();
+                  }
+                  submitBtn.prop('disabled', false).html(originalBtnHtml);
+                }, 4000);
+              } else {
+                msgBox.addClass('alert alert-danger').html('⚠️ ' + (res.message || 'Could not schedule visit. Please try again.'));
+                submitBtn.prop('disabled', false).html(originalBtnHtml);
+              }
+            },
+            error: function() {
+              msgBox.addClass('alert alert-danger').html('❌ Communication failed. Please call us directly at +91 89553 31454.');
+              submitBtn.prop('disabled', false).html(originalBtnHtml);
+            }
+          });
+        });
+      }
+    });
   </script>
 </body>
 

@@ -711,4 +711,157 @@
 .property-rich-desc table th:nth-child(3):empty {
     display: none !important;
 }
+
+/* 🧮 Interactive Home Loan EMI Calculator Styles */
+.emi-card-premium {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+}
+.emi-slider-wrap {
+    margin-bottom: 22px;
+}
+.emi-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 6px;
+    background: #e2e8f0;
+    outline: none;
+    transition: background 0.2s;
+    margin: 10px 0 8px;
+}
+.emi-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #c02a7c;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(192, 42, 124, 0.4);
+    border: 2px solid #ffffff;
+    transition: transform 0.15s ease;
+}
+.emi-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+.emi-slider::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #c02a7c;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(192, 42, 124, 0.4);
+    border: 2px solid #ffffff;
+}
+.emi-quick-btn {
+    font-size: 11px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 3px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.emi-quick-btn:hover {
+    background: #fdf2f8;
+    color: #c02a7c;
+    border-color: #fbcfe8;
+}
+.emi-result-panel {
+    background: linear-gradient(145deg, #fff5f9 0%, #fdf2f8 50%, #ffffff 100%);
+    border-radius: 16px;
+    border: 1px solid #fbcfe8;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+.emi-highlight-amount {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #c02a7c;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+.emi-breakup-bar {
+    display: flex;
+    height: 10px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 16px 0 10px;
+    background: #e2e8f0;
+}
+.emi-bar-principal {
+    background: #334155;
+    transition: width 0.3s ease;
+}
+.emi-bar-interest {
+    background: #c02a7c;
+    transition: width 0.3s ease;
+}
+.btn-emi-cta {
+    background: linear-gradient(135deg, #c02a7c 0%, #991b5b 100%);
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 12px;
+    padding: 12px 18px;
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(192, 42, 124, 0.25);
+    transition: all 0.25s ease;
+}
+.btn-emi-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(192, 42, 124, 0.35);
+}
+
+/* 📅 Site Visit Modal Styles */
+.modal-site-visit .modal-content {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+.modal-site-visit .modal-header {
+    background: #fdf2f8;
+    border-bottom: 1px solid #fce7f3;
+    padding: 20px 24px;
+}
+.slot-pill-input {
+    display: none;
+}
+.slot-pill-label {
+    display: block;
+    padding: 10px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+.slot-pill-input:checked + .slot-pill-label {
+    border-color: #c02a7c;
+    background: #fdf2f8;
+    color: #c02a7c;
+    box-shadow: 0 2px 8px rgba(192, 42, 124, 0.15);
+}
+.slot-pill-label:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
 </style>

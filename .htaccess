@@ -18,7 +18,8 @@
     RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s(.*/)?index\.php [NC]
     RewriteRule ^(.*?)index\.php$ ./$1 [R=301,L,NE]
 
-    # 2. 301 Redirect file.php to file (handles subdirectories)
+    # 2. 301 Redirect file.php to file (handles subdirectories, excludes POST)
+    RewriteCond %{REQUEST_METHOD} !POST
     RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s(.+/)?([^/.]+)\.php [NC]
     RewriteRule ^ %1%2 [R=301,L,NE]
 

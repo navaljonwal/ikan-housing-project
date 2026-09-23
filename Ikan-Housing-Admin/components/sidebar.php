@@ -88,6 +88,11 @@
                         <span class="sub-item">Right Contact</span>
                       </a>
                     </li>
+                    <li>
+                      <a href="site_visits/site_visits">
+                        <span class="sub-item">Site Visits</span>
+                      </a>
+                    </li>
                   </ul>
                 </div>
               </li>
