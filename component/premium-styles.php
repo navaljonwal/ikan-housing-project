@@ -1436,13 +1436,25 @@
   z-index: 1060 !important;
 }
 
+.modal-site-visit.show {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 .modal-site-visit .modal-dialog {
   max-width: 720px !important;
-  margin: 1.25rem auto !important;
+  width: calc(100% - 32px) !important;
+  margin: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .modal-site-visit .modal-content {
+  width: 100% !important;
+  margin: auto !important;
   border-radius: 20px !important;
   border: 1px solid rgba(192, 42, 124, 0.12) !important;
   box-shadow: 0 25px 70px -10px rgba(15, 23, 42, 0.28) !important;
@@ -1453,9 +1465,12 @@
 .modal-site-visit .modal-header {
   background: linear-gradient(135deg, #fff5f9 0%, #ffffff 100%) !important;
   border-bottom: 1px solid #f1f5f9 !important;
-  padding: 13px 22px 11px !important;
+  padding: 14px 22px 12px !important;
   position: relative;
+  display: flex !important;
   align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
 }
 
 .modal-site-visit .modal-header::after {
@@ -1464,6 +1479,13 @@
   top: 0; left: 0; right: 0;
   height: 3.5px;
   background: linear-gradient(90deg, #c02a7c, #ec4899);
+}
+
+.modal-site-visit .modal-header-content {
+  text-align: center !important;
+  width: 100% !important;
+  padding-left: 28px;
+  padding-right: 28px;
 }
 
 .modal-site-visit .site-visit-badge-top {
@@ -1487,30 +1509,36 @@
   color: #0f172a !important;
   letter-spacing: -0.3px;
   line-height: 1.25;
+  text-align: center !important;
 }
 
 .modal-site-visit .modal-subtitle {
   font-family: 'Outfit', sans-serif !important;
   font-size: 12px !important;
   color: #64748b !important;
-  margin-top: 2px !important;
+  margin-top: 3px !important;
   margin-bottom: 0 !important;
   line-height: 1.3;
+  text-align: center !important;
 }
 
 .modal-site-visit .btn-close {
+  position: absolute !important;
+  right: 16px !important;
+  top: 16px !important;
   background-color: #f1f5f9;
   border-radius: 50%;
   padding: 8px;
   opacity: 0.8;
   transition: all 0.2s ease;
   font-size: 10.5px;
+  z-index: 2;
 }
 
 .modal-site-visit .btn-close:hover {
   opacity: 1;
   background-color: #fee2e2;
-  transform: rotate(90deg);
+  transform: rotate(90deg) !important;
 }
 
 .modal-site-visit .modal-body {
@@ -1745,7 +1773,7 @@
 /* 📱 Responsive Mobile Adjustments (< 768px) */
 @media (max-width: 767.98px) {
   .modal-site-visit .modal-dialog {
-    margin: 10px auto !important;
+    margin: auto !important;
     width: calc(100% - 16px) !important;
     max-width: 460px !important;
   }
@@ -1757,6 +1785,16 @@
 
   .modal-site-visit .modal-header {
     padding: 12px 15px 10px !important;
+  }
+
+  .modal-site-visit .modal-header-content {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .modal-site-visit .btn-close {
+    right: 12px !important;
+    top: 12px !important;
   }
 
   .modal-site-visit .site-visit-badge-top {

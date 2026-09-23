@@ -1039,8 +1039,8 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <div class="pe-2">
-            <h5 class="modal-title mb-0 d-flex align-items-center flex-wrap gap-2" id="siteVisitModalLabel">
+          <div class="modal-header-content">
+            <h5 class="modal-title mb-0 d-inline-flex align-items-center justify-content-center flex-wrap gap-2" id="siteVisitModalLabel">
               <span><i class="fa-solid fa-calendar-check" style="color: #c02a7c; margin-right: 6px;"></i> Schedule a Free Site Visit</span>
               <span class="site-visit-badge-top">
                 <i class="fa-solid fa-shield-halved me-1"></i> Verified Visit
@@ -1651,7 +1651,7 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
             modalInstance.show();
           } else {
             // Direct DOM Fallback
-            $(modalEl).addClass('show').css({ display: 'block', background: 'rgba(15,23,42,0.65)' });
+            $(modalEl).addClass('show').css({ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15,23,42,0.65)' });
             $('body').addClass('modal-open');
           }
         }
