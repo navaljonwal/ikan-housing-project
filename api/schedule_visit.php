@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
-include('../config.php');
+require_once __DIR__ . '/../config.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $name = isset($_POST['name']) ? trim($_POST['name']) : '';
@@ -10,7 +10,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $time_slot = isset($_POST['time_slot']) ? trim($_POST['time_slot']) : '';
     $property_name = isset($_POST['property_name']) ? trim($_POST['property_name']) : '';
     $property_slug = isset($_POST['property_slug']) ? trim($_POST['property_slug']) : '';
-    $property_id = isset($_POST['property_id']) && is_numeric($_POST['property_id']) ? (int)$_POST['property_id'] : null;
+    $property_id = isset($_POST['property_id']) && is_numeric($_POST['property_id']) ? (int)$_POST['property_id'] : 0;
+
+    if (empty($property_name)) {
+        $property_name = 'Property Visit';
+    }
 
     if (empty($name) || empty($phone) || empty($visit_date) || empty($time_slot)) {
         echo json_encode([

@@ -1429,69 +1429,171 @@
   box-shadow: 0 4px 14px rgba(192, 42, 124, 0.3);
 }
 
-/* 📅 Site Visit Modal */
+/* 📅 Site Visit Modal — Luxury UI */
+.modal-site-visit {
+  z-index: 1060 !important;
+}
+
 .modal-site-visit .modal-dialog {
-  max-width: 500px !important;
+  max-width: 520px !important;
+  margin: 1.75rem auto;
 }
 
 .modal-site-visit .modal-content {
   border-radius: 24px !important;
-  border: none !important;
-  box-shadow: 0 25px 60px -10px rgba(0,0,0,0.2) !important;
+  border: 1px solid rgba(192, 42, 124, 0.1) !important;
+  box-shadow: 0 25px 70px -12px rgba(15, 23, 42, 0.25) !important;
   overflow: hidden !important;
+  background: #ffffff !important;
 }
 
 .modal-site-visit .modal-header {
-  background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 100%) !important;
-  border-bottom: 1.5px solid #fce7f3 !important;
-  padding: 22px 26px !important;
+  background: linear-gradient(135deg, #fff5f9 0%, #ffffff 100%) !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  padding: 24px 28px 20px !important;
+  position: relative;
+}
+
+.modal-site-visit .modal-header::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #c02a7c, #ec4899);
+}
+
+.modal-site-visit .modal-title {
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 19px !important;
+  color: #0f172a !important;
+  letter-spacing: -0.3px;
+}
+
+.modal-site-visit .btn-close {
+  background-color: #f1f5f9;
+  border-radius: 50%;
+  padding: 8px;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+  font-size: 11px;
+}
+
+.modal-site-visit .btn-close:hover {
+  opacity: 1;
+  background-color: #fee2e2;
+  transform: rotate(90deg);
+}
+
+.modal-site-visit .modal-body {
+  padding: 24px 28px !important;
 }
 
 .modal-site-visit label.form-label {
-  font-size: 13px !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 12.5px !important;
   font-weight: 700 !important;
-  color: #334155 !important;
+  color: #475569 !important;
   margin-bottom: 6px !important;
+  display: block;
 }
 
-.modal-site-visit .form-control {
-  font-size: 14px !important;
-  height: 48px !important;
+/* 🧼 Seamless Unified Input Group */
+.modal-site-visit .input-group {
   border: 1.5px solid #e2e8f0 !important;
-  border-radius: 12px !important;
-  padding: 10px 16px !important;
-  color: #0f172a !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  background: #f8fafc !important;
+  transition: all 0.25s ease !important;
 }
 
-.modal-site-visit .form-control:focus {
+.modal-site-visit .input-group:focus-within {
   border-color: #c02a7c !important;
-  box-shadow: 0 0 0 4px rgba(192, 42, 124, 0.1) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(192, 42, 124, 0.12) !important;
 }
 
+.modal-site-visit .input-group-text {
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  font-size: 14px !important;
+  padding: 0 0 0 16px !important;
+  height: 48px !important;
+  display: flex;
+  align-items: center;
+}
+
+.modal-site-visit .input-group .form-control {
+  border: none !important;
+  background: transparent !important;
+  height: 48px !important;
+  font-size: 14px !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 500 !important;
+  color: #0f172a !important;
+  padding: 10px 16px 10px 12px !important;
+  box-shadow: none !important;
+}
+
+.modal-site-visit .input-group .form-control::placeholder {
+  color: #94a3b8 !important;
+  font-weight: 400 !important;
+}
+
+/* 🕒 Time Slot Pills */
 .slot-pill-input {
   display: none !important;
 }
 
 .slot-pill-label {
-  display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
   padding: 12px 8px !important;
   border: 1.5px solid #e2e8f0 !important;
   border-radius: 14px !important;
-  font-size: 12.5px !important;
+  font-size: 12px !important;
   font-weight: 700 !important;
-  color: #334155 !important;
+  color: #475569 !important;
   cursor: pointer !important;
   text-align: center !important;
-  transition: all 0.2s ease !important;
-  line-height: 1.3 !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   background: #ffffff !important;
+  min-height: 72px;
+}
+
+.slot-pill-label:hover {
+  border-color: #cbd5e1 !important;
+  background: #f8fafc !important;
+  transform: translateY(-1px);
 }
 
 .slot-pill-input:checked + .slot-pill-label {
   border-color: #c02a7c !important;
   background: #fff0f6 !important;
   color: #c02a7c !important;
-  box-shadow: 0 4px 12px rgba(192, 42, 124, 0.15) !important;
+  box-shadow: 0 4px 14px rgba(192, 42, 124, 0.16) !important;
+}
+
+.modal-site-visit .btn-submit-visit {
+  background: linear-gradient(135deg, #c02a7c 0%, #991b5b 100%) !important;
+  color: #ffffff !important;
+  border-radius: 14px !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  font-family: 'Outfit', sans-serif !important;
+  height: 52px !important;
+  border: none !important;
+  box-shadow: 0 8px 20px rgba(192, 42, 124, 0.25) !important;
+  transition: all 0.25s ease !important;
+}
+
+.modal-site-visit .btn-submit-visit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(192, 42, 124, 0.35) !important;
+  color: #ffffff !important;
 }
 
 /* 📱 Responsive Adjustments */

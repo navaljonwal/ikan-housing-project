@@ -39,16 +39,6 @@
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-      <?php if ($seo_page_key === 'property-detail-for'): 
-          $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
-          $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-          $script_dir = dirname($_SERVER['SCRIPT_NAME'] ?? '/');
-          $base_path = rtrim(str_replace('\\', '/', $script_dir), '/') . '/';
-          if ($base_path === '//') $base_path = '/';
-      ?>
-      <base href="<?= htmlspecialchars($protocol . $host . $base_path) ?>">
-      <?php endif; ?>
-
       <title><?= htmlspecialchars($seo_title) ?></title>
       <meta name="description" content="<?= htmlspecialchars($seo_desc) ?>">
       <meta name="keywords" content="<?= htmlspecialchars($seo_keys) ?>">

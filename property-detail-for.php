@@ -360,20 +360,30 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
     </div>
   </section>
 
+  <?php
+  // Check if property has floor plans
+  $has_floor_plans = false;
+  $fp_check_res = mysqli_query($con, "SELECT id FROM floor_plane WHERE property_id = " . (int)$property['id'] . " LIMIT 1");
+  if ($fp_check_res && mysqli_num_rows($fp_check_res) > 0) {
+    $has_floor_plans = true;
+  }
+  ?>
   <!-- 🧭 Sticky Quick Anchor Navigation Sub-Bar -->
-  <div class="property-subnav-sticky">
+  <div class="property-subnav-sticky" id="propertySubnavSticky">
     <div class="container">
       <div class="subnav-scroll-wrap">
-        <a href="#sectionOverview" class="subnav-link active"><i class="fa fa-list-check"></i> Key Specs</a>
-        <a href="#sectionAbout" class="subnav-link"><i class="fa fa-file-lines"></i> About Project</a>
+        <a href="#sectionOverview" class="subnav-link active" data-target="#sectionOverview"><i class="fa fa-list-check"></i> Key Specs</a>
+        <a href="#sectionAbout" class="subnav-link" data-target="#sectionAbout"><i class="fa fa-file-lines"></i> About Project</a>
         <?php if (!empty(trim($property['highlight'] ?? ''))): ?>
-          <a href="#sectionHighlights" class="subnav-link"><i class="fa fa-sparkles"></i> Highlights</a>
+          <a href="#sectionHighlights" class="subnav-link" data-target="#sectionHighlights"><i class="fa fa-sparkles"></i> Highlights</a>
         <?php endif; ?>
-        <a href="#sectionAmenities" class="subnav-link"><i class="fa fa-swimming-pool"></i> Amenities</a>
-        <a href="#sectionFloorPlans" class="subnav-link"><i class="fa fa-ruler-combined"></i> Floor Plans</a>
-        <a href="#sectionEmi" class="subnav-link"><i class="fa fa-calculator"></i> EMI Calculator</a>
+        <a href="#sectionAmenities" class="subnav-link" data-target="#sectionAmenities"><i class="fa fa-swimming-pool"></i> Amenities</a>
+        <?php if ($has_floor_plans): ?>
+          <a href="#sectionFloorPlans" class="subnav-link" data-target="#sectionFloorPlans"><i class="fa fa-ruler-combined"></i> Floor Plans</a>
+        <?php endif; ?>
+        <a href="#sectionEmi" class="subnav-link" data-target="#sectionEmi"><i class="fa fa-calculator"></i> EMI Calculator</a>
         <?php if (!empty(trim($property['map'] ?? ''))): ?>
-          <a href="#sectionMap" class="subnav-link"><i class="fa fa-map-location-dot"></i> Location & Map</a>
+          <a href="#sectionMap" class="subnav-link" data-target="#sectionMap"><i class="fa fa-map-location-dot"></i> Location & Map</a>
         <?php endif; ?>
       </div>
     </div>
@@ -1030,8 +1040,8 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
       <div class="modal-content">
         <div class="modal-header">
           <div>
-            <h5 class="modal-title fw-bold text-dark mb-0" id="siteVisitModalLabel" style="font-family:'Outfit', sans-serif;">
-              <i class="fa-solid fa-calendar-check" style="color: #c02a7c; margin-right: 8px;"></i> Schedule a Site Visit
+            <h5 class="modal-title mb-0" id="siteVisitModalLabel">
+              <i class="fa-solid fa-calendar-check" style="color: #c02a7c; margin-right: 8px;"></i> Schedule a Free Site Visit
             </h5>
             <p class="text-muted small mb-0 mt-1" style="font-family:'Outfit', sans-serif;">Tour <strong><?= htmlspecialchars($property['project_name']) ?></strong> with our senior property expert.</p>
           </div>
@@ -1048,32 +1058,32 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
             <div class="mb-3">
               <label class="form-label">Full Name *</label>
               <div class="input-group">
-                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa fa-user"></i></span>
-                <input type="text" name="name" class="form-control border-start-0" placeholder="e.g. Rahul Sharma" required>
+                <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                <input type="text" name="name" class="form-control" placeholder="e.g. Rahul Sharma" required autocomplete="name">
               </div>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Mobile Number (10 Digits) *</label>
               <div class="input-group">
-                <span class="input-group-text bg-light border-end-0 text-muted fw-bold">+91</span>
-                <input type="tel" name="phone" maxlength="10" pattern="[0-9]{10}" class="form-control border-start-0" placeholder="e.g. 9829012345" required>
+                <span class="input-group-text fw-bold" style="font-size:13px; color:#475569;">+91</span>
+                <input type="tel" name="phone" maxlength="10" pattern="[0-9]{10}" class="form-control" placeholder="e.g. 9829012345" required autocomplete="tel">
               </div>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Email Address (Optional)</label>
               <div class="input-group">
-                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa fa-envelope"></i></span>
-                <input type="email" name="email" class="form-control border-start-0" placeholder="name@example.com">
+                <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                <input type="email" name="email" class="form-control" placeholder="name@example.com" autocomplete="email">
               </div>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Preferred Visit Date *</label>
               <div class="input-group">
-                <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa fa-calendar-day"></i></span>
-                <input type="date" name="visit_date" id="visitDateInput" class="form-control border-start-0" min="<?= date('Y-m-d') ?>" value="<?= date('Y-m-d', strtotime('+1 day')) ?>" required>
+                <span class="input-group-text"><i class="fa-solid fa-calendar-day"></i></span>
+                <input type="date" name="visit_date" id="visitDateInput" class="form-control" min="<?= date('Y-m-d') ?>" value="<?= date('Y-m-d', strtotime('+1 day')) ?>" required>
               </div>
             </div>
 
@@ -1083,32 +1093,38 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
                 <div class="col-4">
                   <input type="radio" name="time_slot" id="slotMorning" value="Morning (10 AM - 1 PM)" class="slot-pill-input" checked>
                   <label for="slotMorning" class="slot-pill-label">
-                    <i class="fa-regular fa-sun d-block mb-1 text-warning" style="font-size:16px;"></i> Morning<br><span style="font-size:10px; font-weight:normal; opacity:0.75;">10 AM - 1 PM</span>
+                    <i class="fa-regular fa-sun text-warning mb-1" style="font-size:18px;"></i>
+                    <span>Morning</span>
+                    <span style="font-size:10px; font-weight:500; opacity:0.75;">10 AM - 1 PM</span>
                   </label>
                 </div>
                 <div class="col-4">
                   <input type="radio" name="time_slot" id="slotAfternoon" value="Afternoon (1 PM - 4 PM)" class="slot-pill-input">
                   <label for="slotAfternoon" class="slot-pill-label">
-                    <i class="fa-solid fa-sun d-block mb-1 text-primary" style="font-size:16px;"></i> Afternoon<br><span style="font-size:10px; font-weight:normal; opacity:0.75;">1 PM - 4 PM</span>
+                    <i class="fa-solid fa-sun text-primary mb-1" style="font-size:18px;"></i>
+                    <span>Afternoon</span>
+                    <span style="font-size:10px; font-weight:500; opacity:0.75;">1 PM - 4 PM</span>
                   </label>
                 </div>
                 <div class="col-4">
                   <input type="radio" name="time_slot" id="slotEvening" value="Evening (4 PM - 7 PM)" class="slot-pill-input">
                   <label for="slotEvening" class="slot-pill-label">
-                    <i class="fa-solid fa-moon d-block mb-1" style="color:#c02a7c; font-size:16px;"></i> Evening<br><span style="font-size:10px; font-weight:normal; opacity:0.75;">4 PM - 7 PM</span>
+                    <i class="fa-solid fa-moon mb-1" style="color:#c02a7c; font-size:18px;"></i>
+                    <span>Evening</span>
+                    <span style="font-size:10px; font-weight:500; opacity:0.75;">4 PM - 7 PM</span>
                   </label>
                 </div>
               </div>
             </div>
 
-            <div class="p-3 mb-4 rounded-3 d-flex align-items-center gap-2" style="background:#f0fdf4; border:1px solid #bbf7d0;">
-              <i class="fa-solid fa-circle-check text-success fs-5"></i>
-              <div style="font-size:12px; color:#166534; line-height:1.4;">
-                <strong>Free Site Visit Guarantee:</strong> Verified sales advisor with on-site floor plan walkthrough and zero service charges.
+            <div class="p-3 mb-4 rounded-3 d-flex align-items-center gap-3" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+              <i class="fa-solid fa-shield-check text-success fs-4"></i>
+              <div style="font-size:12.5px; color:#166534; line-height:1.4;">
+                <strong>100% Free Site Visit Guarantee:</strong> Dedicated advisor, sanitized site car available upon request, and zero commission.
               </div>
             </div>
 
-            <button type="submit" class="btn w-100 py-3 fw-bold text-white shadow-sm" id="submitSiteVisitBtn" style="background:linear-gradient(135deg, #c02a7c 0%, #991b5b 100%); border-radius:14px; font-size:15px; border:none;">
+            <button type="submit" class="btn w-100 btn-submit-visit" id="submitSiteVisitBtn">
               <i class="fa-solid fa-calendar-check me-2"></i> Confirm & Schedule Visit
             </button>
           </form>
@@ -1164,55 +1180,16 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
   </script>
 
   <script>
+    // Safe Location Slider Scroll fallback
     document.addEventListener('DOMContentLoaded', function () {
-      const modal = document.getElementById('myModal');
-      const openBtn = document.getElementById('openModalBtn');
-      const closeBtn = document.querySelector('#myModal .close');
-
-      openBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        modal.style.display = 'block';
-      });
-
-      closeBtn.addEventListener('click', function () {
-        modal.style.display = 'none';
-      });
-
-      window.addEventListener('click', function (event) {
-        if (event.target === modal) {
-          modal.style.display = 'none';
-        }
-      });
-    });
-  </script>
-  <script>
-    const slider = document.getElementById('locationSlider');
-    document.querySelector('.loc-btn.next').addEventListener('click', () => {
-      slider.scrollBy({ left: slider.clientWidth, behavior: 'smooth' });
-    });
-    document.querySelector('.loc-btn.prev').addEventListener('click', () => {
-      slider.scrollBy({ left: -slider.clientWidth, behavior: 'smooth' });
-    });
-  </script>
-
-
-  <script>
-    const openBtn = document.getElementById("openContactBox");
-    const closeBtn = document.getElementById("closeContactBox");
-    const contactBox = document.getElementById("contactBox");
-
-    openBtn.addEventListener("click", () => {
-      contactBox.style.display = "flex";
-    });
-
-    closeBtn.addEventListener("click", () => {
-      contactBox.style.display = "none";
-    });
-
-    // Agar background pe click kare to bhi close ho
-    window.addEventListener("click", (e) => {
-      if (e.target === contactBox) {
-        contactBox.style.display = "none";
+      const slider = document.getElementById('locationSlider');
+      const nextBtn = document.querySelector('.loc-btn.next');
+      const prevBtn = document.querySelector('.loc-btn.prev');
+      if (slider && nextBtn) {
+        nextBtn.addEventListener('click', () => slider.scrollBy({ left: slider.clientWidth, behavior: 'smooth' }));
+      }
+      if (slider && prevBtn) {
+        prevBtn.addEventListener('click', () => slider.scrollBy({ left: -slider.clientWidth, behavior: 'smooth' }));
       }
     });
   </script>
@@ -1574,11 +1551,109 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
       });
     }
 
-    // --- 3. AJAX SITE VISIT FORM SUBMISSION ---
-    document.addEventListener('DOMContentLoaded', function() {
-      calculateEMI();
-      updateSaveButtonUI();
+    // --- 3. BULLETPROOF STICKY SUBNAV SMOOTH SCROLL & SCROLLSPY ---
+    $(document).ready(function() {
+      // Subnav click jump
+      $('.subnav-link').on('click', function(e) {
+        e.preventDefault();
+        const targetSelector = $(this).attr('data-target') || $(this).attr('href');
+        if (!targetSelector || targetSelector === '#') return;
 
+        const targetEl = $(targetSelector);
+        if (targetEl.length) {
+          $('.subnav-link').removeClass('active');
+          $(this).addClass('active');
+
+          const stickyNav = $('.property-subnav-sticky');
+          const navHeight = stickyNav.length ? stickyNav.outerHeight() : 54;
+          const targetPos = targetEl.offset().top - navHeight - 16;
+
+          $('html, body').stop().animate({
+            scrollTop: targetPos
+          }, 450);
+        }
+      });
+
+      // Subnav scrollspy
+      let scrollTimer = null;
+      $(window).on('scroll', function() {
+        if (scrollTimer) clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(function() {
+          const scrollPos = $(window).scrollTop() + 160;
+          let activeFound = false;
+          const links = $('.subnav-link');
+
+          $($(links).get().reverse()).each(function() {
+            const targetSelector = $(this).attr('data-target') || $(this).attr('href');
+            if (!targetSelector || targetSelector === '#') return;
+            const targetEl = $(targetSelector);
+            if (targetEl.length) {
+              const top = targetEl.offset().top;
+              if (scrollPos >= top && !activeFound) {
+                $('.subnav-link').removeClass('active');
+                $(this).addClass('active');
+                activeFound = true;
+
+                // Auto-scroll horizontal subnav wrap
+                const wrap = $('.subnav-scroll-wrap');
+                if (wrap.length) {
+                  const linkPos = $(this).position().left;
+                  wrap.stop().animate({ scrollLeft: linkPos - 40 }, 150);
+                }
+              }
+            }
+          });
+
+          if (!activeFound && links.length) {
+            links.removeClass('active');
+            links.first().addClass('active');
+          }
+        }, 40);
+      });
+
+      // --- 4. BULLETPROOF SITE VISIT MODAL TRIGGER ---
+      $(document).on('click', '[data-bs-target="#siteVisitModal"], .sidebar-btn-visit, .btn-mobile-visit, .btn-action-primary', function(e) {
+        const modalEl = document.getElementById('siteVisitModal');
+        if (modalEl) {
+          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modalInstance.show();
+          } else {
+            // Direct DOM Fallback
+            $(modalEl).addClass('show').css({ display: 'block', background: 'rgba(15,23,42,0.65)' });
+            $('body').addClass('modal-open');
+          }
+        }
+      });
+
+      $(document).on('click', '#siteVisitModal [data-bs-dismiss="modal"], #siteVisitModal .btn-close', function(e) {
+        e.preventDefault();
+        const modalEl = document.getElementById('siteVisitModal');
+        if (modalEl) {
+          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+          }
+          $(modalEl).removeClass('show').css({ display: 'none' });
+          $('body').removeClass('modal-open');
+          $('.modal-backdrop').remove();
+        }
+      });
+
+      $(document).on('click', '#siteVisitModal', function(e) {
+        if (e.target === this) {
+          const modalEl = document.getElementById('siteVisitModal');
+          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+          }
+          $(modalEl).removeClass('show').css({ display: 'none' });
+          $('body').removeClass('modal-open');
+          $('.modal-backdrop').remove();
+        }
+      });
+
+      // --- 5. AJAX SITE VISIT FORM SUBMISSION ---
       const siteVisitForm = $('#siteVisitForm');
       if (siteVisitForm.length) {
         siteVisitForm.on('submit', function(e) {
@@ -1587,7 +1662,21 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
           const submitBtn = $('#submitSiteVisitBtn');
           const msgBox = $('#siteVisitMsg');
 
-          msgBox.html('').removeClass('alert alert-success alert-danger d-none');
+          const name = $.trim(form.find('input[name="name"]').val());
+          const phone = $.trim(form.find('input[name="phone"]').val());
+          const date = $.trim(form.find('input[name="visit_date"]').val());
+
+          if (!name || !phone || !date) {
+            msgBox.removeClass('d-none alert-success').addClass('alert alert-danger').html('⚠️ Please fill in all required fields (Name, Phone & Date).');
+            return false;
+          }
+
+          if (phone.replace(/[^0-9]/g, '').length < 10) {
+            msgBox.removeClass('d-none alert-success').addClass('alert alert-danger').html('⚠️ Please enter a valid 10-digit mobile number.');
+            return false;
+          }
+
+          msgBox.html('').removeClass('alert alert-success alert-danger').addClass('d-none');
           const originalBtnHtml = submitBtn.html();
           submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Scheduling Visit...');
 
@@ -1598,14 +1687,14 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
             dataType: 'json',
             success: function(res) {
               if (res.status === 'success') {
-                msgBox.addClass('alert alert-success').html('<strong>🎉 Success!</strong> ' + res.message);
+                msgBox.removeClass('d-none alert-danger').addClass('alert alert-success').html('<strong>🎉 Success!</strong> ' + res.message);
                 form[0].reset();
-                submitBtn.html('<i class="fa-solid fa-check me-2"></i>Visit Scheduled!');
+                submitBtn.html('<i class="fa-solid fa-circle-check me-2"></i>Visit Scheduled!');
 
                 if (typeof Swal !== 'undefined') {
                   Swal.fire({
                     icon: 'success',
-                    title: 'Site Visit Confirmed!',
+                    title: 'Site Visit Confirmed! 🎉',
                     text: res.message,
                     confirmButtonColor: '#c02a7c',
                     confirmButtonText: 'Great, Thank You!'
@@ -1614,24 +1703,31 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
 
                 setTimeout(function() {
                   const modalEl = document.getElementById('siteVisitModal');
-                  if (modalEl && typeof bootstrap !== 'undefined') {
+                  if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
                     const modalInstance = bootstrap.Modal.getInstance(modalEl);
                     if (modalInstance) modalInstance.hide();
                   }
+                  $('#siteVisitModal').removeClass('show').css({ display: 'none' });
+                  $('body').removeClass('modal-open');
+                  $('.modal-backdrop').remove();
                   submitBtn.prop('disabled', false).html(originalBtnHtml);
-                }, 4000);
+                  msgBox.addClass('d-none');
+                }, 3500);
               } else {
-                msgBox.addClass('alert alert-danger').html('⚠️ ' + (res.message || 'Could not schedule visit. Please try again.'));
+                msgBox.removeClass('d-none alert-success').addClass('alert alert-danger').html('⚠️ ' + (res.message || 'Could not schedule visit. Please try again.'));
                 submitBtn.prop('disabled', false).html(originalBtnHtml);
               }
             },
             error: function() {
-              msgBox.addClass('alert alert-danger').html('❌ Communication failed. Please call us directly at +91 89553 31454.');
+              msgBox.removeClass('d-none alert-success').addClass('alert alert-danger').html('❌ Communication failed. Please call us directly at +91 89553 31454.');
               submitBtn.prop('disabled', false).html(originalBtnHtml);
             }
           });
         });
       }
+
+      calculateEMI();
+      updateSaveButtonUI();
     });
   </script>
 </body>
