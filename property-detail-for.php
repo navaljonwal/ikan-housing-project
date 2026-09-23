@@ -1039,9 +1039,12 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <div>
+          <div class="pe-2">
+            <div class="site-visit-badge-top">
+              <i class="fa-solid fa-shield-halved me-1"></i> Verified Property Visit
+            </div>
             <h5 class="modal-title mb-0" id="siteVisitModalLabel">
-              <i class="fa-solid fa-calendar-check" style="color: #c02a7c; margin-right: 8px;"></i> Schedule a Free Site Visit
+              <i class="fa-solid fa-calendar-check" style="color: #c02a7c; margin-right: 6px;"></i> Schedule a Free Site Visit
             </h5>
             <p class="modal-subtitle">Tour <strong><?= htmlspecialchars($property['project_name']) ?></strong> with our verified property advisor.</p>
           </div>
@@ -1055,78 +1058,101 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
             <input type="hidden" name="property_name" value="<?= htmlspecialchars($property['project_name']) ?>">
             <input type="hidden" name="property_slug" value="<?= htmlspecialchars($slug) ?>">
 
-            <div class="mb-3">
-              <label class="form-label">Full Name *</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                <input type="text" name="name" class="form-control" placeholder="e.g. Rahul Sharma" required autocomplete="name">
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Mobile Number (10 Digits) *</label>
-              <div class="input-group">
-                <span class="input-group-text fw-bold" style="font-size:13px; color:#475569;">+91</span>
-                <input type="tel" name="phone" maxlength="10" pattern="[0-9]{10}" class="form-control" placeholder="e.g. 9829012345" required autocomplete="tel">
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Email Address (Optional)</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
-                <input type="email" name="email" class="form-control" placeholder="name@example.com" autocomplete="email">
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Preferred Visit Date *</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-calendar-day"></i></span>
-                <input type="date" name="visit_date" id="visitDateInput" class="form-control" min="<?= date('Y-m-d') ?>" value="<?= date('Y-m-d', strtotime('+1 day')) ?>" required>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Preferred Time Slot *</label>
-              <div class="row g-2 slot-pills-row">
-                <div class="col-4">
-                  <input type="radio" name="time_slot" id="slotMorning" value="Morning (10 AM - 1 PM)" class="slot-pill-input" checked>
-                  <label for="slotMorning" class="slot-pill-label">
-                    <i class="fa-regular fa-sun slot-icon text-warning"></i>
-                    <span class="slot-title">Morning</span>
-                    <span class="slot-time">10 AM - 1 PM</span>
-                  </label>
-                </div>
-                <div class="col-4">
-                  <input type="radio" name="time_slot" id="slotAfternoon" value="Afternoon (1 PM - 4 PM)" class="slot-pill-input">
-                  <label for="slotAfternoon" class="slot-pill-label">
-                    <i class="fa-solid fa-sun slot-icon text-primary"></i>
-                    <span class="slot-title">Afternoon</span>
-                    <span class="slot-time">1 PM - 4 PM</span>
-                  </label>
-                </div>
-                <div class="col-4">
-                  <input type="radio" name="time_slot" id="slotEvening" value="Evening (4 PM - 7 PM)" class="slot-pill-input">
-                  <label for="slotEvening" class="slot-pill-label">
-                    <i class="fa-solid fa-moon slot-icon" style="color:#c02a7c;"></i>
-                    <span class="slot-title">Evening</span>
-                    <span class="slot-time">4 PM - 7 PM</span>
-                  </label>
+            <div class="row g-2 g-md-3">
+              <!-- Full Name (Desktop: 6 cols, Mobile: 12 cols) -->
+              <div class="col-12 col-md-6">
+                <label class="form-label">Full Name *</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                  <input type="text" name="name" class="form-control" placeholder="e.g. Rahul Sharma" required autocomplete="name">
                 </div>
               </div>
-            </div>
 
-            <div class="trust-guarantee-box">
-              <i class="fa-solid fa-shield-check"></i>
-              <div>
-                <strong>100% Free Site Visit:</strong> Zero brokerage, verified sales advisor & sanitized site car available.
+              <!-- Mobile Number (Desktop: 6 cols, Mobile: 12 cols) -->
+              <div class="col-12 col-md-6">
+                <label class="form-label">Mobile Number *</label>
+                <div class="input-group">
+                  <span class="input-group-text fw-bold text-muted" style="font-size:13px; color:#475569;">+91</span>
+                  <input type="tel" name="phone" maxlength="10" pattern="[0-9]{10}" class="form-control" placeholder="10-digit number" required autocomplete="tel">
+                </div>
+              </div>
+
+              <!-- Email Address (Desktop: 6 cols, Mobile: 12 cols) -->
+              <div class="col-12 col-md-6">
+                <label class="form-label">Email Address <span class="text-muted fw-normal" style="font-size:11px;">(Optional)</span></label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                  <input type="email" name="email" class="form-control" placeholder="name@example.com" autocomplete="email">
+                </div>
+              </div>
+
+              <!-- Visit Date (Desktop: 6 cols, Mobile: 12 cols) -->
+              <div class="col-12 col-md-6">
+                <label class="form-label">Preferred Date *</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fa-solid fa-calendar-day"></i></span>
+                  <input type="date" name="visit_date" id="visitDateInput" class="form-control" min="<?= date('Y-m-d') ?>" value="<?= date('Y-m-d', strtotime('+1 day')) ?>" required>
+                </div>
+              </div>
+
+              <!-- Time Slot Pills (Full Width) -->
+              <div class="col-12">
+                <label class="form-label">Preferred Time Slot *</label>
+                <div class="row g-2 slot-pills-row">
+                  <div class="col-4">
+                    <input type="radio" name="time_slot" id="slotMorning" value="Morning (10 AM - 1 PM)" class="slot-pill-input" checked>
+                    <label for="slotMorning" class="slot-pill-label">
+                      <i class="fa-regular fa-sun slot-icon text-warning"></i>
+                      <span class="slot-title">Morning</span>
+                      <span class="slot-time">10 AM - 1 PM</span>
+                    </label>
+                  </div>
+                  <div class="col-4">
+                    <input type="radio" name="time_slot" id="slotAfternoon" value="Afternoon (1 PM - 4 PM)" class="slot-pill-input">
+                    <label for="slotAfternoon" class="slot-pill-label">
+                      <i class="fa-solid fa-sun slot-icon text-primary"></i>
+                      <span class="slot-title">Afternoon</span>
+                      <span class="slot-time">1 PM - 4 PM</span>
+                    </label>
+                  </div>
+                  <div class="col-4">
+                    <input type="radio" name="time_slot" id="slotEvening" value="Evening (4 PM - 7 PM)" class="slot-pill-input">
+                    <label for="slotEvening" class="slot-pill-label">
+                      <i class="fa-solid fa-moon slot-icon" style="color:#c02a7c;"></i>
+                      <span class="slot-title">Evening</span>
+                      <span class="slot-time">4 PM - 7 PM</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Free Cab Option -->
+              <div class="col-12">
+                <div class="form-check visit-cab-check">
+                  <input class="form-check-input" type="checkbox" name="need_cab" id="needCabCheck" value="Yes">
+                  <label class="form-check-label" for="needCabCheck">
+                    <i class="fa-solid fa-car-side text-muted me-1"></i> Request free cab pickup & drop <span class="badge-cab-free">FREE</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Trust Guarantee Banner -->
+              <div class="col-12">
+                <div class="trust-guarantee-box">
+                  <i class="fa-solid fa-shield-check"></i>
+                  <div>
+                    <strong>100% Free Site Visit:</strong> Zero brokerage • Verified property advisor • Sanitized private site car.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Confirm Button -->
+              <div class="col-12 pt-1">
+                <button type="submit" class="btn btn-submit-visit" id="submitSiteVisitBtn">
+                  <i class="fa-solid fa-calendar-check me-2"></i> Confirm & Schedule Visit
+                </button>
               </div>
             </div>
-
-            <button type="submit" class="btn btn-submit-visit" id="submitSiteVisitBtn">
-              <i class="fa-solid fa-calendar-check me-2"></i> Confirm & Schedule Visit
-            </button>
           </form>
         </div>
       </div>

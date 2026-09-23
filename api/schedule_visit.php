@@ -44,15 +44,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit();
     }
 
-    $stmt = $con->prepare("INSERT INTO site_visits (property_id, property_name, property_slug, name, phone, email, visit_date, time_slot, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'New')");
+    $need_cab = isset($_POST['need_cab']) && $_POST['need_cab'] === 'Yes';
+    $notes = $need_cab ? 'Free Cab Pick & Drop Requested' : '';
+
+    $stmt = $con->prepare("INSERT INTO site_visits (property_id, property_name, property_slug, name, phone, email, visit_date, time_slot, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'New', ?)");
     if ($stmt) {
         $clean_phone = substr(preg_replace('/[^0-9]/', '', $phone), -10);
-        $stmt->bind_param("isssssss", $property_id, $property_name, $property_slug, $name, $clean_phone, $email, $visit_date, $time_slot);
+        $stmt->bind_param("issssssss", $property_id, $property_name, $property_slug, $name, $clean_phone, $email, $visit_date, $time_slot, $notes);
         
         if ($stmt->execute()) {
+            $cab_msg = $need_cab ? ' with complimentary cab pickup' : '';
             echo json_encode([
                 "status" => "success",
-                "message" => "Your site visit for " . htmlspecialchars($property_name) . " has been scheduled for " . date('d M, Y', $selected_timestamp) . " (" . htmlspecialchars($time_slot) . "). Our property advisor will call you shortly to confirm."
+                "message" => "Your site visit for " . htmlspecialchars($property_name) . " has been scheduled for " . date('d M, Y', $selected_timestamp) . " (" . htmlspecialchars($time_slot) . ")" . $cab_msg . ". Our property advisor will call you shortly to confirm."
             ]);
         } else {
             echo json_encode([

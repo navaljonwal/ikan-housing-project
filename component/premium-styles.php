@@ -1437,13 +1437,13 @@
 }
 
 .modal-site-visit .modal-dialog {
-  max-width: 530px !important;
+  max-width: 620px !important;
   margin: 1.75rem auto !important;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .modal-site-visit .modal-content {
-  border-radius: 24px !important;
+  border-radius: 22px !important;
   border: 1px solid rgba(192, 42, 124, 0.12) !important;
   box-shadow: 0 25px 70px -10px rgba(15, 23, 42, 0.28) !important;
   overflow: hidden !important;
@@ -1453,8 +1453,9 @@
 .modal-site-visit .modal-header {
   background: linear-gradient(135deg, #fff5f9 0%, #ffffff 100%) !important;
   border-bottom: 1px solid #f1f5f9 !important;
-  padding: 22px 28px 18px !important;
+  padding: 18px 26px 15px !important;
   position: relative;
+  align-items: flex-start !important;
 }
 
 .modal-site-visit .modal-header::after {
@@ -1465,10 +1466,24 @@
   background: linear-gradient(90deg, #c02a7c, #ec4899);
 }
 
+.modal-site-visit .site-visit-badge-top {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(192, 42, 124, 0.08);
+  color: #c02a7c;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 20px;
+  margin-bottom: 5px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
 .modal-site-visit .modal-title {
   font-family: 'Outfit', sans-serif !important;
   font-weight: 800 !important;
-  font-size: 19px !important;
+  font-size: 18px !important;
   color: #0f172a !important;
   letter-spacing: -0.3px;
   line-height: 1.25;
@@ -1476,11 +1491,11 @@
 
 .modal-site-visit .modal-subtitle {
   font-family: 'Outfit', sans-serif !important;
-  font-size: 13px !important;
+  font-size: 12.5px !important;
   color: #64748b !important;
-  margin-top: 4px !important;
+  margin-top: 3px !important;
   margin-bottom: 0 !important;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .modal-site-visit .btn-close {
@@ -1490,6 +1505,7 @@
   opacity: 0.8;
   transition: all 0.2s ease;
   font-size: 11px;
+  margin-top: -2px;
 }
 
 .modal-site-visit .btn-close:hover {
@@ -1499,25 +1515,25 @@
 }
 
 .modal-site-visit .modal-body {
-  padding: 24px 28px !important;
-  max-height: calc(88vh - 90px);
+  padding: 20px 24px 22px !important;
+  max-height: calc(88vh - 85px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 .modal-site-visit label.form-label {
   font-family: 'Outfit', sans-serif !important;
-  font-size: 12.5px !important;
+  font-size: 12px !important;
   font-weight: 700 !important;
   color: #334155 !important;
-  margin-bottom: 6px !important;
+  margin-bottom: 5px !important;
   display: block;
 }
 
 /* 🧼 Seamless Unified Input Group */
 .modal-site-visit .input-group {
   border: 1.5px solid #e2e8f0 !important;
-  border-radius: 14px !important;
+  border-radius: 12px !important;
   overflow: hidden !important;
   background: #f8fafc !important;
   transition: all 0.25s ease !important;
@@ -1526,16 +1542,16 @@
 .modal-site-visit .input-group:focus-within {
   border-color: #c02a7c !important;
   background: #ffffff !important;
-  box-shadow: 0 0 0 4px rgba(192, 42, 124, 0.12) !important;
+  box-shadow: 0 0 0 3px rgba(192, 42, 124, 0.12) !important;
 }
 
 .modal-site-visit .input-group-text {
   background: transparent !important;
   border: none !important;
   color: #94a3b8 !important;
-  font-size: 14px !important;
-  padding: 0 0 0 16px !important;
-  height: 50px !important;
+  font-size: 13.5px !important;
+  padding: 0 0 0 13px !important;
+  height: 46px !important;
   display: flex;
   align-items: center;
 }
@@ -1543,13 +1559,18 @@
 .modal-site-visit .input-group .form-control {
   border: none !important;
   background: transparent !important;
-  height: 50px !important;
-  font-size: 14.5px !important;
+  height: 46px !important;
+  font-size: 14px !important;
   font-family: 'Outfit', sans-serif !important;
   font-weight: 500 !important;
   color: #0f172a !important;
-  padding: 10px 16px 10px 12px !important;
+  padding: 8px 13px 8px 10px !important;
   box-shadow: none !important;
+}
+
+.modal-site-visit .input-group input[type="date"] {
+  min-height: 46px !important;
+  color: #334155 !important;
 }
 
 .modal-site-visit .input-group .form-control::placeholder {
@@ -1567,35 +1588,37 @@
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 12px 6px !important;
+  padding: 9px 5px !important;
   border: 1.5px solid #e2e8f0 !important;
-  border-radius: 14px !important;
+  border-radius: 12px !important;
   color: #475569 !important;
   cursor: pointer !important;
   text-align: center !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   background: #ffffff !important;
-  min-height: 72px;
+  min-height: 64px;
+  width: 100%;
   user-select: none;
 }
 
 .slot-pill-label .slot-icon {
-  font-size: 18px;
-  margin-bottom: 4px;
+  font-size: 16px;
+  margin-bottom: 2px;
 }
 
 .slot-pill-label .slot-title {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   display: block;
 }
 
 .slot-pill-label .slot-time {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 500;
-  opacity: 0.75;
+  opacity: 0.8;
   display: block;
   margin-top: 1px;
+  white-space: nowrap;
 }
 
 .slot-pill-label:hover {
@@ -1608,40 +1631,88 @@
   border-color: #c02a7c !important;
   background: #fff0f6 !important;
   color: #c02a7c !important;
-  box-shadow: 0 4px 14px rgba(192, 42, 124, 0.16) !important;
+  box-shadow: 0 4px 12px rgba(192, 42, 124, 0.14) !important;
 }
 
+/* 🚗 Cab Request Checkbox */
+.modal-site-visit .visit-cab-check {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 11px;
+  padding: 8px 12px 8px 32px;
+  transition: all 0.2s ease;
+}
+
+.modal-site-visit .visit-cab-check:hover {
+  background: #fff5f9;
+  border-color: #f472b6;
+}
+
+.modal-site-visit .visit-cab-check .form-check-input {
+  margin-left: -22px;
+  margin-top: 3px;
+  cursor: pointer;
+}
+
+.modal-site-visit .visit-cab-check .form-check-input:checked {
+  background-color: #c02a7c;
+  border-color: #c02a7c;
+}
+
+.modal-site-visit .visit-cab-check .form-check-label {
+  font-size: 11.5px !important;
+  color: #334155 !important;
+  cursor: pointer;
+  font-weight: 600 !important;
+  line-height: 1.35;
+  margin-bottom: 0 !important;
+}
+
+.badge-cab-free {
+  background: #16a34a;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 5px;
+  letter-spacing: 0.4px;
+  margin-left: 4px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* 🛡️ Trust Box */
 .modal-site-visit .trust-guarantee-box {
   background: #f0fdf4 !important;
   border: 1px solid #bbf7d0 !important;
-  border-radius: 14px !important;
-  padding: 12px 16px !important;
+  border-radius: 11px !important;
+  padding: 8px 12px !important;
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 20px !important;
+  gap: 10px;
 }
 
 .modal-site-visit .trust-guarantee-box i {
   color: #16a34a;
-  font-size: 20px;
+  font-size: 17px;
   flex-shrink: 0;
 }
 
 .modal-site-visit .trust-guarantee-box div {
-  font-size: 12px;
+  font-size: 11.5px;
   color: #166534;
-  line-height: 1.45;
+  line-height: 1.35;
 }
 
+/* 🔘 Submit Button */
 .modal-site-visit .btn-submit-visit {
   background: linear-gradient(135deg, #c02a7c 0%, #991b5b 100%) !important;
   color: #ffffff !important;
-  border-radius: 14px !important;
+  border-radius: 12px !important;
   font-weight: 700 !important;
-  font-size: 15px !important;
+  font-size: 14.5px !important;
   font-family: 'Outfit', sans-serif !important;
-  height: 52px !important;
+  height: 48px !important;
   width: 100% !important;
   border: none !important;
   box-shadow: 0 8px 20px rgba(192, 42, 124, 0.25) !important;
@@ -1653,16 +1724,20 @@
 
 .modal-site-visit .btn-submit-visit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 26px rgba(192, 42, 124, 0.35) !important;
+  box-shadow: 0 12px 24px rgba(192, 42, 124, 0.35) !important;
   color: #ffffff !important;
 }
 
-/* 📱 Responsive Mobile Adjustments (< 576px) */
-@media (max-width: 575.98px) {
+.modal-site-visit .btn-submit-visit:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* 📱 Responsive Mobile Adjustments (< 768px) */
+@media (max-width: 767.98px) {
   .modal-site-visit .modal-dialog {
     margin: 12px auto !important;
-    width: calc(100% - 24px) !important;
-    max-width: 100% !important;
+    width: calc(100% - 20px) !important;
+    max-width: 460px !important;
   }
 
   .modal-site-visit .modal-content {
@@ -1671,24 +1746,26 @@
   }
 
   .modal-site-visit .modal-header {
-    padding: 16px 18px 14px !important;
+    padding: 14px 16px 12px !important;
+  }
+
+  .modal-site-visit .site-visit-badge-top {
+    font-size: 10px;
+    padding: 2px 8px;
+    margin-bottom: 4px;
   }
 
   .modal-site-visit .modal-title {
-    font-size: 17px !important;
+    font-size: 16.5px !important;
   }
 
   .modal-site-visit .modal-subtitle {
-    font-size: 12px !important;
+    font-size: 11.5px !important;
   }
 
   .modal-site-visit .modal-body {
-    padding: 16px 18px 20px !important;
-    max-height: calc(100vh - 120px) !important;
-  }
-
-  .modal-site-visit .mb-3 {
-    margin-bottom: 12px !important;
+    padding: 14px 16px 18px !important;
+    max-height: calc(100vh - 105px) !important;
   }
 
   .modal-site-visit .input-group-text {
@@ -1702,14 +1779,19 @@
     padding: 8px 12px !important;
   }
 
+  .modal-site-visit .input-group input[type="date"] {
+    min-height: 46px !important;
+    font-size: 15px !important;
+  }
+
   .slot-pills-row {
     --bs-gutter-x: 6px !important;
   }
 
   .slot-pill-label {
-    min-height: 60px !important;
-    padding: 8px 4px !important;
-    border-radius: 12px !important;
+    min-height: 58px !important;
+    padding: 8px 3px !important;
+    border-radius: 10px !important;
   }
 
   .slot-pill-label .slot-icon {
@@ -1722,24 +1804,48 @@
   }
 
   .slot-pill-label .slot-time {
-    font-size: 9px !important;
+    font-size: 8.5px !important;
+    letter-spacing: -0.2px;
+  }
+
+  .modal-site-visit .visit-cab-check {
+    padding: 8px 10px 8px 30px;
+  }
+
+  .modal-site-visit .visit-cab-check .form-check-label {
+    font-size: 11.5px !important;
   }
 
   .modal-site-visit .trust-guarantee-box {
-    padding: 10px 12px !important;
-    margin-bottom: 16px !important;
-    border-radius: 12px !important;
+    padding: 8px 10px !important;
+    border-radius: 10px !important;
   }
 
   .modal-site-visit .trust-guarantee-box div {
-    font-size: 11.5px !important;
-    line-height: 1.35 !important;
+    font-size: 11px !important;
+    line-height: 1.3 !important;
   }
 
   .modal-site-visit .btn-submit-visit {
-    height: 48px !important;
+    height: 46px !important;
     font-size: 14px !important;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
+  }
+}
+
+/* 📱 Super Narrow Mobile (< 360px) */
+@media (max-width: 359.98px) {
+  .modal-site-visit .modal-dialog {
+    width: calc(100% - 12px) !important;
+  }
+  .modal-site-visit .modal-title {
+    font-size: 15px !important;
+  }
+  .slot-pill-label .slot-title {
+    font-size: 10px !important;
+  }
+  .slot-pill-label .slot-time {
+    font-size: 8px !important;
   }
 }
 
