@@ -1666,53 +1666,6 @@
   box-shadow: 0 3px 10px rgba(192, 42, 124, 0.14) !important;
 }
 
-/* 🚗 Cab Request Checkbox */
-.modal-site-visit .visit-cab-check {
-  background: #f8fafc;
-  border: 1px dashed #cbd5e1;
-  border-radius: 10px;
-  padding: 6px 10px 6px 30px;
-  min-height: 38px;
-  transition: all 0.2s ease;
-}
-
-.modal-site-visit .visit-cab-check:hover {
-  background: #fff5f9;
-  border-color: #f472b6;
-}
-
-.modal-site-visit .visit-cab-check .form-check-input {
-  margin-left: -20px;
-  margin-top: 0;
-  cursor: pointer;
-}
-
-.modal-site-visit .visit-cab-check .form-check-input:checked {
-  background-color: #c02a7c;
-  border-color: #c02a7c;
-}
-
-.modal-site-visit .visit-cab-check .form-check-label {
-  font-size: 11px !important;
-  color: #334155 !important;
-  cursor: pointer;
-  font-weight: 600 !important;
-  line-height: 1.3;
-  margin-bottom: 0 !important;
-}
-
-.badge-cab-free {
-  background: #16a34a;
-  color: #ffffff;
-  font-size: 8.5px;
-  font-weight: 800;
-  padding: 1px 5px;
-  border-radius: 4px;
-  letter-spacing: 0.3px;
-  margin-left: 3px;
-  display: inline-block;
-  vertical-align: middle;
-}
 
 /* 🛡️ Trust Box */
 .modal-site-visit .trust-guarantee-box {
@@ -1858,14 +1811,6 @@
     letter-spacing: -0.2px;
   }
 
-  .modal-site-visit .visit-cab-check {
-    padding: 6px 8px 6px 28px;
-    min-height: 36px;
-  }
-
-  .modal-site-visit .visit-cab-check .form-check-label {
-    font-size: 11px !important;
-  }
 
   .modal-site-visit .trust-guarantee-box {
     padding: 6px 8px !important;

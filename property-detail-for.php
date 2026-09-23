@@ -1132,21 +1132,12 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
                 </div>
               </div>
 
-              <!-- Free Cab Option & Trust Box (Side by side on desktop, stacked on mobile) -->
-              <div class="col-12 col-md-6">
-                <div class="form-check visit-cab-check h-100 d-flex align-items-center">
-                  <input class="form-check-input" type="checkbox" name="need_cab" id="needCabCheck" value="Yes">
-                  <label class="form-check-label" for="needCabCheck">
-                    <i class="fa-solid fa-car-side text-muted me-1"></i> Free cab pickup & drop <span class="badge-cab-free">FREE</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="col-12 col-md-6">
-                <div class="trust-guarantee-box h-100 d-flex align-items-center">
-                  <i class="fa-solid fa-shield-check"></i>
+              <!-- Trust Guarantee Banner -->
+              <div class="col-12">
+                <div class="trust-guarantee-box d-flex align-items-center justify-content-center text-center">
+                  <i class="fa-solid fa-shield-check me-2"></i>
                   <div>
-                    <strong>Zero Brokerage:</strong> Free guided site visit with verified advisor.
+                    <strong>100% Free Site Visit:</strong> Zero brokerage • Verified property advisor • Private site consultation.
                   </div>
                 </div>
               </div>
