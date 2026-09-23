@@ -1036,7 +1036,7 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
 
   <!-- 📅 Modal: Schedule a Site Visit -->
   <div class="modal fade modal-site-visit" id="siteVisitModal" tabindex="-1" aria-labelledby="siteVisitModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
           <div class="modal-header-content">
@@ -1651,7 +1651,7 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
             modalInstance.show();
           } else {
             // Direct DOM Fallback
-            $(modalEl).addClass('show').css({ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15,23,42,0.65)' });
+            $(modalEl).addClass('show').css({ display: 'block', background: 'rgba(15,23,42,0.65)' });
             $('body').addClass('modal-open');
           }
         }

@@ -1434,27 +1434,23 @@
    ========================================================================== */
 .modal-site-visit {
   z-index: 1060 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-site-visit.show {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  display: block !important;
 }
 
 .modal-site-visit .modal-dialog {
   max-width: 720px !important;
   width: calc(100% - 32px) !important;
-  margin: auto !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  margin: 70px auto 40px !important;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .modal-site-visit .modal-content {
   width: 100% !important;
-  margin: auto !important;
   border-radius: 20px !important;
   border: 1px solid rgba(192, 42, 124, 0.12) !important;
   box-shadow: 0 25px 70px -10px rgba(15, 23, 42, 0.28) !important;
@@ -1773,7 +1769,7 @@
 /* 📱 Responsive Mobile Adjustments (< 768px) */
 @media (max-width: 767.98px) {
   .modal-site-visit .modal-dialog {
-    margin: auto !important;
+    margin: 45px auto 30px !important;
     width: calc(100% - 16px) !important;
     max-width: 460px !important;
   }
