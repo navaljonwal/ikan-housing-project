@@ -162,52 +162,81 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
   </script>
   <?php include 'component/navbar.php'; ?>
 
-  <!-- 💎 New Premium Hero & Gallery -->
+  <!-- 💎 Ultra-Luxury Real Estate Hero & Gallery Section -->
   <section class="premium-hero-header" data-aos="fade-down" data-aos-duration="800">
     <div class="container">
-      <div class="row align-items-end mb-4">
+      
+      <!-- Breadcrumb Navigation -->
+      <nav class="property-breadcrumb" aria-label="breadcrumb">
+        <a href="index"><i class="fa fa-home me-1"></i> Home</a>
+        <span class="separator">/</span>
+        <a href="ongoing-project">Jaipur</a>
+        <span class="separator">/</span>
+        <a href="ongoing-project">Projects</a>
+        <span class="separator">/</span>
+        <span class="current"><?= htmlspecialchars($property['project_name']) ?></span>
+      </nav>
+
+      <!-- Property Title, Meta & Price Header -->
+      <div class="row align-items-start justify-content-between mb-3">
         <div class="col-lg-8">
-          <h1 class="project-title mb-3"><?= htmlspecialchars($property['project_name']) ?></h1>
-          <p class="mb-2" style="font-size:16px; font-weight:500; display:flex; align-items:center; flex-wrap:wrap; gap:15px;">
-            <span style="color:#64748b;"><i class="fa fa-building" style="color:#c02a7c; margin-right:5px;"></i> Builder: 
+          <h1 class="project-title"><?= htmlspecialchars($property['project_name']) ?></h1>
+          
+          <div class="project-meta-row">
+            <span class="project-meta-item">
+              <i class="fa fa-building"></i> Builder:
               <?php
                 $showbuilder = "SELECT builder.builder_name FROM new_property LEFT JOIN builder ON new_property.builder_name = builder.id WHERE new_property.id = '" . $property['id'] . "'";
                 $resbuilder = mysqli_query($con, $showbuilder);
                 $builderRow = mysqli_fetch_assoc($resbuilder);
               ?>
-              <a href="#" class="b-name" style="color:#0f172a; text-decoration:none; font-weight:700;"><?= htmlspecialchars($builderRow['builder_name'] ?? 'N/A') ?></a>
+              <a href="ongoing-project"><?= htmlspecialchars($builderRow['builder_name'] ?? 'Ikan Housing Partner') ?></a>
             </span>
-            <span style="color:#64748b;"><i class="fa fa-map-marker-alt" style="color:#c02a7c; margin-right:5px;"></i> <?= htmlspecialchars($property['location']) ?></span>
-          </p>
-          <div style="margin-top:15px; display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
-            <span class="<?= ($rera_display !== 'N/A') ? 'badge bg-light text-success border' : 'badge bg-light text-secondary border' ?>" style="padding: 8px 14px; font-size: 13px; font-weight: 700; border-radius: 8px;">
-                <?= ($rera_display !== 'N/A') ? '✔ RERA: ' . htmlspecialchars($rera_display) : '✔ Verified Property' ?>
+            <span class="project-meta-item">
+              <i class="fa fa-map-marker-alt"></i> <?= htmlspecialchars($property['location']) ?>
             </span>
-            <span class="badge bg-light text-secondary border" style="padding: 8px 14px; font-size: 13px; font-weight: 700; border-radius: 8px;">
-              <i class="fa fa-calendar-alt me-1" style="color:#c02a7c;"></i>
+          </div>
+
+          <!-- Feature & Verification Pills -->
+          <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+            <span class="badge-pill-luxury badge-pill-rera">
+              <i class="fa-solid fa-circle-check"></i>
+              <?= ($rera_display !== 'N/A') ? 'RERA: ' . htmlspecialchars($rera_display) : 'Verified Property' ?>
+            </span>
+            <span class="badge-pill-luxury badge-pill-status">
+              <i class="fa-solid fa-clock"></i> <?= htmlspecialchars($constructText) ?>
+            </span>
+            <span class="badge-pill-luxury badge-pill-neutral">
+              <i class="fa-regular fa-calendar-check text-muted"></i>
               <?php
                 if (!empty($property['created_at'])) {
                   $created_at = new DateTime($property['created_at']);
-                  echo "Added on " . $created_at->format('j M Y');
+                  echo "Added " . $created_at->format('j M Y');
                 } else {
-                  echo "Added Recently";
+                  echo "Verified Listing";
                 }
               ?>
             </span>
           </div>
         </div>
-        <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-          <div class="price-label">Estimated Price</div>
-          <div class="header-price" style="color: #c02a7c; white-space: nowrap;"><?= htmlspecialchars($price_range_display) ?></div>
+
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+          <div class="hero-price-card">
+            <div class="hero-price-label">Estimated Price</div>
+            <div class="hero-price-value"><?= htmlspecialchars($price_range_display) ?></div>
+            <div class="hero-price-emi">
+              EMI starts from ₹43,391/mo • <a href="#sectionEmi">Calculate EMI</a>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- 🖼️ Responsive Premium Gallery -->
+      <!-- 🖼️ Responsive Luxury Gallery -->
       <?php if (!empty($images)): 
         $img_count = count($images);
         $grid_class = ($img_count <= 5) ? 'gallery-grid-' . $img_count : 'gallery-grid-default';
       ?>
-      <div class="gallery-wrapper mb-4" data-aos="zoom-in" data-aos-duration="1000">
+      <div class="gallery-wrapper" data-aos="zoom-in" data-aos-duration="1000">
         
         <!-- 🖥️ Desktop Staggered Grid -->
         <div class="gallery-grid-premium <?= $grid_class ?>">
@@ -275,187 +304,260 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
 
       </div>
       <?php endif; ?>
-    </div>
-  </section>
 
-  <section class="property-section py-4">
-    <div class="container">
-      <div class="row g-4">
+      <!-- 🎯 High-Converting Action Toolbar (Directly Below Gallery) -->
+      <div class="property-actions-container">
+        <div class="property-actions-toolbar">
+          <div class="actions-group-primary">
+            <button type="button" class="btn-action-primary" data-bs-toggle="modal" data-bs-target="#siteVisitModal">
+              <i class="fa-solid fa-calendar-check"></i> Schedule Free Site Visit
+            </button>
 
-        <!-- Left Side -->
-        <div class="col-12 col-lg-8">
-          <div class="col-md-12 rtyu">
-            <div class="detl-rd" data-aos="fade-down" data-aos-duration="1000">
-              <h3 class="vh mb-3">About Project</h3>
-              <div class="property-rich-desc">
-                <?php 
-                $desc = trim($property['other_key_feature'] ?? '');
-                if (!empty($desc)) {
-                  // Clean SEO & prompt meta blocks that leaked into description
-                  $desc = preg_replace('/<h[1-6][^>]*>.*?SEO.*?<\/h[1-6]>/si', '', $desc);
-                  $desc = preg_replace('/<p[^>]*>.*?\(Targeting.*?<\/p>/si', '', $desc);
-                  $desc = preg_replace('/<p[^>]*>.*?Title:.*?<\/p>/si', '', $desc);
-                  $desc = preg_replace('/<p[^>]*>.*?Meta(?:&nbsp;|\s)*Description:.*?<\/p>/si', '', $desc);
-                  // Remove empty 3rd table column cells
-                  $desc = str_replace('<td>&nbsp;</td>', '', $desc);
-                  $desc = str_replace('<td></td>', '', $desc);
-                  // Clean empty paragraphs
-                  $desc = preg_replace('/<p[^>]*>(&nbsp;|\s)*<\/p>/si', '', $desc);
-                  echo $desc;
-                } else {
-                  echo '<p class="text-muted">Detailed project description will be updated soon.</p>';
-                }
-                ?>
-              </div>
+            <a href="https://wa.me/918955331454?text=<?= urlencode('Hello Ikan Housing, I am interested in ' . $property['project_name'] . ' (' . $property['location'] . '). Please share details.') ?>" target="_blank" class="btn-action-whatsapp">
+              <i class="fa-brands fa-whatsapp" style="font-size: 17px; color: #22c55e;"></i> WhatsApp Advisor
+            </a>
 
-              <!-- Premium Brochure Action Card -->
-              <div class="brochure-card-premium mt-4 p-4 d-flex align-items-center gap-4 shadow-sm" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 20px; border: 1px solid #e2e8f0;">
-                <div class="brochure-icon" style="width: 60px; height: 60px; background: white; border-radius: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
-                  <i class="fa-solid fa-file-pdf" style="color: #ef4444; font-size: 30px;"></i>
-                </div>
-                <div class="flex-grow-1">
-                  <h5 style="font-weight: 800; color: #0f172a; margin-bottom: 4px;">Project Brochure</h5>
-                  <p style="color: #64748b; font-size: 13px; margin: 0; font-weight: 500;">Download complete project details, floor plans & specifications.</p>
-                </div>
-                <?php if (!empty($property['brochure']) && file_exists('uploads/' . trim($property['brochure']))): ?>
-                  <a href="uploads/<?= htmlspecialchars(trim($property['brochure'])); ?>" class="btn-premium-brochure" download style="background: #c02a7c; color: white; padding: 12px 25px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(192, 42, 124, 0.3);">
-                    <i class="fa-solid fa-download me-2"></i> Download
-                  </a>
-                <?php else: ?>
-                  <a href="#sidebarContactForm" class="btn-premium-brochure" style="background: #c02a7c; color: white; padding: 12px 25px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(192, 42, 124, 0.3);">
-                    <i class="fa-solid fa-envelope me-2"></i> Request Brochure
-                  </a>
-                <?php endif; ?>
+            <?php if (!empty($property['brochure']) && file_exists('uploads/' . trim($property['brochure']))): ?>
+              <a href="uploads/<?= htmlspecialchars(trim($property['brochure'])); ?>" download class="btn-action-brochure">
+                <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> Brochure
+              </a>
+            <?php else: ?>
+              <a href="#sidebarContactForm" class="btn-action-brochure">
+                <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> Brochure
+              </a>
+            <?php endif; ?>
+          </div>
+
+          <div class="actions-group-secondary">
+            <button type="button" class="btn-action-pill" id="savePropertyBtn" onclick="toggleSaveProperty();">
+              <i class="fa-regular fa-heart" style="color: #c02a7c;"></i> Save
+            </button>
+
+            <div class="dropdown">
+              <button class="btn-action-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-share-nodes" style="color: #64748b;"></i> Share
+              </button>
+              <div class="dropdown-menu dropdown-menu-end shadow-lg border-0" style="border-radius:15px; padding:10px; min-width: 180px;">
+                <a class="dropdown-item d-flex align-items-center py-2" href="https://api.whatsapp.com/send?text=<?= urlencode('Check out this property: ' . 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>" target="_blank">
+                  <i class="fa-brands fa-whatsapp" style="color: #25D366; font-size:18px; width:25px;"></i> WhatsApp
+                </a>
+                <a class="dropdown-item d-flex align-items-center py-2" href="https://www.facebook.com/sharer/sharer?u=<?= urlencode('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>" target="_blank">
+                  <i class="fa-brands fa-facebook" style="color: #1877F2; font-size:18px; width:25px;"></i> Facebook
+                </a>
+                <a class="dropdown-item d-flex align-items-center py-2" href="https://twitter.com/intent/tweet?url=<?= urlencode('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>" target="_blank">
+                  <i class="fa-brands fa-x-twitter" style="color: #000; font-size:18px; width:25px;"></i> Twitter (X)
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item d-flex align-items-center py-2" href="javascript:void(0);" onclick="copyToClipboard();">
+                  <i class="fa-solid fa-link" style="color: #64748b; font-size:16px; width:25px;"></i> Copy Link
+                </a>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 🧭 Sticky Quick Anchor Navigation Sub-Bar -->
+  <div class="property-subnav-sticky">
+    <div class="container">
+      <div class="subnav-scroll-wrap">
+        <a href="#sectionOverview" class="subnav-link active"><i class="fa fa-list-check"></i> Key Specs</a>
+        <a href="#sectionAbout" class="subnav-link"><i class="fa fa-file-lines"></i> About Project</a>
+        <?php if (!empty(trim($property['highlight'] ?? ''))): ?>
+          <a href="#sectionHighlights" class="subnav-link"><i class="fa fa-sparkles"></i> Highlights</a>
+        <?php endif; ?>
+        <a href="#sectionAmenities" class="subnav-link"><i class="fa fa-swimming-pool"></i> Amenities</a>
+        <a href="#sectionFloorPlans" class="subnav-link"><i class="fa fa-ruler-combined"></i> Floor Plans</a>
+        <a href="#sectionEmi" class="subnav-link"><i class="fa fa-calculator"></i> EMI Calculator</a>
+        <?php if (!empty(trim($property['map'] ?? ''))): ?>
+          <a href="#sectionMap" class="subnav-link"><i class="fa fa-map-location-dot"></i> Location & Map</a>
+        <?php endif; ?>
+      </div>
+    </div>
+  </div>
+
+  <section class="property-section pb-5" id="propertyDetailPage">
+    <div class="container">
+      <div class="row g-4">
+
+        <!-- Left Side: Main Property Content (8 Cols) -->
+        <div class="col-12 col-lg-8">
           
-          <div class="why-box mb-4 mt-4" data-aos="fade-down" data-aos-duration="1000">
-            <h3 class="mb-3">Highlights</h3>
-            <div class="property-highlights-box">
+          <!-- 🍱 1. Key Specifications: Modern Bento Overview Grid -->
+          <div id="sectionOverview" class="mb-4" data-aos="fade-up" data-aos-duration="800">
+            <div class="section-title-luxury">
+              <span class="heading-accent-bar"></span> Key Specifications & Overview
+            </div>
+            <p class="section-subtitle-luxury">Essential details and verified configurations for this project.</p>
+
+            <div class="bento-overview-grid">
+              <div class="bento-card">
+                <div class="bento-icon-circle bento-icon-status"><i class="fa fa-building"></i></div>
+                <div>
+                  <div class="bento-label">Status</div>
+                  <div class="bento-value"><?= htmlspecialchars($constructText) ?></div>
+                </div>
+              </div>
+
+              <div class="bento-card">
+                <div class="bento-icon-circle bento-icon-bhk"><i class="fa fa-bed"></i></div>
+                <div>
+                  <div class="bento-label">Configurations</div>
+                  <div class="bento-value"><?= htmlspecialchars($property['bhk']) ?> Apts</div>
+                </div>
+              </div>
+
+              <div class="bento-card">
+                <div class="bento-icon-circle bento-icon-carpet"><i class="fa fa-vector-square"></i></div>
+                <div>
+                  <div class="bento-label">Carpet Area</div>
+                  <div class="bento-value"><?= htmlspecialchars($carpet_display) ?></div>
+                </div>
+              </div>
+
+              <div class="bento-card">
+                <div class="bento-icon-circle bento-icon-buildup"><i class="fa fa-ruler-combined"></i></div>
+                <div>
+                  <div class="bento-label">Build-Up Area</div>
+                  <div class="bento-value"><?= htmlspecialchars($buildup_display) ?></div>
+                </div>
+              </div>
+
+              <div class="bento-card">
+                <div class="bento-icon-circle bento-icon-price"><i class="fa fa-tags"></i></div>
+                <div>
+                  <div class="bento-label">Price Range</div>
+                  <div class="bento-value"><?= htmlspecialchars($price_range_display) ?></div>
+                </div>
+              </div>
+
+              <div class="bento-card">
+                <div class="bento-icon-circle bento-icon-possession"><i class="fa fa-calendar-check"></i></div>
+                <div>
+                  <div class="bento-label">Possession Date</div>
+                  <div class="bento-value"><?= htmlspecialchars($possession_display) ?></div>
+                </div>
+              </div>
+
+              <div class="bento-card">
+                <div class="bento-icon-circle bento-icon-furnish"><i class="fa fa-couch"></i></div>
+                <div>
+                  <div class="bento-label">Furnishing</div>
+                  <div class="bento-value"><?= htmlspecialchars($furnishText) ?></div>
+                </div>
+              </div>
+
+              <div class="bento-card">
+                <div class="bento-icon-circle bento-icon-category"><i class="fa fa-home"></i></div>
+                <div>
+                  <div class="bento-label">Property Type</div>
+                  <div class="bento-value"><?= htmlspecialchars($flats) ?></div>
+                </div>
+              </div>
+
+              <div class="bento-card">
+                <div class="bento-icon-circle bento-icon-rera"><i class="fa fa-shield-halved"></i></div>
+                <div>
+                  <div class="bento-label"><?= ($property['rera_no'] != "JDA Approved") ? "RERA ID" : "Approval" ?></div>
+                  <div class="bento-value"><?= ($property['rera_no'] != "JDA Approved") ? htmlspecialchars($rera_display) : "JDA Approved" ?></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 📝 2. About Project & Rich Narrative Card -->
+          <div id="sectionAbout" class="content-card-luxury" data-aos="fade-up" data-aos-duration="800">
+            <div class="section-title-luxury mb-3">
+              <span class="heading-accent-bar"></span> About <?= htmlspecialchars($property['project_name']) ?>
+            </div>
+
+            <div class="property-rich-desc">
               <?php 
-              $hl = trim($property['highlight'] ?? '');
-              if (!empty($hl)) {
-                if (stripos($hl, '<li') !== false || stripos($hl, '<p') !== false) {
-                  echo $hl;
-                } else {
-                  echo '<ul><li>' . nl2br($hl) . '</li></ul>';
+              $desc = trim($property['other_key_feature'] ?? '');
+              if (!empty($desc)) {
+                // Clean SEO & prompt meta blocks that leaked into description
+                $desc = preg_replace('/<h[1-6][^>]*>.*?SEO.*?<\/h[1-6]>/si', '', $desc);
+                $desc = preg_replace('/<p[^>]*>.*?\(Targeting.*?<\/p>/si', '', $desc);
+                $desc = preg_replace('/<p[^>]*>.*?Title:.*?<\/p>/si', '', $desc);
+                $desc = preg_replace('/<p[^>]*>.*?Meta(?:&nbsp;|\s)*Description:.*?<\/p>/si', '', $desc);
+                // Remove empty 3rd table column cells
+                $desc = str_replace('<td>&nbsp;</td>', '', $desc);
+                $desc = str_replace('<td></td>', '', $desc);
+                // Clean empty paragraphs
+                $desc = preg_replace('/<p[^>]*>(&nbsp;|\s)*<\/p>/si', '', $desc);
+                echo $desc;
+              } else {
+                echo '<p class="text-muted">Detailed project description and specifications will be updated soon.</p>';
+              }
+              ?>
+            </div>
+
+            <!-- Luxury Brochure Action Card -->
+            <div class="brochure-card-premium">
+              <div class="brochure-icon-badge">
+                <i class="fa-solid fa-file-pdf"></i>
+              </div>
+              <div class="flex-grow-1">
+                <h5 style="font-weight: 800; color: #0f172a; margin-bottom: 2px;">Official Project Brochure</h5>
+                <p style="color: #64748b; font-size: 13.5px; margin: 0; font-weight: 500;">
+                  Download comprehensive floor plans, payment schedules & technical specifications.
+                </p>
+              </div>
+              <?php if (!empty($property['brochure']) && file_exists('uploads/' . trim($property['brochure']))): ?>
+                <a href="uploads/<?= htmlspecialchars(trim($property['brochure'])); ?>" class="btn-premium-brochure" download>
+                  <i class="fa-solid fa-download me-1"></i> Download PDF
+                </a>
+              <?php else: ?>
+                <a href="#sidebarContactForm" class="btn-premium-brochure">
+                  <i class="fa-solid fa-envelope me-1"></i> Request PDF
+                </a>
+              <?php endif; ?>
+            </div>
+          </div>
+          
+          <!-- ✨ 3. Project Highlights & Connectivity (Only shown when content exists!) -->
+          <?php 
+          $hl = trim($property['highlight'] ?? '');
+          if (!empty($hl)): 
+          ?>
+          <div id="sectionHighlights" class="content-card-luxury" data-aos="fade-up" data-aos-duration="800">
+            <div class="section-title-luxury">
+              <span class="heading-accent-bar"></span> Project Highlights & Connectivity
+            </div>
+            <p class="section-subtitle-luxury">Key neighborhood landmarks and strategic access routes.</p>
+
+            <div class="highlights-grid-container">
+              <?php 
+              if (preg_match_all('/<li>(.*?)<\/li>/i', $hl, $hl_matches)) {
+                foreach ($hl_matches[1] as $item) {
+                  $clean_item = trim(strip_tags($item));
+                  if (!empty($clean_item)) {
+                    echo '<div class="highlight-item-card">';
+                    echo '  <div class="highlight-icon-check"><i class="fa-solid fa-check"></i></div>';
+                    echo '  <span>' . htmlspecialchars($clean_item) . '</span>';
+                    echo '</div>';
+                  }
                 }
               } else {
-                echo '<p class="text-muted">Highlights not specified for this property.</p>';
+                $lines = array_filter(array_map('trim', explode("\n", strip_tags($hl))));
+                foreach ($lines as $line) {
+                  if (!empty($line)) {
+                    echo '<div class="highlight-item-card">';
+                    echo '  <div class="highlight-icon-check"><i class="fa-solid fa-check"></i></div>';
+                    echo '  <span>' . htmlspecialchars($line) . '</span>';
+                    echo '</div>';
+                  }
+                }
               }
               ?>
             </div>
           </div>
+          <?php endif; ?>
 
-          <section class="project-overview" data-aos="fade-down" data-aos-duration="1000">
-            <div class="mb-4 border-bottom pb-3">
-              <h3 class="vh">Property Overview</h3>
-              <p style="color: #64748b; font-size: 14px; margin-top: 5px;">Key specifications and current status of the project.</p>
-            </div>
-
-            <div class="overview-grid-premium">
-              <div class="overview-card-premium">
-                <div class="overview-icon-container"><i class="fa fa-building"></i></div>
-                <div>
-                  <p class="ov-title">Status</p>
-                  <p class="ov-val"><?= htmlspecialchars($constructText) ?></p>
-                </div>
-              </div>
-              <div class="overview-card-premium">
-                <div class="overview-icon-container"><i class="fa fa-couch"></i></div>
-                <div>
-                  <p class="ov-title">Furnishing</p>
-                  <p class="ov-val"><?= htmlspecialchars($furnishText) ?></p>
-                </div>
-              </div>
-              <div class="overview-card-premium">
-                <div class="overview-icon-container"><i class="fa fa-home"></i></div>
-                <div>
-                  <p class="ov-title">Category</p>
-                  <p class="ov-val"><?= htmlspecialchars($flats) ?></p>
-                </div>
-              </div>
-              <div class="overview-card-premium">
-                <div class="overview-icon-container"><i class="fa fa-vector-square"></i></div>
-                <div>
-                  <p class="ov-title">Carpet Area</p>
-                  <p class="ov-val"><?= htmlspecialchars($carpet_display) ?></p>
-                </div>
-              </div>
-              <div class="overview-card-premium">
-                <div class="overview-icon-container"><i class="fa fa-ruler-combined"></i></div>
-                <div>
-                  <p class="ov-title">Build-up Area</p>
-                  <p class="ov-val"><?= htmlspecialchars($buildup_display) ?></p>
-                </div>
-              </div>
-              <div class="overview-card-premium">
-                <div class="overview-icon-container"><i class="fa fa-coins"></i></div>
-                <div>
-                  <p class="ov-title">Price Range</p>
-                  <p class="ov-val"><?= htmlspecialchars($price_range_display) ?></p>
-                </div>
-              </div>
-              <div class="overview-card-premium">
-                <div class="overview-icon-container"><i class="fa fa-clock"></i></div>
-                <div>
-                  <p class="ov-title">Possession</p>
-                  <p class="ov-val"><?= htmlspecialchars($possession_display) ?></p>
-                </div>
-              </div>
-              <div class="overview-card-premium">
-                <div class="overview-icon-container"><i class="fa fa-bed"></i></div>
-                <div>
-                  <p class="ov-title">Configurations</p>
-                  <p class="ov-val"><?= htmlspecialchars($property['bhk']) ?> Apts</p>
-                </div>
-              </div>
-              <div class="overview-card-premium">
-                <div class="overview-icon-container"><i class="fa fa-file-contract"></i></div>
-                <div>
-                  <p class="ov-title"><?= ($property['rera_no'] != "JDA Approved") ? "RERA ID" : "JDA" ?></p>
-                  <p class="ov-val"><?= ($property['rera_no'] != "JDA Approved") ? htmlspecialchars($rera_display) : "Approved" ?></p>
-                </div>
-              </div>
-            </div>
-            
-            <div class="property-actions-toolbar mb-4">
-              <button type="button" class="btn-action-primary" data-bs-toggle="modal" data-bs-target="#siteVisitModal">
-                <i class="fa-solid fa-calendar-check"></i> Book Site Visit
-              </button>
-
-              <a href="https://wa.me/918955331454?text=<?= urlencode('Hello Ikan Housing, I am interested in ' . $property['project_name'] . ' (' . $property['location'] . '). Please share details.') ?>" target="_blank" class="btn-action-whatsapp">
-                <i class="fa-brands fa-whatsapp" style="font-size: 17px; color: #22c55e;"></i> WhatsApp
-              </a>
-
-              <button type="button" class="btn-action-secondary" id="savePropertyBtn" onclick="toggleSaveProperty();">
-                <i class="fa-regular fa-heart" style="color: #c02a7c;"></i> Save
-              </button>
-
-              <div class="dropdown">
-                <button class="btn-action-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="fa-solid fa-share-nodes" style="color: #64748b;"></i> Share
-                </button>
-                <div class="dropdown-menu share-dropdown-menu shadow-lg border-0" style="border-radius:15px; padding:10px;">
-                  <a class="dropdown-item share-dropdown-item d-flex align-items-center py-2" href="https://api.whatsapp.com/send?text=<?= urlencode('Check out this property: ' . 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>" target="_blank">
-                    <i class="fa-brands fa-whatsapp" style="color: #25D366; font-size:20px; width:25px; margin-right:10px;"></i> WhatsApp
-                  </a>
-                  <a class="dropdown-item share-dropdown-item d-flex align-items-center py-2" href="https://www.facebook.com/sharer/sharer?u=<?= urlencode('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>" target="_blank">
-                    <i class="fa-brands fa-facebook" style="color: #1877F2; font-size:20px; width:25px; margin-right:10px;"></i> Facebook
-                  </a>
-                  <a class="dropdown-item share-dropdown-item d-flex align-items-center py-2" href="https://twitter.com/intent/tweet?url=<?= urlencode('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']); ?>" target="_blank">
-                    <i class="fa-brands fa-x-twitter" style="color: #000; font-size:20px; width:25px; margin-right:10px;"></i> Twitter (X)
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item share-dropdown-item d-flex align-items-center py-2" href="javascript:void(0);" onclick="copyToClipboard();">
-                    <i class="fa-solid fa-link" style="color: #64748b; font-size:20px; width:25px; margin-right:10px;"></i> Copy Link
-                  </a>
-                </div>
-              </div>
-            </div>
-          </section>
-
+          <!-- 🏊 4. Project Amenities -->
           <?php
           $property_id = (int) $property['id'];
           $amenity_querry = "SELECT amenity.name, amenity.icon
@@ -469,7 +571,6 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
             $amenities[] = $row_amenity;
           }
           if (empty($amenities)) {
-            // Intelligent fallback: check if amenity names are mentioned in description or highlights
             $all_amenities_q = mysqli_query($con, "SELECT name, icon FROM amenity WHERE status = 1");
             if ($all_amenities_q) {
               $search_blob = ($property['other_key_feature'] ?? '') . ' ' . ($property['highlight'] ?? '');
@@ -482,26 +583,40 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
           }
           ?>
           <?php if (!empty($amenities)): ?>
-          <div class="amenities-section" data-aos="fade-down" data-aos-duration="1000">
-            <h3 class="vh mb-4">Project Amenities</h3>
+          <div id="sectionAmenities" class="content-card-luxury" data-aos="fade-up" data-aos-duration="800">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div>
+                <div class="section-title-luxury">
+                  <span class="heading-accent-bar"></span> World-Class Amenities
+                </div>
+                <p class="section-subtitle-luxury mb-0">Designed for modern lifestyle and leisure.</p>
+              </div>
+              <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill font-monospace" style="font-size:12px; font-weight:700;">
+                <?= count($amenities) ?> Amenities
+              </span>
+            </div>
 
-            <div class="amenities-premium-grid" id="amenitiesGrid">
+            <div class="amenities-premium-grid mt-3" id="amenitiesGrid">
               <?php
               foreach ($amenities as $index => $am):
-                $hidden_class = ($index >= 9) ? 'amenity-hidden d-none' : '';
+                $hidden_class = ($index >= 8) ? 'amenity-hidden d-none' : '';
                 ?>
                 <div class="amenity-premium-badge <?= $hidden_class ?>">
-                  <img src="uploads/<?php echo htmlspecialchars($am['icon']); ?>" alt="icon">
+                  <img src="uploads/<?php echo htmlspecialchars($am['icon']); ?>" alt="amenity icon">
                   <span><?php echo htmlspecialchars($am['name']); ?></span>
                 </div>
                 <?php
               endforeach;
               ?>
-              
-              <?php if (count($amenities) > 9): ?>
-                <button id="toggleAmenitiesBtn" onclick="toggleAmenities();" class="load-more-btn-hs amenity-premium-badge" style="background:#fdf2f8; color:#c02a7c; font-weight:700; border:none; cursor:pointer;">+ View All</button>
-              <?php endif; ?>
             </div>
+
+            <?php if (count($amenities) > 8): ?>
+              <div class="text-center mt-3 pt-2">
+                <button id="toggleAmenitiesBtn" onclick="toggleAmenities();" class="btn btn-sm btn-light border px-4 py-2 rounded-pill" style="font-weight:700; color:#c02a7c;">
+                  <i class="fa-solid fa-plus me-1"></i> View All (<?= count($amenities) ?>) Amenities
+                </button>
+              </div>
+            <?php endif; ?>
 
             <script>
               function toggleAmenities() {
@@ -511,10 +626,10 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
                 hiddenItems.forEach(item => {
                   if(item.classList.contains('d-none')) {
                     item.classList.remove('d-none');
-                    btn.innerHTML = '- View Less';
+                    btn.innerHTML = '<i class="fa-solid fa-minus me-1"></i> View Less';
                   } else {
                     item.classList.add('d-none');
-                    btn.innerHTML = '+ View All';
+                    btn.innerHTML = '<i class="fa-solid fa-plus me-1"></i> View All (<?= count($amenities) ?>) Amenities';
                   }
                 });
               }
@@ -522,6 +637,7 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
           </div>
           <?php endif; ?>
 
+          <!-- 🎬 5. Media & Videos Section -->
           <?php
           $video_url = trim($property['video_link'] ?? '');
           $embed_url = '';
@@ -535,61 +651,31 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
           $video_file = trim($property['video_file'] ?? '');
           $has_video_file = !empty($video_file) && file_exists(__DIR__ . '/uploads/' . $video_file);
           ?>
-          <?php if (!empty($embed_url) || $has_video_file || count($images) > 1): ?>
-          <section class="media-showcase" data-aos="fade-down" data-aos-duration="1000">
-            <div class="media-container">
-              <h5 class="media-title">Photos & Videos: <span>Tour this project virtually</span></h5>
-              <p class="media-subtitle">Project Tour & Photos</p>
-
-              <div class="media-grid">
-                <!-- Featured Video File (Dynamic from Admin Upload) -->
-                <?php if ($has_video_file): ?>
-                <div class="media-item media-video video-wide">
-                  <video controls playsinline class="w-100 h-100" style="object-fit: cover; border-radius: 12px; background: #000; min-height: 280px;">
-                    <source src="uploads/<?= htmlspecialchars($video_file) ?>">
-                    Your browser does not support the video tag.
-                  </video>
-                </div>
-                <?php endif; ?>
-
-                <!-- Featured YouTube Video (Dynamic from Admin) -->
-                <?php if (!empty($embed_url)): ?>
-                <div class="media-item media-video video-wide">
-                  <iframe src="<?= htmlspecialchars($embed_url) ?>" title="YouTube video player"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
-                  </iframe>
-                </div>
-                <?php endif; ?>
-
-                <!-- Images from PHP -->
-                <?php
-                $total_images = count($images);
-                foreach ($images as $index => $img) {
-                  $clean_img = trim($img);
-                  if (empty($clean_img)) continue;
-                  if ($index < 1) { // Show first image
-                    ?>
-                    <div class="media-item">
-                      <a href="uploads/<?= htmlspecialchars($clean_img) ?>" target="_blank">
-                        <img src="uploads/<?= htmlspecialchars($clean_img) ?>" alt="Project Photo">
-                      </a>
-                    </div>
-                  <?php } elseif ($index == 3) { // Last image shows +count ?>
-                    <div class="media-item more-photos view-more" onclick="document.getElementById('popup').style.display='block'" style="cursor:pointer;">
-                      <div class="gallery-small view-more"
-                        style="background-image: url('uploads/<?= htmlspecialchars($clean_img); ?>');">
-                        <div class="overlay overlay-v">+ View More</div>
-                      </div>
-                    </div>
-                    <?php break;
-                  }
-                } ?>
-              </div>
+          <?php if (!empty($embed_url) || $has_video_file): ?>
+          <div id="sectionMedia" class="content-card-luxury" data-aos="fade-up" data-aos-duration="800">
+            <div class="section-title-luxury">
+              <span class="heading-accent-bar"></span> Virtual Tour & Video Walkthrough
             </div>
-          </section>
+            <p class="section-subtitle-luxury">Take an immersive virtual walkthrough of the property.</p>
+
+            <div class="map-iframe-container" style="height: 420px !important;">
+              <?php if ($has_video_file): ?>
+                <video controls playsinline class="w-100 h-100" style="object-fit: cover;">
+                  <source src="uploads/<?= htmlspecialchars($video_file) ?>">
+                  Your browser does not support the video tag.
+                </video>
+              <?php elseif (!empty($embed_url)): ?>
+                <iframe src="<?= htmlspecialchars($embed_url) ?>" title="Virtual Tour"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+                </iframe>
+              <?php endif; ?>
+            </div>
+          </div>
           <?php endif; ?>
+
+          <!-- 📐 6. Interactive Floor Plans -->
           <?php
           $bhk_query = "
                   SELECT sub_category.id AS subcat_id, sub_category.name AS bhk_name
@@ -607,10 +693,7 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
               'name' => $row['bhk_name']
             ];
           }
-          ?>
 
-          <?php
-          // ✅ Fetch BHK Images with existence check
           $img_query = "SELECT subcat_id, image FROM floor_plane WHERE property_id = $property_id";
           $img_res = mysqli_query($con, $img_query);
 
@@ -623,15 +706,19 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
             }
           }
 
-          // ✅ Show section only if at least one valid floor plan exists
           if (!empty($bhk_images)) :
           ?>
-          <section class="rd-flore-pland" data-aos="fade-down" data-aos-duration="1000">
-            <div class="rd-container">
+          <div id="sectionFloorPlans" class="floorplan-card-luxury" data-aos="fade-up" data-aos-duration="800">
+            <div class="section-title-luxury">
+              <span class="heading-accent-bar"></span> Floor Plans & Layouts
+            </div>
+            <p class="section-subtitle-luxury">Explore spacious layouts and architectural designs.</p>
+
+            <div class="rd-flore-pland">
               <div class="rd-bhk-buttons">
                 <?php foreach ($bhks as $index => $b): ?>
                   <button class="<?= $index == 0 ? 'active' : '' ?>" onclick="rdShowSlider('bhk-<?= $index ?>', event)">
-                    <?= $b['name'] ?>
+                    <?= htmlspecialchars($b['name']) ?>
                   </button>
                 <?php endforeach; ?>
               </div>
@@ -647,7 +734,7 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
                   <div class="rd-slides">
                     <?php if (!empty($images)): 
                        foreach ($images as $img): ?>  
-                        <img src="uploads/<?= $img ?>" alt="">
+                        <img src="uploads/<?= $img ?>" alt="Floor Plan">
                       <?php endforeach;
                      else: ?>
                       <img src="img/no-image.jpg" alt="No Image">
@@ -659,13 +746,11 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
                 </div>
               <?php endforeach; ?>
             </div>
-          </section>
-          <?php
-          endif;
-          ?>
+          </div>
+          <?php endif; ?>
 
+          <!-- 🧮 7. Interactive Home Loan EMI Calculator -->
           <?php
-          // Intelligent default loan amount (80% of min_price_int or 50 Lakhs default)
           $init_loan_amount = 5000000;
           if (!empty($property['min_price_int']) && $property['min_price_int'] > 0) {
               $calc_loan = round(($property['min_price_int'] * 0.8) / 100000) * 100000;
@@ -674,175 +759,213 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
               }
           }
           ?>
-          <!-- 🧮 Interactive Home Loan EMI Calculator -->
-          <section class="emi-calculator-section mt-4 mb-4" data-aos="fade-down" data-aos-duration="1000">
-            <div class="emi-card-premium">
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 pb-3 border-bottom">
-                <div>
-                  <span class="emi-section-badge">MORTGAGE CALCULATOR</span>
-                  <h4 class="emi-section-title">
-                    <i class="fa-solid fa-calculator" style="color: #c02a7c;"></i> Home Loan EMI Calculator
-                  </h4>
-                  <p class="emi-section-subtitle">Plan your monthly budget with live bank interest rate estimates.</p>
-                </div>
-                <div class="emi-rate-pill">
-                  <i class="fa-solid fa-sparkles me-1"></i> Rates from 8.5% p.a.*
-                </div>
+          <div id="sectionEmi" class="emi-card-premium" data-aos="fade-up" data-aos-duration="800">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 pb-3 border-bottom">
+              <div>
+                <span class="emi-section-badge">MORTGAGE CALCULATOR</span>
+                <h4 class="emi-section-title">
+                  <i class="fa-solid fa-calculator" style="color: #c02a7c;"></i> Home Loan EMI Calculator
+                </h4>
+                <p class="emi-section-subtitle">Plan your monthly budget with live bank interest rate estimates.</p>
               </div>
-
-              <div class="row g-4 align-items-stretch">
-                <!-- Left: Sliders -->
-                <div class="col-12 col-lg-7">
-                  <!-- Loan Amount -->
-                  <div class="emi-slider-wrap">
-                    <div class="emi-label-row">
-                      <span class="emi-label-title">Loan Amount</span>
-                      <span id="emiLoanAmountDisplay" class="emi-val-pill">₹<?= number_format($init_loan_amount) ?></span>
-                    </div>
-                    <input type="range" class="emi-slider" id="emiLoanInput" min="500000" max="50000000" step="50000" value="<?= $init_loan_amount ?>">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
-                      <span class="text-muted" style="font-size:11px; font-weight:600;">₹5 L</span>
-                      <div class="d-flex gap-1">
-                        <button type="button" class="emi-quick-btn" onclick="setEmiAmount(2500000)">₹25 L</button>
-                        <button type="button" class="emi-quick-btn" onclick="setEmiAmount(5000000)">₹50 L</button>
-                        <button type="button" class="emi-quick-btn" onclick="setEmiAmount(7500000)">₹75 L</button>
-                        <button type="button" class="emi-quick-btn" onclick="setEmiAmount(10000000)">₹1 Cr</button>
-                      </div>
-                      <span class="text-muted" style="font-size:11px; font-weight:600;">₹5 Cr</span>
-                    </div>
-                  </div>
-
-                  <!-- Interest Rate -->
-                  <div class="emi-slider-wrap">
-                    <div class="emi-label-row">
-                      <span class="emi-label-title">Interest Rate (% p.a.)</span>
-                      <span id="emiRateDisplay" class="emi-val-pill">8.5% p.a.</span>
-                    </div>
-                    <input type="range" class="emi-slider" id="emiRateInput" min="6.0" max="15.0" step="0.1" value="8.5">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
-                      <span class="text-muted" style="font-size:11px; font-weight:600;">6.0%</span>
-                      <div class="d-flex gap-1">
-                        <button type="button" class="emi-quick-btn" onclick="setEmiRate(8.0)">8.0%</button>
-                        <button type="button" class="emi-quick-btn" onclick="setEmiRate(8.5)">8.5%</button>
-                        <button type="button" class="emi-quick-btn" onclick="setEmiRate(9.0)">9.0%</button>
-                        <button type="button" class="emi-quick-btn" onclick="setEmiRate(9.5)">9.5%</button>
-                      </div>
-                      <span class="text-muted" style="font-size:11px; font-weight:600;">15.0%</span>
-                    </div>
-                  </div>
-
-                  <!-- Tenure -->
-                  <div class="emi-slider-wrap mb-0">
-                    <div class="emi-label-row">
-                      <span class="emi-label-title">Loan Tenure</span>
-                      <span id="emiTenureDisplay" class="emi-val-pill">20 Years (240 M)</span>
-                    </div>
-                    <input type="range" class="emi-slider" id="emiTenureInput" min="1" max="30" step="1" value="20">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
-                      <span class="text-muted" style="font-size:11px; font-weight:600;">1 Yr</span>
-                      <div class="d-flex gap-1">
-                        <button type="button" class="emi-quick-btn" onclick="setEmiTenure(10)">10 Yrs</button>
-                        <button type="button" class="emi-quick-btn" onclick="setEmiTenure(15)">15 Yrs</button>
-                        <button type="button" class="emi-quick-btn" onclick="setEmiTenure(20)">20 Yrs</button>
-                        <button type="button" class="emi-quick-btn" onclick="setEmiTenure(25)">25 Yrs</button>
-                      </div>
-                      <span class="text-muted" style="font-size:11px; font-weight:600;">30 Yrs</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Right: Calculation Results (Luxury Dark Slate Card) -->
-                <div class="col-12 col-lg-5">
-                  <div class="emi-result-panel">
-                    <div>
-                      <div class="emi-card-lbl">Estimated Monthly EMI</div>
-                      <div class="emi-highlight-amount" id="emiMonthlyDisplay">₹43,391</div>
-                      <div class="emi-sub-duration" id="emiSubtext">per month for 20 years</div>
-                    </div>
-
-                    <div class="my-3">
-                      <!-- Visual Breakdown Bar -->
-                      <div class="emi-breakup-bar">
-                        <div class="emi-bar-principal" id="emiPrincipalBar" style="width: 48%;"></div>
-                        <div class="emi-bar-interest" id="emiInterestBar" style="width: 52%;"></div>
-                      </div>
-                      <div class="d-flex justify-content-between align-items-center small mt-1">
-                        <span style="color:#38bdf8; font-weight:700;"><i class="fa-solid fa-circle me-1" style="font-size:8px;"></i> <span id="emiPrincipalLabel">Principal (48%)</span></span>
-                        <span style="color:#ec4899; font-weight:700;"><i class="fa-solid fa-circle me-1" style="font-size:8px;"></i> <span id="emiInterestLabel">Interest (52%)</span></span>
-                      </div>
-                    </div>
-
-                    <div class="border-top border-secondary pt-2" style="border-color: #334155 !important;">
-                      <div class="emi-breakdown-row">
-                        <span class="lbl">Principal Amount:</span>
-                        <span class="val" id="emiPrincipalDisplay">₹50,00,000</span>
-                      </div>
-                      <div class="emi-breakdown-row">
-                        <span class="lbl">Total Interest:</span>
-                        <span class="val" id="emiInterestDisplay">₹54,13,879</span>
-                      </div>
-                      <div class="emi-breakdown-row total-row">
-                        <span class="lbl" style="color:#ffffff; font-weight:700;">Total Payable:</span>
-                        <span class="val" id="emiTotalPayableDisplay">₹1,04,13,879</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <a href="#" id="emiLoanAssistanceBtn" target="_blank" class="btn-emi-cta">
-                        <i class="fa-solid fa-hand-holding-dollar me-2"></i> Apply for Home Loan
-                      </a>
-                    </div>
-                  </div>
-                </div>
+              <div class="emi-rate-pill">
+                <i class="fa-solid fa-sparkles me-1"></i> Rates from 8.5% p.a.*
               </div>
             </div>
-          </section>
 
-          <?php if (!empty(trim($property['map'] ?? ''))): ?>
-          <div class="property-map-section mt-4" data-aos="fade-down" data-aos-duration="1000">
-            <div class="map-card-premium" style="background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 20px;">
-              <h4 style="font-weight: 800; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                <i class="fa fa-map-marked-alt" style="color: #c02a7c;"></i> Project Location & Map
-              </h4>
-              <div class="map-iframe-container">
-                <?php echo $property['map']; ?>
+            <div class="row g-4 align-items-stretch">
+              <!-- Left: Sliders -->
+              <div class="col-12 col-lg-7">
+                <!-- Loan Amount -->
+                <div class="emi-slider-wrap">
+                  <div class="emi-label-row">
+                    <span class="emi-label-title">Loan Amount</span>
+                    <span id="emiLoanAmountDisplay" class="emi-val-pill">₹<?= number_format($init_loan_amount) ?></span>
+                  </div>
+                  <input type="range" class="emi-slider" id="emiLoanInput" min="500000" max="50000000" step="50000" value="<?= $init_loan_amount ?>">
+                  <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
+                    <span class="text-muted" style="font-size:11px; font-weight:600;">₹5 L</span>
+                    <div class="d-flex gap-1">
+                      <button type="button" class="emi-quick-btn" onclick="setEmiAmount(2500000)">₹25 L</button>
+                      <button type="button" class="emi-quick-btn" onclick="setEmiAmount(5000000)">₹50 L</button>
+                      <button type="button" class="emi-quick-btn" onclick="setEmiAmount(7500000)">₹75 L</button>
+                      <button type="button" class="emi-quick-btn" onclick="setEmiAmount(10000000)">₹1 Cr</button>
+                    </div>
+                    <span class="text-muted" style="font-size:11px; font-weight:600;">₹5 Cr</span>
+                  </div>
+                </div>
+
+                <!-- Interest Rate -->
+                <div class="emi-slider-wrap">
+                  <div class="emi-label-row">
+                    <span class="emi-label-title">Interest Rate (% p.a.)</span>
+                    <span id="emiRateDisplay" class="emi-val-pill">8.5% p.a.</span>
+                  </div>
+                  <input type="range" class="emi-slider" id="emiRateInput" min="6.0" max="15.0" step="0.1" value="8.5">
+                  <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
+                    <span class="text-muted" style="font-size:11px; font-weight:600;">6.0%</span>
+                    <div class="d-flex gap-1">
+                      <button type="button" class="emi-quick-btn" onclick="setEmiRate(8.0)">8.0%</button>
+                      <button type="button" class="emi-quick-btn" onclick="setEmiRate(8.5)">8.5%</button>
+                      <button type="button" class="emi-quick-btn" onclick="setEmiRate(9.0)">9.0%</button>
+                      <button type="button" class="emi-quick-btn" onclick="setEmiRate(9.5)">9.5%</button>
+                    </div>
+                    <span class="text-muted" style="font-size:11px; font-weight:600;">15.0%</span>
+                  </div>
+                </div>
+
+                <!-- Tenure -->
+                <div class="emi-slider-wrap mb-0">
+                  <div class="emi-label-row">
+                    <span class="emi-label-title">Loan Tenure</span>
+                    <span id="emiTenureDisplay" class="emi-val-pill">20 Years (240 M)</span>
+                  </div>
+                  <input type="range" class="emi-slider" id="emiTenureInput" min="1" max="30" step="1" value="20">
+                  <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
+                    <span class="text-muted" style="font-size:11px; font-weight:600;">1 Yr</span>
+                    <div class="d-flex gap-1">
+                      <button type="button" class="emi-quick-btn" onclick="setEmiTenure(10)">10 Yrs</button>
+                      <button type="button" class="emi-quick-btn" onclick="setEmiTenure(15)">15 Yrs</button>
+                      <button type="button" class="emi-quick-btn" onclick="setEmiTenure(20)">20 Yrs</button>
+                      <button type="button" class="emi-quick-btn" onclick="setEmiTenure(25)">25 Yrs</button>
+                    </div>
+                    <span class="text-muted" style="font-size:11px; font-weight:600;">30 Yrs</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Luxury Dark Slate Result Card -->
+              <div class="col-12 col-lg-5">
+                <div class="emi-result-panel">
+                  <div>
+                    <div class="emi-card-lbl">Estimated Monthly EMI</div>
+                    <div class="emi-highlight-amount" id="emiMonthlyDisplay">₹43,391</div>
+                    <div class="emi-sub-duration" id="emiSubtext">per month for 20 years</div>
+                  </div>
+
+                  <div class="my-3">
+                    <div class="emi-breakup-bar">
+                      <div class="emi-bar-principal" id="emiPrincipalBar" style="width: 48%;"></div>
+                      <div class="emi-bar-interest" id="emiInterestBar" style="width: 52%;"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center small mt-1">
+                      <span style="color:#38bdf8; font-weight:700;"><i class="fa-solid fa-circle me-1" style="font-size:8px;"></i> <span id="emiPrincipalLabel">Principal (48%)</span></span>
+                      <span style="color:#ec4899; font-weight:700;"><i class="fa-solid fa-circle me-1" style="font-size:8px;"></i> <span id="emiInterestLabel">Interest (52%)</span></span>
+                    </div>
+                  </div>
+
+                  <div class="border-top border-secondary pt-2" style="border-color: #334155 !important;">
+                    <div class="emi-breakdown-row">
+                      <span class="lbl">Principal Amount:</span>
+                      <span class="val" id="emiPrincipalDisplay">₹50,00,000</span>
+                    </div>
+                    <div class="emi-breakdown-row">
+                      <span class="lbl">Total Interest:</span>
+                      <span class="val" id="emiInterestDisplay">₹54,13,879</span>
+                    </div>
+                    <div class="emi-breakdown-row total-row">
+                      <span class="lbl" style="color:#ffffff; font-weight:700;">Total Payable:</span>
+                      <span class="val" id="emiTotalPayableDisplay">₹1,04,13,879</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <a href="#" id="emiLoanAssistanceBtn" target="_blank" class="btn-emi-cta">
+                      <i class="fa-solid fa-hand-holding-dollar me-2"></i> Apply for Home Loan
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- 📍 8. Project Location & Interactive Map -->
+          <?php if (!empty(trim($property['map'] ?? ''))): ?>
+          <div id="sectionMap" class="map-card-luxury" data-aos="fade-up" data-aos-duration="800">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div>
+                <div class="section-title-luxury">
+                  <span class="heading-accent-bar"></span> Project Location & Neighborhood
+                </div>
+                <p class="section-subtitle-luxury mb-0">
+                  <i class="fa-solid fa-location-dot me-1 text-danger"></i> <?= htmlspecialchars($property['location']) ?>
+                </p>
+              </div>
+              <a href="https://maps.google.com/?q=<?= urlencode($property['project_name'] . ' ' . $property['location']) ?>" target="_blank" class="btn btn-sm btn-light border px-3 py-2 rounded-pill font-weight-bold" style="color:#c02a7c; font-weight:700;">
+                <i class="fa-solid fa-diamond-turn-right me-1"></i> Get Directions
+              </a>
+            </div>
+
+            <div class="map-iframe-container">
+              <?php echo $property['map']; ?>
+            </div>
+          </div>
           <?php endif; ?>
+
         </div>
 
-        <!-- Right Side -->
-        <div class="col-12 col-lg-4 ghjp">
+        <!-- Right Side: High-Conversion Sticky Contact Sidebar (4 Cols) -->
+        <div class="col-12 col-lg-4">
           <div class="sidebar-sticky">
             <div id="formMessage"></div>
-            <div class="premium-contact-card">
-              <div class="badge-premium">⚡ Most Liked Project in This Area</div>
+            
+            <div class="luxury-sidebar-card">
+              <div class="badge-sidebar-demand">
+                <i class="fa-solid fa-bolt"></i> High Demand Property in This Area
+              </div>
 
-              <div class="seller-info mb-4 d-flex align-items-center gap-3 p-3" style="background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
-                <div class="seller-icon-box" style="width: 48px; height: 48px; background: #c02a7c; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white;">
-                  <i class="fa-solid fa-building-circle-check" style="font-size: 24px;"></i>
+              <!-- Agency Profile Header -->
+              <div class="sidebar-agency-profile">
+                <div class="sidebar-agency-avatar">
+                  <i class="fa-solid fa-building-circle-check"></i>
                 </div>
-                <div class="flex-grow-1 text-start">
-                  <h4 style="font-weight: 800; color: #0f172a; margin: 0; font-size: 18px; line-height: 1.2;">I Kan Housing <i class="fa fa-circle-check" style="color: #22c55e; font-size: 14px; margin-left: 4px;" title="Verified Provider"></i></h4>
-                  <p style="color: #64748b; font-weight: 600; margin: 2px 0 0; font-size: 14px;"><i class="fa-solid fa-phone-volume me-1" style="color: #22c55e;"></i> +91 89553 31454</p>
+                <div>
+                  <h5 style="font-weight: 800; color: #0f172a; margin: 0; font-size: 17px; line-height: 1.2;">
+                    I Kan Housing <i class="fa-solid fa-circle-check text-success" style="font-size: 13px;" title="Verified Platinum Partner"></i>
+                  </h5>
+                  <p style="color: #64748b; font-weight: 600; margin: 3px 0 0; font-size: 13.5px;">
+                    <i class="fa-solid fa-phone-volume me-1 text-success"></i> +91 89553 31454
+                  </p>
                 </div>
               </div>
 
+              <!-- Instant Lead Capture Form -->
               <form class="contact-form" method="POST" id="sidebarContactForm">
                 <input type="hidden" name="property_slug" value="<?= htmlspecialchars($slug) ?>">
-                <input type="text" name="c_name" class="form-control" placeholder="Your Name" required>
-                <input type="email" name="email" class="form-control" placeholder="Email Address" required>
-                <input type="text" name="phone" class="form-control" placeholder="Phone Number" required pattern="\d{10}">
+                <input type="hidden" name="property_name" value="<?= htmlspecialchars($property['project_name']) ?>">
+                
+                <div class="sidebar-form-group">
+                  <div class="sidebar-input-wrap">
+                    <i class="fa-solid fa-user sidebar-input-icon"></i>
+                    <input type="text" name="c_name" class="sidebar-input" placeholder="Your Full Name *" required>
+                  </div>
+                </div>
 
-                <div class="form-check my-3">
+                <div class="sidebar-form-group">
+                  <div class="sidebar-input-wrap">
+                    <i class="fa-solid fa-envelope sidebar-input-icon"></i>
+                    <input type="email" name="email" class="sidebar-input" placeholder="Email Address *" required>
+                  </div>
+                </div>
+
+                <div class="sidebar-form-group">
+                  <div class="sidebar-input-wrap">
+                    <i class="fa-solid fa-phone sidebar-input-icon"></i>
+                    <input type="tel" name="phone" maxlength="10" pattern="[0-9]{10}" class="sidebar-input" placeholder="Mobile Number (10 Digits) *" required>
+                  </div>
+                </div>
+
+                <div class="form-check mb-3 mt-2">
                   <input type="checkbox" class="form-check-input" id="agree" checked>
-                  <label for="agree" class="form-check-label" style="font-size:13px; color:#64748b;">
-                    I agree to be contacted via WhatsApp, SMS, or phone.
+                  <label for="agree" class="form-check-label" style="font-size:12px; color:#64748b; cursor:pointer;">
+                    I agree to receive project updates via WhatsApp and phone.
                   </label>
                 </div>
 
-                <button type="submit" class="btn-premium-cta" id="sidebarSubmitBtn">Contact Expert</button>
+                <button type="submit" class="btn-sidebar-submit" id="sidebarSubmitBtn">
+                  <span>Request Instant Callback</span>
+                  <i class="fa-solid fa-arrow-right"></i>
+                </button>
               </form>
 
               <!-- Quick Action Conversion CTAs -->
@@ -854,6 +977,13 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
                   <i class="fa-brands fa-whatsapp" style="font-size: 16px; color: #22c55e;"></i> WhatsApp
                 </a>
               </div>
+
+              <!-- Buyer Trust Indicators -->
+              <div class="sidebar-trust-box">
+                <span><i class="fa-solid fa-shield-halved text-success me-1"></i> Zero Brokerage</span>
+                <span>•</span>
+                <span><i class="fa-solid fa-user-shield text-primary me-1"></i> Free Site Visit</span>
+              </div>
             </div>
           </div>
         </div>
@@ -861,6 +991,22 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
       </div>
     </div>
   </section>
+
+  <!-- 📱 Mobile Floating Sticky Conversion Bar (< 992px) -->
+  <div class="mobile-sticky-actionbar d-lg-none">
+    <div class="mobile-sticky-price">
+      <div class="lbl">Price Range</div>
+      <div class="val"><?= htmlspecialchars($min_price_display ?: 'On Request') ?></div>
+    </div>
+    <div class="mobile-sticky-btns">
+      <a href="https://wa.me/918955331454?text=<?= urlencode('Hello Ikan Housing, I am interested in ' . $property['project_name'] . ' (' . $property['location'] . '). Please share details.') ?>" target="_blank" class="btn-mobile-wa" title="WhatsApp Advisor">
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
+      <button type="button" class="btn-mobile-visit" data-bs-toggle="modal" data-bs-target="#siteVisitModal">
+        <i class="fa-solid fa-calendar-check"></i> Book Visit
+      </button>
+    </div>
+  </div>
 
   <!-- Hidden Popup Slider (Safely outside content flow) -->
   <div id="popup" class="popup popup-v" style="display:none;">

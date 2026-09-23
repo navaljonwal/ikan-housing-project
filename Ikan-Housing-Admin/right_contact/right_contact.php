@@ -100,6 +100,7 @@ $result = mysqli_query($con, $query);
                     <th class="ps-4">Sequence</th>
                     <th>Identity Summary</th>
                     <th>Communication Channel</th>
+                    <th>Project Inquiry</th>
                     <th class="text-end pe-4">Lead Status</th>
                   </tr>
                 </thead>
@@ -114,19 +115,28 @@ $result = mysqli_query($con, $query);
                           <td>
                              <div class="d-flex align-items-center">
                                 <div class="avatar avatar-sm me-3">
-                                   <span class="avatar-title rounded-circle bg-light-pink text-primary fw-bold"><?= strtoupper(substr($row['name'], 0, 1)) ?></span>
+                                   <span class="avatar-title rounded-circle bg-light-pink text-primary fw-bold"><?= strtoupper(substr($row['name'] ?? 'U', 0, 1)) ?></span>
                                 </div>
                                 <div>
-                                   <div class="fw-bold text-premium mb-0 fs-14"><?= htmlspecialchars($row['name']) ?></div>
-                                   <div class="text-muted small">Verified User</div>
+                                   <div class="fw-bold text-premium mb-0 fs-14"><?= htmlspecialchars($row['name'] ?? 'Guest') ?></div>
+                                   <div class="text-muted small">Verified Lead</div>
                                 </div>
                              </div>
                           </td>
                           <td>
                              <div class="d-flex flex-column gap-1">
-                                <div class="small"><i class="fas fa-envelope me-2 text-primary opacity-50"></i><?= htmlspecialchars($row['email']) ?></div>
-                                <div class="small fw-bold"><i class="fas fa-phone-alt me-2 text-primary opacity-50"></i><?= htmlspecialchars($row['phone']) ?></div>
+                                <div class="small"><i class="fas fa-envelope me-2 text-primary opacity-50"></i><?= htmlspecialchars($row['email'] ?? 'N/A') ?></div>
+                                <div class="small fw-bold"><i class="fas fa-phone-alt me-2 text-primary opacity-50"></i><?= htmlspecialchars($row['phone'] ?? '') ?></div>
                              </div>
+                          </td>
+                          <td>
+                             <?php if (!empty($row['property_name'])): ?>
+                               <span class="badge bg-light text-primary border fw-bold px-2 py-1"><i class="fas fa-building me-1"></i><?= htmlspecialchars($row['property_name']) ?></span>
+                             <?php elseif (!empty($row['property_slug'])): ?>
+                               <span class="badge bg-light text-muted border px-2 py-1"><?= htmlspecialchars($row['property_slug']) ?></span>
+                             <?php else: ?>
+                               <span class="text-muted small">General Inquiry</span>
+                             <?php endif; ?>
                           </td>
                           <td class="text-end pe-4">
                              <div class="d-flex justify-content-end gap-2">
