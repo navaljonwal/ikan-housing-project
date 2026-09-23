@@ -1040,25 +1040,25 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
       <div class="modal-content">
         <div class="modal-header">
           <div class="pe-2">
-            <div class="site-visit-badge-top">
-              <i class="fa-solid fa-shield-halved me-1"></i> Verified Property Visit
-            </div>
-            <h5 class="modal-title mb-0" id="siteVisitModalLabel">
-              <i class="fa-solid fa-calendar-check" style="color: #c02a7c; margin-right: 6px;"></i> Schedule a Free Site Visit
+            <h5 class="modal-title mb-0 d-flex align-items-center flex-wrap gap-2" id="siteVisitModalLabel">
+              <span><i class="fa-solid fa-calendar-check" style="color: #c02a7c; margin-right: 6px;"></i> Schedule a Free Site Visit</span>
+              <span class="site-visit-badge-top">
+                <i class="fa-solid fa-shield-halved me-1"></i> Verified Visit
+              </span>
             </h5>
             <p class="modal-subtitle">Tour <strong><?= htmlspecialchars($property['project_name']) ?></strong> with our verified property advisor.</p>
           </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <div id="siteVisitMsg" class="d-none mb-3"></div>
+          <div id="siteVisitMsg" class="d-none mb-2"></div>
 
           <form id="siteVisitForm" method="POST">
             <input type="hidden" name="property_id" value="<?= (int)$property['id'] ?>">
             <input type="hidden" name="property_name" value="<?= htmlspecialchars($property['project_name']) ?>">
             <input type="hidden" name="property_slug" value="<?= htmlspecialchars($slug) ?>">
 
-            <div class="row g-2 g-md-3">
+            <div class="row g-2">
               <!-- Full Name (Desktop: 6 cols, Mobile: 12 cols) -->
               <div class="col-12 col-md-6">
                 <label class="form-label">Full Name *</label>
@@ -1103,45 +1103,50 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
                     <input type="radio" name="time_slot" id="slotMorning" value="Morning (10 AM - 1 PM)" class="slot-pill-input" checked>
                     <label for="slotMorning" class="slot-pill-label">
                       <i class="fa-regular fa-sun slot-icon text-warning"></i>
-                      <span class="slot-title">Morning</span>
-                      <span class="slot-time">10 AM - 1 PM</span>
+                      <div class="slot-pill-content">
+                        <span class="slot-title">Morning</span>
+                        <span class="slot-time">10 AM - 1 PM</span>
+                      </div>
                     </label>
                   </div>
                   <div class="col-4">
                     <input type="radio" name="time_slot" id="slotAfternoon" value="Afternoon (1 PM - 4 PM)" class="slot-pill-input">
                     <label for="slotAfternoon" class="slot-pill-label">
                       <i class="fa-solid fa-sun slot-icon text-primary"></i>
-                      <span class="slot-title">Afternoon</span>
-                      <span class="slot-time">1 PM - 4 PM</span>
+                      <div class="slot-pill-content">
+                        <span class="slot-title">Afternoon</span>
+                        <span class="slot-time">1 PM - 4 PM</span>
+                      </div>
                     </label>
                   </div>
                   <div class="col-4">
                     <input type="radio" name="time_slot" id="slotEvening" value="Evening (4 PM - 7 PM)" class="slot-pill-input">
                     <label for="slotEvening" class="slot-pill-label">
                       <i class="fa-solid fa-moon slot-icon" style="color:#c02a7c;"></i>
-                      <span class="slot-title">Evening</span>
-                      <span class="slot-time">4 PM - 7 PM</span>
+                      <div class="slot-pill-content">
+                        <span class="slot-title">Evening</span>
+                        <span class="slot-time">4 PM - 7 PM</span>
+                      </div>
                     </label>
                   </div>
                 </div>
               </div>
 
-              <!-- Free Cab Option -->
-              <div class="col-12">
-                <div class="form-check visit-cab-check">
+              <!-- Free Cab Option & Trust Box (Side by side on desktop, stacked on mobile) -->
+              <div class="col-12 col-md-6">
+                <div class="form-check visit-cab-check h-100 d-flex align-items-center">
                   <input class="form-check-input" type="checkbox" name="need_cab" id="needCabCheck" value="Yes">
                   <label class="form-check-label" for="needCabCheck">
-                    <i class="fa-solid fa-car-side text-muted me-1"></i> Request free cab pickup & drop <span class="badge-cab-free">FREE</span>
+                    <i class="fa-solid fa-car-side text-muted me-1"></i> Free cab pickup & drop <span class="badge-cab-free">FREE</span>
                   </label>
                 </div>
               </div>
 
-              <!-- Trust Guarantee Banner -->
-              <div class="col-12">
-                <div class="trust-guarantee-box">
+              <div class="col-12 col-md-6">
+                <div class="trust-guarantee-box h-100 d-flex align-items-center">
                   <i class="fa-solid fa-shield-check"></i>
                   <div>
-                    <strong>100% Free Site Visit:</strong> Zero brokerage • Verified property advisor • Sanitized private site car.
+                    <strong>Zero Brokerage:</strong> Free guided site visit with verified advisor.
                   </div>
                 </div>
               </div>
