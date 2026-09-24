@@ -2,21 +2,74 @@
 include('../components/auth.php');
 include('../../config.php');
 
-// ✅ Slug Generate
+// ✅ Increase memory and execution time for uploads
+@ini_set('memory_limit', '512M');
+@ini_set('max_execution_time', '300');
+
+// ✅ Auto-Migrate / Self-Heal Database Schema dynamically
+function ensurePropertySchema($con)
+{
+    static $done = false;
+    if ($done || !$con) return;
+    $done = true;
+
+    try {
+        // 1. Check & Add video_file column
+        $colCheck = mysqli_query($con, "SHOW COLUMNS FROM new_property LIKE 'video_file'");
+        if ($colCheck && mysqli_num_rows($colCheck) == 0) {
+            @mysqli_query($con, "ALTER TABLE new_property ADD COLUMN video_file varchar(255) DEFAULT NULL AFTER video_link");
+        }
+
+        // 2. Relax brochure to optional DEFAULT '' NULL
+        @mysqli_query($con, "ALTER TABLE new_property MODIFY COLUMN brochure varchar(255) DEFAULT '' NULL");
+
+        // 3. Relax strict integer & date columns so empty values never crash strict MySQL
+        @mysqli_query($con, "ALTER TABLE new_property MODIFY COLUMN bigha int(11) DEFAULT 0 NULL");
+        @mysqli_query($con, "ALTER TABLE new_property MODIFY COLUMN unit int(11) DEFAULT 0 NULL");
+        @mysqli_query($con, "ALTER TABLE new_property MODIFY COLUMN floor int(11) DEFAULT 0 NULL");
+        @mysqli_query($con, "ALTER TABLE new_property MODIFY COLUMN block int(11) DEFAULT 0 NULL");
+        @mysqli_query($con, "ALTER TABLE new_property MODIFY COLUMN launch_date date DEFAULT NULL NULL");
+        @mysqli_query($con, "ALTER TABLE new_property MODIFY COLUMN possession_date date DEFAULT NULL NULL");
+        @mysqli_query($con, "ALTER TABLE new_property MODIFY COLUMN max_price_int bigint(20) DEFAULT NULL NULL");
+        @mysqli_query($con, "ALTER TABLE new_property MODIFY COLUMN min_price_int bigint(20) DEFAULT NULL NULL");
+        @mysqli_query($con, "ALTER TABLE new_property MODIFY COLUMN trending tinyint(4) DEFAULT 0 NULL");
+        @mysqli_query($con, "ALTER TABLE new_property MODIFY COLUMN project_type tinyint(4) DEFAULT 1 NULL");
+    } catch (Throwable $e) {
+        error_log("Schema auto-migrate notice: " . $e->getMessage());
+    }
+}
+ensurePropertySchema($con);
+
+// ✅ Slug Generate (Resilient)
 function generateSlug($name, $con)
 {
-    $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-'));
+    $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', (string)$name), '-'));
+    if (empty($slug)) {
+        $slug = 'property-' . time();
+    }
     $base = $slug;
     $i = 1;
-    while (mysqli_num_rows(mysqli_query($con, "SELECT id FROM new_property WHERE slug='$slug'")) > 0) {
-        $slug = $base . '-' . $i++;
+    try {
+        while (true) {
+            $checkRes = mysqli_query($con, "SELECT id FROM new_property WHERE slug='" . mysqli_real_escape_string($con, $slug) . "'");
+            if ($checkRes && mysqli_num_rows($checkRes) > 0) {
+                $slug = $base . '-' . $i++;
+            } else {
+                break;
+            }
+        }
+    } catch (Throwable $t) {
+        $slug = $base . '-' . time() . '-' . rand(10, 99);
     }
     return $slug;
 }
 
-// ✅ File Upload Helper (WebP Support + Watermark + Direct Fallback)
+// ✅ File Upload Helper (High performance + Bulletproof GD + Instant fallback)
 function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", "png", "webp", "pdf", "jfif", "avif", "gif"], $maxMB = 10)
 {
+    @ini_set('memory_limit', '512M');
+    @ini_set('max_execution_time', '300');
+
     if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) return "";
     $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
     if ($ext === 'jfif') $ext = 'jpg';
@@ -38,85 +91,75 @@ function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", 
     $imageProcessed = false;
     $finalName = "";
 
-    // Attempt GD watermark/compression if GD is available
-    if (extension_loaded('gd') && function_exists('imagecreatefromstring')) {
-        $content = @file_get_contents($file['tmp_name']);
-        if ($content !== false) {
-            $src = @imagecreatefromstring($content);
+    // ✅ Safe & Fast GD Watermark / WebP Conversion
+    try {
+        if (extension_loaded('gd') && function_exists('imagecreatefromstring')) {
+            $content = @file_get_contents($file['tmp_name']);
+            if ($content !== false && strlen($content) > 0) {
+                $src = @imagecreatefromstring($content);
 
-            if (!$src) {
-                if (($ext === 'jpg' || $ext === 'jpeg') && function_exists('imagecreatefromjpeg')) {
-                    $src = @imagecreatefromjpeg($file['tmp_name']);
-                } elseif ($ext === 'png' && function_exists('imagecreatefrompng')) {
-                    $src = @imagecreatefrompng($file['tmp_name']);
-                } elseif ($ext === 'webp' && function_exists('imagecreatefromwebp')) {
-                    $src = @imagecreatefromwebp($file['tmp_name']);
-                } elseif ($ext === 'gif' && function_exists('imagecreatefromgif')) {
-                    $src = @imagecreatefromgif($file['tmp_name']);
+                if (!$src) {
+                    if (($ext === 'jpg' || $ext === 'jpeg') && function_exists('imagecreatefromjpeg')) {
+                        $src = @imagecreatefromjpeg($file['tmp_name']);
+                    } elseif ($ext === 'png' && function_exists('imagecreatefrompng')) {
+                        $src = @imagecreatefrompng($file['tmp_name']);
+                    } elseif ($ext === 'webp' && function_exists('imagecreatefromwebp')) {
+                        $src = @imagecreatefromwebp($file['tmp_name']);
+                    } elseif ($ext === 'gif' && function_exists('imagecreatefromgif')) {
+                        $src = @imagecreatefromgif($file['tmp_name']);
+                    }
                 }
-            }
 
-            if ($src) {
-                $watermark_path = "../assets/img/icon-2.png"; 
-                if (file_exists($watermark_path) && function_exists('imagecreatefrompng')) {
-                    $watermark = @imagecreatefrompng($watermark_path);
-                    if ($watermark) {
-                        $src_w = (int)imagesx($src);
-                        $src_h = (int)imagesy($src);
-                        $wm_w = (int)imagesx($watermark);
-                        $wm_h = (int)imagesy($watermark);
+                if ($src) {
+                    $watermark_path = "../assets/img/icon-2.png"; 
+                    if (file_exists($watermark_path) && function_exists('imagecreatefrompng')) {
+                        $watermark = @imagecreatefrompng($watermark_path);
+                        if ($watermark) {
+                            $src_w = (int)imagesx($src);
+                            $src_h = (int)imagesy($src);
+                            $wm_w = (int)imagesx($watermark);
+                            $wm_h = (int)imagesy($watermark);
 
-                        if ($src_w > 80 && $src_h > 80 && $wm_w > 0 && $wm_h > 0) {
-                            $target_wm_w = max(1, (int)($src_w * 0.18));
-                            $target_wm_h = max(1, (int)($wm_h * ($target_wm_w / $wm_w)));
+                            if ($src_w > 100 && $src_h > 100 && $wm_w > 0 && $wm_h > 0) {
+                                // Fast watermark scaling (clamped to max 140px width)
+                                $target_wm_w = min(140, max(50, (int)($src_w * 0.15)));
+                                $target_wm_h = max(1, (int)($wm_h * ($target_wm_w / $wm_w)));
 
-                            $final_wm = imagecreatetruecolor($target_wm_w, $target_wm_h);
-                            imagealphablending($final_wm, false);
-                            imagesavealpha($final_wm, true);
-                            imagecopyresampled($final_wm, $watermark, 0, 0, 0, 0, $target_wm_w, $target_wm_h, $wm_w, $wm_h);
+                                $dest_x = max(10, (int)($src_w - $target_wm_w - 20));
+                                $dest_y = max(10, (int)($src_h - $target_wm_h - 20));
 
-                            // ✅ Apply 30% "Ghost" Opacity to Watermark
-                            for ($x = 0; $x < $target_wm_w; $x++) {
-                                for ($y = 0; $y < $target_wm_h; $y++) {
-                                    $color = imagecolorat($final_wm, $x, $y);
-                                    $alpha = ($color >> 24) & 0xFF; 
-                                    $newAlpha = 127 - ((127 - $alpha) * 0.3); 
-                                    $newColor = ($color & 0xFFFFFF) | ((int)$newAlpha << 24);
-                                    imagesetpixel($final_wm, $x, $y, $newColor);
-                                }
+                                imagealphablending($src, true);
+                                imagecopyresampled($src, $watermark, $dest_x, $dest_y, 0, 0, $target_wm_w, $target_wm_h, $wm_w, $wm_h);
                             }
-
-                            $dest_x = max(5, (int)($src_w - $target_wm_w - 40));
-                            $dest_y = max(5, (int)($src_h - $target_wm_h - 40));
-                            imagealphablending($src, true);
-                            imagecopy($src, $final_wm, $dest_x, $dest_y, 0, 0, $target_wm_w, $target_wm_h);
-                            imagedestroy($final_wm);
+                            @imagedestroy($watermark);
                         }
-                        imagedestroy($watermark);
                     }
-                }
 
-                if (function_exists('imagewebp')) {
-                    $finalName = $baseName . ".webp";
-                    if (@imagewebp($src, $dest . $finalName, 85)) {
-                        $imageProcessed = true;
+                    if (function_exists('imagewebp')) {
+                        $finalName = $baseName . ".webp";
+                        if (@imagewebp($src, $dest . $finalName, 85)) {
+                            $imageProcessed = true;
+                        }
+                    } elseif (function_exists('imagejpeg')) {
+                        $finalName = $baseName . ".jpg";
+                        if (@imagejpeg($src, $dest . $finalName, 90)) {
+                            $imageProcessed = true;
+                        }
                     }
-                } elseif (function_exists('imagejpeg')) {
-                    $finalName = $baseName . ".jpg";
-                    if (@imagejpeg($src, $dest . $finalName, 90)) {
-                        $imageProcessed = true;
-                    }
+                    @imagedestroy($src);
                 }
-                imagedestroy($src);
             }
         }
+    } catch (Throwable $t) {
+        error_log("GD Processing notice: " . $t->getMessage());
+        $imageProcessed = false;
     }
 
     if ($imageProcessed && !empty($finalName) && file_exists($dest . $finalName)) {
         return $finalName;
     }
 
-    // ✅ Graceful Direct Save Fallback: Never reject a valid image if GD cannot decode/re-encode it
+    // ✅ Graceful Direct Save Fallback: Never fail upload or crash if GD is unavailable or out of RAM
     $safeExt = in_array($ext, ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"]) ? ($ext === 'jfif' ? 'jpg' : $ext) : "jpg";
     $fallbackName = $baseName . "." . $safeExt;
     if (@move_uploaded_file($file['tmp_name'], $dest . $fallbackName)) {
@@ -197,12 +240,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $rera_no = "JDA Approved";
     }
 
-    // ✅ Uploads
+    // ✅ Uploads - Main Image
     $main_image = "";
     $mainErr = uploadedFileError('main_image');
     if ($mainErr === UPLOAD_ERR_OK) {
         $main_image = uploadFile($_FILES['main_image'], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
-        if (!$main_image) $errors[] = "Main cover image upload failed. Please ensure file is a valid image (JPG, PNG, WebP) under 10MB.";
+        if (!$main_image) $errors[] = "Main cover image upload failed. Please ensure file is under 10MB.";
     } else {
         $errors[] = "Main cover image is required.";
     }
@@ -212,42 +255,65 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $image3 = uploadFile($_FILES['image3'] ?? [], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
     $image4 = uploadFile($_FILES['image4'] ?? [], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
     
+    // ✅ Brochure is strictly OPTIONAL (Never block property submission)
     $pdf = "";
-    $brochureErr = uploadedFileError('brochure');
-    if ($brochureErr === UPLOAD_ERR_OK) {
-        $pdf = uploadFile($_FILES['brochure'], "../../uploads/", ["pdf"], 200);
-        if (!$pdf) $errors[] = "Brochure (PDF) upload failed. Check file size (Max 200MB).";
-    } elseif ($brochureErr !== UPLOAD_ERR_NO_FILE) {
-        $errors[] = "Brochure upload error code: " . $brochureErr;
+    if (isset($_FILES['brochure']) && uploadedFileError('brochure') === UPLOAD_ERR_OK) {
+        $uploadedPdf = uploadFile($_FILES['brochure'], "../../uploads/", ["pdf"], 200);
+        if ($uploadedPdf) {
+            $pdf = $uploadedPdf;
+        }
     }
 
+    // ✅ Video File is strictly OPTIONAL
     $video_file = "";
-    $videoErr = uploadedFileError('video_file');
-    if ($videoErr === UPLOAD_ERR_OK) {
-        $video_file = uploadFile($_FILES['video_file'], "../../uploads/", ["mp4", "webm", "ogg", "mov", "mkv"], 100);
-        if (!$video_file) $errors[] = "Video upload failed. Check format (MP4, WebM, MOV) and size (Max 100MB).";
-    } elseif ($videoErr !== UPLOAD_ERR_NO_FILE) {
-        $errors[] = "Video upload error code: " . $videoErr;
+    if (isset($_FILES['video_file']) && uploadedFileError('video_file') === UPLOAD_ERR_OK) {
+        $uploadedVideo = uploadFile($_FILES['video_file'], "../../uploads/", ["mp4", "webm", "ogg", "mov", "mkv"], 100);
+        if ($uploadedVideo) {
+            $video_file = $uploadedVideo;
+        }
     }
 
-    // ✅ Stop if error
+    // ✅ Stop if validation error
     if (empty($errors)) {
         $min_price_int = priceToInt($minprice);
         $max_price_int = priceToInt($maxprice);
 
-        // ✅ Insert Query
-        $sql = "INSERT INTO new_property 
-        (project_name,builder_name,max_price_int,min_price_int,min_price,max_price,location,rera_no,bhk,video_link,video_file,map,highlight,other_key_feature,
-         bigha,unit,floor,block,status,trending,project_type,launch_date,possession_date,furnish_type,construct_Status,
-         main_image,image_1,image_2,image_3,image_4,brochure,slug) 
-        VALUES 
-        ('$propertyname','$buildername','$max_price_int','$min_price_int', '$minprice','$maxprice','$location','$rera_no','$bhk','$video_link','$video_file','$map',
-        '$highlight','$other_key',$bigha,$unit,$floor,$block,$status,$trend,$project_type,$launchSql,
-        $possessionSql,'$furnish','$construct','$main_image','$image1','$image2','$image3','$image4','$pdf','$slug')";
+        // Dynamically verify if video_file column is present in new_property table
+        $hasVideoCol = false;
+        try {
+            $colRes = mysqli_query($con, "SHOW COLUMNS FROM new_property LIKE 'video_file'");
+            if ($colRes && mysqli_num_rows($colRes) > 0) {
+                $hasVideoCol = true;
+            }
+        } catch (Throwable $t) {
+            $hasVideoCol = false;
+        }
 
+        // ✅ Resilient Insert Query
+        if ($hasVideoCol) {
+            $sql = "INSERT INTO new_property 
+            (project_name,builder_name,max_price_int,min_price_int,min_price,max_price,location,rera_no,bhk,video_link,video_file,map,highlight,other_key_feature,
+             bigha,unit,floor,block,status,trending,project_type,launch_date,possession_date,furnish_type,construct_Status,
+             main_image,image_1,image_2,image_3,image_4,brochure,slug) 
+            VALUES 
+            ('$propertyname','$buildername','$max_price_int','$min_price_int', '$minprice','$maxprice','$location','$rera_no','$bhk','$video_link','$video_file','$map',
+            '$highlight','$other_key',$bigha,$unit,$floor,$block,$status,$trend,$project_type,$launchSql,
+            $possessionSql,'$furnish','$construct','$main_image','$image1','$image2','$image3','$image4','$pdf','$slug')";
+        } else {
+            $sql = "INSERT INTO new_property 
+            (project_name,builder_name,max_price_int,min_price_int,min_price,max_price,location,rera_no,bhk,video_link,map,highlight,other_key_feature,
+             bigha,unit,floor,block,status,trending,project_type,launch_date,possession_date,furnish_type,construct_Status,
+             main_image,image_1,image_2,image_3,image_4,brochure,slug) 
+            VALUES 
+            ('$propertyname','$buildername','$max_price_int','$min_price_int', '$minprice','$maxprice','$location','$rera_no','$bhk','$video_link','$map',
+            '$highlight','$other_key',$bigha,$unit,$floor,$block,$status,$trend,$project_type,$launchSql,
+            $possessionSql,'$furnish','$construct','$main_image','$image1','$image2','$image3','$image4','$pdf','$slug')";
+        }
+
+        $inserted = false;
         try {
             $inserted = mysqli_query($con, $sql);
-        } catch (mysqli_sql_exception $e) {
+        } catch (Throwable $e) {
             $inserted = false;
             $errors[] = "Database Error: " . $e->getMessage();
         }
@@ -329,7 +395,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         }
                     }
                 }
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 error_log("Sub-table insert notice: " . $e->getMessage());
             }
 
@@ -788,9 +854,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                         <div class="p-4 bg-white rounded border">
                                                             <div class="row align-items-center">
                                                                 <div class="col-md-6">
-                                                                    <label class="fw-bold"><i class="fas fa-file-pdf me-2 text-danger"></i>Project Brochure (PDF)</label>
+                                                                    <label class="fw-bold"><i class="fas fa-file-pdf me-2 text-danger"></i>Project Brochure (PDF) <span class="badge bg-secondary ms-1 fw-normal" style="font-size: 11px;">Optional</span></label>
                                                                     <input type="file" name="brochure" id="brochure" class="form-control" accept=".pdf">
-                                                                    <small class="text-muted d-block mt-1">Upload PDF brochure if available (Max 200MB)</small>
+                                                                    <small class="text-muted d-block mt-1">Optional - Upload PDF brochure only if available (Max 200MB)</small>
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <label class="fw-bold">Bulk Gallery Upload</label>

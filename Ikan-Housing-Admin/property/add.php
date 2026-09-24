@@ -85,17 +85,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     echo "Error with the image upload.";
   }
 
-  if ($_FILES['brochure']['error'] == 0) {
-    $brochure = $_FILES['brochure']['name'];
+  $brochure = '';
+  if (isset($_FILES['brochure']) && $_FILES['brochure']['error'] == 0) {
+    $brochure = time() . '_' . $_FILES['brochure']['name'];
     $brochure_tmp_name = $_FILES['brochure']['tmp_name'];
     $brochure_path = '../../uploads/' . $brochure;
-    if (!move_uploaded_file($brochure_tmp_name, $brochure_path)) {
-      echo "Error uploading the brochure file.";
-      exit();
-    }
-  } else {
-    echo "Error with the brochure upload.";
-    exit();
+    @move_uploaded_file($brochure_tmp_name, $brochure_path);
   }
 
   if ($_FILES['logo']['error'] == 0) {
