@@ -117,15 +117,15 @@ if (!$result) {
                   <div class="property-prices">
                     <div>
                       <small>Starting from</small>
-                      <h6>₹ <?= htmlspecialchars($row['min_price']) ?></h6>
+                      <h6>₹ <?= htmlspecialchars($row['min_price'] ?? '') ?></h6>
                     </div>
                      <div>
                     <small>Ending till</small>
-                    <h6>₹ <?= htmlspecialchars($row['max_price']) ?></h6>
+                    <h6>₹ <?= htmlspecialchars($row['max_price'] ?? '') ?></h6>
                   </div>
                     <div>
                       <small>Possession</small>
-                      <h6><?php echo htmlspecialchars($row['possession_date'])?></h6>
+                      <h6><?= htmlspecialchars(!empty($row['possession_date']) ? $row['possession_date'] : 'Ready to Move') ?></h6>
                     </div>
                   </div>
 

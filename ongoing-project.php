@@ -443,15 +443,15 @@ $found_count = mysqli_num_rows($result);
                   <div class="property-prices">
                     <div>
                       <small>Starts from</small>
-                      <h6>₹ <?= htmlspecialchars($row['min_price']) ?></h6>
+                      <h6>₹ <?= htmlspecialchars($row['min_price'] ?? '') ?></h6>
                     </div>
                     <div>
                       <small>Up to</small>
-                      <h6>₹ <?= htmlspecialchars($row['max_price']) ?></h6>
+                      <h6>₹ <?= htmlspecialchars($row['max_price'] ?? '') ?></h6>
                     </div>
                     <div>
                       <small>Possession</small>
-                      <h6><?= htmlspecialchars($row['possession_date']) ?></h6>
+                      <h6><?= htmlspecialchars(!empty($row['possession_date']) ? $row['possession_date'] : 'On Request') ?></h6>
                     </div>
                   </div>
 

@@ -126,32 +126,56 @@ function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", 
     return "";
 }
 
+function postEsc($con, $key, $default = '') {
+    return mysqli_real_escape_string($con, (string)($_POST[$key] ?? $default));
+}
+
+function priceToInt($price) {
+    $price = strtolower(trim((string)$price));
+    $price = str_replace([' ', ','], '', $price);
+    if (strpos($price, 'cr') !== false) return (int)(floatval($price) * 10000000);
+    if (strpos($price, 'lac') !== false || strpos($price, 'lakh') !== false) return (int)(floatval($price) * 100000);
+    return (int)$price;
+}
+
+function sqlDateOrNull($con, $value) {
+    $value = trim((string)$value);
+    if ($value === '' || $value === '0000-00-00') {
+        return 'NULL';
+    }
+    return "'" . mysqli_real_escape_string($con, $value) . "'";
+}
+
+function uploadedFileError($field) {
+    return $_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE;
+}
+
 $errors = [];
 $success = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Inputs
-    $propertyname = mysqli_real_escape_string($con, $_POST['project_name']);
-    $buildername = mysqli_real_escape_string($con, $_POST['buildername']);
-    $minprice = $_POST['min-price'] ?? '';
-    $maxprice = $_POST['max-price'] ?? '';
-    $location = $_POST['location'] ?? '';
-    $bhk = $_POST['bhk'] ?? '';
-    $video_link = $_POST['video_link'] ?? '';
-    $bigha = $_POST['bigha'] ?? '';
-    $unit = $_POST['units'] ?? '';
-    $floor = $_POST['floor'] ?? '';
-    $block = $_POST['blocks'] ?? '';
-    $status = $_POST['status'] ?? '';
-    $trend = $_POST['trending'] ?? '';
-    $project_type = $_POST['project_type'] ?? '';
-    $launch = $_POST['launch_date'] ?? '';
-    $possession = $_POST['possession_date'] ?? '';
-    $furnish = $_POST['furnish'] ?? '';
-    $construct = $_POST['construct'] ?? '';
-    $map = $_POST['map'] ?? '';
-    $highlight = $_POST['highlights'] ?? '';
-    $other_key = $_POST['other_key_feature'] ?? '';
+    $propertyname = postEsc($con, 'project_name');
+    $buildername = postEsc($con, 'buildername');
+    $minprice = postEsc($con, 'min-price');
+    $maxprice = postEsc($con, 'max-price');
+    $location = postEsc($con, 'location');
+    $bhk = postEsc($con, 'bhk');
+    $video_link = postEsc($con, 'video_link');
+    $bigha = (int)($_POST['bigha'] ?? 0);
+    $unit = (int)($_POST['units'] ?? 0);
+    $floor = (int)($_POST['floor'] ?? 0);
+    $block = (int)($_POST['blocks'] ?? 0);
+    $status = isset($_POST['status']) ? (int)$_POST['status'] : 1;
+    $trend = isset($_POST['trending']) ? (int)$_POST['trending'] : 0;
+    $project_type = isset($_POST['project_type']) ? (int)$_POST['project_type'] : 0;
+    $launchSql = sqlDateOrNull($con, $_POST['launch_date'] ?? '');
+    $possessionSql = sqlDateOrNull($con, $_POST['possession_date'] ?? '');
+    $furnish = postEsc($con, 'furnish');
+    $construct = postEsc($con, 'construct');
+    $map = postEsc($con, 'map');
+    $highlight = postEsc($con, 'highlights');
+    $other_key = postEsc($con, 'other_key_feature');
     $slug = generateSlug($propertyname, $con);
 
     // ✅ Required Validation
@@ -163,25 +187,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // ✅ RERA / JDA
     if (empty($_POST['rera_type'])) {
         $errors[] = "Please select RERA or JDA option.";
+        $rera_no = "";
+    } elseif ($_POST['rera_type'] == "rera") {
+        $rera_no = postEsc($con, 'rera_no');
+        if ($rera_no === '') {
+            $errors[] = "RERA Number is required.";
+        }
     } else {
-        $rera_no = ($_POST['rera_type'] == "rera")
-            ? ($_POST['rera_no'] ?? $errors[] = "RERA Number required.")
-            : "JDA Approved";
+        $rera_no = "JDA Approved";
     }
-
-    // ✅ Area validation
-    $carpet = floatval($bigha);
-    $builtup = floatval($unit);
-    $super = floatval($floor);
 
     // ✅ Uploads
     $main_image = "";
-    if (isset($_FILES['main_image']) && $_FILES['main_image']['error'] == UPLOAD_ERR_OK) {
+    $mainErr = uploadedFileError('main_image');
+    if ($mainErr === UPLOAD_ERR_OK) {
         $main_image = uploadFile($_FILES['main_image'], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
-        if (!$main_image) $errors[] = "Main image upload failed. Please ensure file is a valid image (JPG, PNG, WebP) under 10MB.";
-    } elseif (empty($errors)) {
-        // Only require main image if we're not already displaying errors
-        $errors[] = "Main image is required.";
+        if (!$main_image) $errors[] = "Main cover image upload failed. Please ensure file is a valid image (JPG, PNG, WebP) under 10MB.";
+    } else {
+        $errors[] = "Main cover image is required.";
     }
 
     $image1 = uploadFile($_FILES['image1'] ?? [], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
@@ -190,29 +213,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $image4 = uploadFile($_FILES['image4'] ?? [], "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
     
     $pdf = "";
-    if ($_FILES['brochure']['error'] == 0) {
+    $brochureErr = uploadedFileError('brochure');
+    if ($brochureErr === UPLOAD_ERR_OK) {
         $pdf = uploadFile($_FILES['brochure'], "../../uploads/", ["pdf"], 200);
         if (!$pdf) $errors[] = "Brochure (PDF) upload failed. Check file size (Max 200MB).";
-    } elseif ($_FILES['brochure']['error'] != 4) { // 4 = No file uploaded
-        $errors[] = "Brochure upload error code: " . $_FILES['brochure']['error'];
+    } elseif ($brochureErr !== UPLOAD_ERR_NO_FILE) {
+        $errors[] = "Brochure upload error code: " . $brochureErr;
     }
 
     $video_file = "";
-    if (isset($_FILES['video_file']) && $_FILES['video_file']['error'] == UPLOAD_ERR_OK) {
+    $videoErr = uploadedFileError('video_file');
+    if ($videoErr === UPLOAD_ERR_OK) {
         $video_file = uploadFile($_FILES['video_file'], "../../uploads/", ["mp4", "webm", "ogg", "mov", "mkv"], 100);
         if (!$video_file) $errors[] = "Video upload failed. Check format (MP4, WebM, MOV) and size (Max 100MB).";
+    } elseif ($videoErr !== UPLOAD_ERR_NO_FILE) {
+        $errors[] = "Video upload error code: " . $videoErr;
     }
 
-    // ✅ Stop if error (Removing exit to show errors in UI)
+    // ✅ Stop if error
     if (empty($errors)) {
-        function priceToInt($price) {
-            $price = strtolower(trim($price));
-            $price = str_replace([' ', ','], '', $price);
-            if (strpos($price, 'cr') !== false) return (int)(floatval($price) * 10000000);
-            if (strpos($price, 'lac') !== false || strpos($price, 'lakh') !== false) return (int)(floatval($price) * 100000);
-            return (int)$price;
-        }
-
         $min_price_int = priceToInt($minprice);
         $max_price_int = priceToInt($maxprice);
 
@@ -223,87 +242,99 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
          main_image,image_1,image_2,image_3,image_4,brochure,slug) 
         VALUES 
         ('$propertyname','$buildername','$max_price_int','$min_price_int', '$minprice','$maxprice','$location','$rera_no','$bhk','$video_link','$video_file','$map',
-        '$highlight','$other_key','$bigha','$unit','$floor','$block','$status','$trend','$project_type','$launch',
-        '$possession','$furnish','$construct','$main_image','$image1','$image2','$image3','$image4','$pdf','$slug')";
+        '$highlight','$other_key',$bigha,$unit,$floor,$block,$status,$trend,$project_type,$launchSql,
+        $possessionSql,'$furnish','$construct','$main_image','$image1','$image2','$image3','$image4','$pdf','$slug')";
 
-        if (mysqli_query($con, $sql)) {
+        try {
+            $inserted = mysqli_query($con, $sql);
+        } catch (mysqli_sql_exception $e) {
+            $inserted = false;
+            $errors[] = "Database Error: " . $e->getMessage();
+        }
+
+        if ($inserted) {
             $property_id = mysqli_insert_id($con);
 
-            // ✅ Multiple images
-            if (!empty($_FILES['images']['name'][0])) {
-                foreach ($_FILES['images']['tmp_name'] as $k => $tmp) {
-                    if (empty($_FILES['images']['name'][$k])) continue;
-                    $fileData = [
-                        'name' => $_FILES['images']['name'][$k],
-                        'tmp_name' => $tmp,
-                        'error' => $_FILES['images']['error'][$k],
-                        'size' => $_FILES['images']['size'][$k]
-                    ];
-                    $img = uploadFile($fileData, "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
-                    if ($img) mysqli_query($con, "INSERT INTO property_img (property_id,image) VALUES ('$property_id','$img')");
+            try {
+                // ✅ Multiple images
+                if (!empty($_FILES['images']['name'][0])) {
+                    foreach ($_FILES['images']['tmp_name'] as $k => $tmp) {
+                        if (empty($_FILES['images']['name'][$k])) continue;
+                        $fileData = [
+                            'name' => $_FILES['images']['name'][$k],
+                            'tmp_name' => $tmp,
+                            'error' => $_FILES['images']['error'][$k],
+                            'size' => $_FILES['images']['size'][$k]
+                        ];
+                        $img = uploadFile($fileData, "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 10);
+                        if ($img) {
+                            $imgEsc = mysqli_real_escape_string($con, $img);
+                            mysqli_query($con, "INSERT INTO property_img (property_id,image) VALUES ('$property_id','$imgEsc')");
+                        }
+                    }
                 }
-            }
 
-            // ✅ Amenities
-            if (!empty($_POST['amenities'])) {
-                foreach ($_POST['amenities'] as $a) mysqli_query($con, "INSERT INTO property_amenities (property_id, amenity_id) VALUES ('$property_id','$a')");
-            }
+                // ✅ Amenities
+                if (!empty($_POST['amenities'])) {
+                    foreach ($_POST['amenities'] as $a) {
+                        $a_id = (int)$a;
+                        mysqli_query($con, "INSERT INTO property_amenities (property_id, amenity_id) VALUES ('$property_id','$a_id')");
+                    }
+                }
 
-            // ✅ Sub Categories
-            if (!empty($_POST['subcat'])) {
-                $cat_id = mysqli_real_escape_string($con, $_POST['cat_name']);
-                foreach ($_POST['subcat'] as $s) mysqli_query($con, "INSERT INTO property_subcat (property_id,category_id,subcat_id) VALUES ('$property_id','$cat_id','$s')");
-            }
+                // ✅ Sub Categories
+                if (!empty($_POST['subcat'])) {
+                    $cat_id = (int)($_POST['cat_name'] ?? 0);
+                    foreach ($_POST['subcat'] as $s) {
+                        $s_id = (int)$s;
+                        mysqli_query($con, "INSERT INTO property_subcat (property_id,category_id,subcat_id) VALUES ('$property_id','$cat_id','$s_id')");
+                    }
+                }
 
-            // ✅ Category
-            if (!empty($_POST['cat_name'])) {
-                $cat = mysqli_real_escape_string($con, $_POST['cat_name']);
-                mysqli_query($con, "INSERT INTO property_category (property_id,category_id) VALUES ('$property_id','$cat')");
-            }
+                // ✅ Category
+                if (!empty($_POST['cat_name'])) {
+                    $cat = (int)$_POST['cat_name'];
+                    mysqli_query($con, "INSERT INTO property_category (property_id,category_id) VALUES ('$property_id','$cat')");
+                }
 
-            // ✅ Floor Plan (Verbose Error Reporting & 20MB Limit)
-            if (!empty($_POST['subcat'])) {
-                foreach ($_POST['subcat'] as $subcat_item) {
-                    $subcat_id = (int)$subcat_item;
-                    if (!empty($_FILES['images_floor']['name'][$subcat_id])) {
-                        $countFiles = count($_FILES['images_floor']['name'][$subcat_id]);
-                        for ($i = 0; $i < $countFiles; $i++) {
-                            $errCode = $_FILES['images_floor']['error'][$subcat_id][$i];
-                            if ($errCode === 0) {
-                                $fileSize = $_FILES['images_floor']['size'][$subcat_id][$i];
-                                if ($fileSize > 20 * 1024 * 1024) {
-                                    $errors[] = "Floor Plan Error: File too large (Max 20MB) for Subcat ID: $subcat_id";
-                                    continue;
-                                }
-
-                                $fileData = [
-                                    'name' => $_FILES['images_floor']['name'][$subcat_id][$i],
-                                    'tmp_name' => $_FILES['images_floor']['tmp_name'][$subcat_id][$i],
-                                    'error' => $errCode,
-                                    'size' => $fileSize
-                                ];
-                                
-                                $fileName = uploadFile($fileData, "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 20);
-                                if ($fileName) {
-                                    $imgNameEsc = mysqli_real_escape_string($con, $fileName);
-                                    $floorSql = "INSERT INTO floor_plane (image, property_id, subcat_id) VALUES ('$imgNameEsc', $property_id, $subcat_id)";
-                                    if (!mysqli_query($con, $floorSql)) {
-                                        $errors[] = "Floor Plan DB Error: " . mysqli_error($con) . " (ID: $subcat_id)";
+                // ✅ Floor Plan (Verbose Error Reporting & 20MB Limit)
+                if (!empty($_POST['subcat'])) {
+                    foreach ($_POST['subcat'] as $subcat_item) {
+                        $subcat_id = (int)$subcat_item;
+                        if (!empty($_FILES['images_floor']['name'][$subcat_id])) {
+                            $countFiles = count($_FILES['images_floor']['name'][$subcat_id]);
+                            for ($i = 0; $i < $countFiles; $i++) {
+                                $errCode = $_FILES['images_floor']['error'][$subcat_id][$i];
+                                if ($errCode === 0) {
+                                    $fileSize = $_FILES['images_floor']['size'][$subcat_id][$i];
+                                    if ($fileSize > 20 * 1024 * 1024) {
+                                        continue;
                                     }
-                                } else {
-                                    $errors[] = "Floor Plan Processing Error: Failed to process image for Subcat ID: $subcat_id. Check format (JPG/PNG/WebP).";
+
+                                    $fileData = [
+                                        'name' => $_FILES['images_floor']['name'][$subcat_id][$i],
+                                        'tmp_name' => $_FILES['images_floor']['tmp_name'][$subcat_id][$i],
+                                        'error' => $errCode,
+                                        'size' => $fileSize
+                                    ];
+                                    
+                                    $fileName = uploadFile($fileData, "../../uploads/", ["jpg", "jpeg", "png", "webp", "jfif", "avif", "gif"], 20);
+                                    if ($fileName) {
+                                        $imgNameEsc = mysqli_real_escape_string($con, $fileName);
+                                        $floorSql = "INSERT INTO floor_plane (image, property_id, subcat_id) VALUES ('$imgNameEsc', $property_id, $subcat_id)";
+                                        mysqli_query($con, $floorSql);
+                                    }
                                 }
-                            } elseif ($errCode !== 4) {
-                                $errors[] = "Floor Plan Upload Error (Code $errCode) for Subcat ID: $subcat_id";
                             }
                         }
                     }
                 }
+            } catch (Exception $e) {
+                error_log("Sub-table insert notice: " . $e->getMessage());
             }
+
             header("Location: new_property");
             exit;
-        } else {
-            $errors[] = "Database Error: " . mysqli_error($con);
         }
     }
 }
@@ -757,9 +788,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                         <div class="p-4 bg-white rounded border">
                                                             <div class="row align-items-center">
                                                                 <div class="col-md-6">
-                                                                    <label class="fw-bold"><i class="fas fa-file-pdf me-2 text-danger"></i>Project Brochure (PDF) <span class="text-danger">*</span></label>
-                                                                    <input type="file" name="brochure" id="brochure" class="form-control" accept=".pdf" required>
-                                                                    <div class="invalid-feedback">PDF brochure is required.</div>
+                                                                    <label class="fw-bold"><i class="fas fa-file-pdf me-2 text-danger"></i>Project Brochure (PDF)</label>
+                                                                    <input type="file" name="brochure" id="brochure" class="form-control" accept=".pdf">
+                                                                    <small class="text-muted d-block mt-1">Upload PDF brochure if available (Max 200MB)</small>
                                                                 </div>
                                                                 <div class="col-md-6">
                                                                     <label class="fw-bold">Bulk Gallery Upload</label>
@@ -966,18 +997,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         });
 
         // ✅ RERA Toggle logic with validation clearing
-        document.getElementById('rera_type').addEventListener('change', function() {
+        function syncRera() {
+            const reraTypeEl = document.getElementById('rera_type');
             const reraNo = document.getElementById('rera_no');
-            if(this.value === 'rera'){
+            if (!reraTypeEl || !reraNo) return;
+            if (reraTypeEl.value === 'rera') {
                 reraNo.style.display = 'block';
                 reraNo.setAttribute('required', 'true');
             } else {
                 reraNo.style.display = 'none';
                 reraNo.removeAttribute('required');
                 reraNo.classList.remove('is-invalid');
-                document.getElementById('rera_no_error').style.display = 'none';
+                const err = document.getElementById('rera_no_error');
+                if (err) err.style.display = 'none';
             }
-        });
+        }
+        document.getElementById('rera_type')?.addEventListener('change', syncRera);
+        syncRera();
 
         // Price Intelligence
         function formatPrice(val) {
@@ -1032,7 +1068,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Focus first error tab
                 const tabsWithErrors = [];
                 document.querySelectorAll('.nav-link').forEach(btn => {
-                    if(btn.style.borderBottom.includes("red")) {
+                    if(btn.style.borderBottom && btn.style.borderBottom.includes("red")) {
                         tabsWithErrors.push(btn);
                     }
                 });
@@ -1040,7 +1076,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if(tabsWithErrors.length > 0) {
                     const firstTab = new bootstrap.Tab(tabsWithErrors[0]);
                     firstTab.show();
-                    
+                }
+
+                if (typeof swal === 'function') {
                     swal({
                         title: "Oops...",
                         text: "Please fill all mandatory fields marked with *",
@@ -1051,6 +1089,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             }
                         }
                     });
+                } else {
+                    alert("Please fill all mandatory fields marked with *");
                 }
                 return false;
             }
