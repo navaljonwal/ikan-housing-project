@@ -117,8 +117,8 @@ function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", 
                     $watermark_candidates = [
                         __DIR__ . '/../assets/img/watermark-ikan.png',
                         __DIR__ . '/../../img/watermark-ikan.png',
-                        __DIR__ . '/../../img/watermark-ikan-contrast.png',
-                        __DIR__ . '/../../img/housing (1).png',
+                        __DIR__ . '/../assets/img/watermark-ikan-white.png',
+                        __DIR__ . '/../../img/watermark-ikan-white.png',
                         __DIR__ . '/../assets/img/icon-2.png'
                     ];
                     $watermark_path = "";
@@ -138,8 +138,8 @@ function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", 
                             $wm_h = (int)imagesy($watermark);
 
                             if ($src_w > 120 && $src_h > 120 && $wm_w > 0 && $wm_h > 0) {
-                                // Scale watermark to ~50% photo width (between 180px and 900px)
-                                $target_wm_w = max(180, min((int)($src_w * 0.52), 900));
+                                // Scale watermark to ~45% photo width (between 180px and 900px)
+                                $target_wm_w = max(180, min((int)($src_w * 0.45), 900));
                                 $target_wm_h = max(1, (int)($wm_h * ($target_wm_w / $wm_w)));
 
                                 $scaled = imagecreatetruecolor($target_wm_w, $target_wm_h);
@@ -150,16 +150,27 @@ function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", 
                                     imagefill($scaled, 0, 0, $trans);
                                     imagecopyresampled($scaled, $watermark, 0, 0, 0, 0, $target_wm_w, $target_wm_h, $wm_w, $wm_h);
 
-                                    // Ensure subtle transparency (~28% opacity)
-                                    $sample_color = imagecolorat($scaled, (int)($target_wm_w / 2), (int)($target_wm_h / 2));
-                                    $sample_alpha = ($sample_color >> 24) & 0x7F;
-                                    if ($sample_alpha < 40) {
+                                    // Robust check if watermark already has alpha transparency
+                                    $is_already_translucent = false;
+                                    for ($sx = 0; $sx < $target_wm_w; $sx += 10) {
+                                        for ($sy = 0; $sy < $target_wm_h; $sy += 10) {
+                                            $sc = imagecolorat($scaled, $sx, $sy);
+                                            $sa = ($sc >> 24) & 0x7F;
+                                            if ($sa > 50 && $sa < 125) {
+                                                $is_already_translucent = true;
+                                                break 2;
+                                            }
+                                        }
+                                    }
+
+                                    // If watermark is solid, apply ~35% opacity
+                                    if (!$is_already_translucent) {
                                         for ($px = 0; $px < $target_wm_w; $px++) {
                                             for ($py = 0; $py < $target_wm_h; $py++) {
                                                 $col = imagecolorat($scaled, $px, $py);
                                                 $alp = ($col >> 24) & 0x7F;
                                                 if ($alp < 127) {
-                                                    $newAlp = 127 - (int)((127 - $alp) * 0.28);
+                                                    $newAlp = 127 - (int)((127 - $alp) * 0.35);
                                                     $newColor = ($col & 0x00FFFFFF) | ($newAlp << 24);
                                                     imagesetpixel($scaled, $px, $py, $newColor);
                                                 }
