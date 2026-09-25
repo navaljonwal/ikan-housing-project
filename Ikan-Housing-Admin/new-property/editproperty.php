@@ -114,8 +114,22 @@ function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", 
                 }
 
                 if ($src) {
-                    $watermark_path = "../assets/img/icon-2.png"; 
-                    if (file_exists($watermark_path) && function_exists('imagecreatefrompng')) {
+                    $watermark_candidates = [
+                        __DIR__ . '/../assets/img/watermark-ikan.png',
+                        __DIR__ . '/../../img/watermark-ikan.png',
+                        __DIR__ . '/../../img/watermark-ikan-contrast.png',
+                        __DIR__ . '/../../img/housing (1).png',
+                        __DIR__ . '/../assets/img/icon-2.png'
+                    ];
+                    $watermark_path = "";
+                    foreach ($watermark_candidates as $cand) {
+                        if (file_exists($cand)) {
+                            $watermark_path = $cand;
+                            break;
+                        }
+                    }
+
+                    if (!empty($watermark_path) && function_exists('imagecreatefrompng')) {
                         $watermark = @imagecreatefrompng($watermark_path);
                         if ($watermark) {
                             $src_w = (int)imagesx($src);
@@ -123,15 +137,56 @@ function uploadFile($file, $dest = "../../uploads/", $allowed = ["jpg", "jpeg", 
                             $wm_w = (int)imagesx($watermark);
                             $wm_h = (int)imagesy($watermark);
 
-                            if ($src_w > 100 && $src_h > 100 && $wm_w > 0 && $wm_h > 0) {
-                                $target_wm_w = min(140, max(50, (int)($src_w * 0.15)));
+                            if ($src_w > 120 && $src_h > 120 && $wm_w > 0 && $wm_h > 0) {
+                                // Scale watermark to ~50% photo width (between 180px and 900px)
+                                $target_wm_w = max(180, min((int)($src_w * 0.52), 900));
                                 $target_wm_h = max(1, (int)($wm_h * ($target_wm_w / $wm_w)));
 
-                                $dest_x = max(10, (int)($src_w - $target_wm_w - 20));
-                                $dest_y = max(10, (int)($src_h - $target_wm_h - 20));
+                                $scaled = imagecreatetruecolor($target_wm_w, $target_wm_h);
+                                if ($scaled) {
+                                    imagealphablending($scaled, false);
+                                    imagesavealpha($scaled, true);
+                                    $trans = imagecolorallocatealpha($scaled, 0, 0, 0, 127);
+                                    imagefill($scaled, 0, 0, $trans);
+                                    imagecopyresampled($scaled, $watermark, 0, 0, 0, 0, $target_wm_w, $target_wm_h, $wm_w, $wm_h);
 
-                                imagealphablending($src, true);
-                                imagecopyresampled($src, $watermark, $dest_x, $dest_y, 0, 0, $target_wm_w, $target_wm_h, $wm_w, $wm_h);
+                                    // Ensure subtle transparency (~28% opacity)
+                                    $sample_color = imagecolorat($scaled, (int)($target_wm_w / 2), (int)($target_wm_h / 2));
+                                    $sample_alpha = ($sample_color >> 24) & 0x7F;
+                                    if ($sample_alpha < 40) {
+                                        for ($px = 0; $px < $target_wm_w; $px++) {
+                                            for ($py = 0; $py < $target_wm_h; $py++) {
+                                                $col = imagecolorat($scaled, $px, $py);
+                                                $alp = ($col >> 24) & 0x7F;
+                                                if ($alp < 127) {
+                                                    $newAlp = 127 - (int)((127 - $alp) * 0.28);
+                                                    $newColor = ($col & 0x00FFFFFF) | ($newAlp << 24);
+                                                    imagesetpixel($scaled, $px, $py, $newColor);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Rotate diagonally by 30 degrees
+                                    $rotated = function_exists('imagerotate') ? @imagerotate($scaled, 30, $trans) : false;
+                                    if ($rotated) {
+                                        imagesavealpha($rotated, true);
+                                        $rot_w = (int)imagesx($rotated);
+                                        $rot_h = (int)imagesy($rotated);
+                                        $dest_x = (int)(($src_w - $rot_w) / 2);
+                                        $dest_y = (int)(($src_h - $rot_h) / 2);
+
+                                        imagealphablending($src, true);
+                                        imagecopy($src, $rotated, $dest_x, $dest_y, 0, 0, $rot_w, $rot_h);
+                                        @imagedestroy($rotated);
+                                    } else {
+                                        $dest_x = (int)(($src_w - $target_wm_w) / 2);
+                                        $dest_y = (int)(($src_h - $target_wm_h) / 2);
+                                        imagealphablending($src, true);
+                                        imagecopy($src, $scaled, $dest_x, $dest_y, 0, 0, $target_wm_w, $target_wm_h);
+                                    }
+                                    @imagedestroy($scaled);
+                                }
                             }
                             @imagedestroy($watermark);
                         }
