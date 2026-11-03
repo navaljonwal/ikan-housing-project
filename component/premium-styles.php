@@ -989,6 +989,81 @@
   border-radius: 8px !important;
 }
 
+/* 🧮 Interactive Manual Price & Parameters Input Box */
+.emi-manual-input-box {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  padding: 2px 10px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.emi-manual-input-box:focus-within {
+  border-color: #c02a7c !important;
+  box-shadow: 0 0 0 3px rgba(192, 42, 124, 0.15) !important;
+  background: #ffffff !important;
+}
+
+.emi-currency-symbol {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #c02a7c !important;
+  margin-right: 4px !important;
+}
+
+.emi-manual-val-input {
+  border: none !important;
+  background: transparent !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  width: 140px !important;
+  text-align: right !important;
+  outline: none !important;
+  font-family: 'Outfit', sans-serif !important;
+  padding: 3px 0 !important;
+}
+
+.emi-manual-val-input-sm {
+  width: 60px !important;
+  text-align: right !important;
+}
+
+.emi-unit-symbol {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #64748b !important;
+  margin-left: 4px !important;
+}
+
+.emi-manual-edit-icon {
+  font-size: 11px !important;
+  color: #94a3b8 !important;
+  margin-left: 6px !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease !important;
+}
+
+.emi-manual-input-box:hover .emi-manual-edit-icon {
+  color: #c02a7c !important;
+}
+
+.emi-quick-btn-prop {
+  background: #fdf2f8 !important;
+  color: #c02a7c !important;
+  border-color: #fbcfe8 !important;
+  font-weight: 700 !important;
+}
+
+.emi-quick-btn-prop:hover {
+  background: #c02a7c !important;
+  color: #ffffff !important;
+  border-color: #c02a7c !important;
+}
+
 .emi-slider {
   -webkit-appearance: none !important;
   appearance: none !important;

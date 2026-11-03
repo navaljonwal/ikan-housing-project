@@ -1,0 +1,515 @@
+/* ==========================================================================
+   I KAN HOUSING - LUXURY REAL ESTATE ANIMATION SYSTEM
+   Smooth, High-Performance GPU Accelerated Animations & Micro-Interactions
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. GLOBAL SCROLL PROGRESS INDICATOR
+   -------------------------------------------------------------------------- */
+#ikan-scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3.5px;
+    background: linear-gradient(90deg, #c02a7c 0%, #ff6b9d 50%, #ffa07a 100%);
+    z-index: 999999;
+    transition: width 0.15s ease-out;
+    box-shadow: 0 0 12px rgba(192, 42, 124, 0.6);
+    pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   2. KEYFRAME ANIMATIONS
+   -------------------------------------------------------------------------- */
+@keyframes textShimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes floatSlow {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes floatBadge {
+    0%, 100% { transform: translateY(-50%); }
+    50% { transform: translateY(calc(-50% - 10px)); }
+}
+
+@keyframes pulseRing {
+    0% {
+        box-shadow: 0 0 0 0 rgba(192, 42, 124, 0.5);
+    }
+    70% {
+        box-shadow: 0 0 0 16px rgba(192, 42, 124, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(192, 42, 124, 0);
+    }
+}
+
+@keyframes pulseGlowSoft {
+    0%, 100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.03);
+    }
+}
+
+@keyframes pinBounce {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-4px); }
+}
+
+@keyframes iconFloat {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-6px) rotate(4deg); }
+}
+
+@keyframes btnShimmerSweep {
+    0% { transform: translateX(-150%) skewX(-25deg); }
+    30%, 100% { transform: translateX(250%) skewX(-25deg); }
+}
+
+@keyframes accentTagPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 2px 8px rgba(192, 42, 124, 0.25); }
+    50% { transform: scale(1.04); box-shadow: 0 4px 14px rgba(192, 42, 124, 0.45); }
+}
+
+@keyframes floatBlob {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -25px) scale(1.08); }
+    66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+@keyframes rippleEffect {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    50% { transform: scale(1.15); opacity: 0; }
+    100% { transform: scale(0.95); opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   3. HERO SECTION ANIMATIONS
+   -------------------------------------------------------------------------- */
+/* Floating luxury badge */
+.hero-floating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+    padding: 8px 22px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    animation: floatSlow 4s ease-in-out infinite, pulseGlowSoft 3s ease-in-out infinite;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.hero-floating-badge:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.hero-floating-badge i {
+    color: #ff85c0;
+    font-size: 1rem;
+}
+
+/* Animated gradient text in hero */
+.hero-title .text-primary,
+.shimmer-text {
+    background: linear-gradient(120deg, #e564b7 0%, #ff85c0 30%, #ffffff 50%, #ff85c0 70%, #e564b7 100%) !important;
+    background-size: 250% auto !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    animation: textShimmer 5s linear infinite !important;
+    display: inline-block;
+    filter: drop-shadow(0 2px 12px rgba(192, 42, 124, 0.4));
+}
+
+/* Hero Search Console Hover & Interactions */
+.hero-search-console {
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease, border-color 0.4s ease !important;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.hero-search-console:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 30px 65px -10px rgba(45, 10, 28, 0.22) !important;
+}
+
+.hero-search-console .search-field {
+    transition: background 0.3s ease, border-radius 0.3s ease;
+}
+
+.hero-search-console .search-field:focus-within {
+    background: rgba(192, 42, 124, 0.03);
+    border-radius: 12px;
+}
+
+.hero-search-console .search-field:focus-within i {
+    transform: scale(1.2);
+    transition: transform 0.3s ease;
+}
+
+/* Hero search button pulse */
+.search-submit-btn {
+    position: relative;
+    overflow: hidden;
+    animation: pulseRing 3s infinite;
+    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.search-submit-btn:hover {
+    transform: scale(1.08) rotate(-4deg) !important;
+    animation: none;
+    box-shadow: 0 12px 28px rgba(192, 42, 124, 0.45) !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. PROPERTY CARD ANIMATIONS (MINIMAL, TRENDING, ONGOING)
+   -------------------------------------------------------------------------- */
+.property-card-minimal {
+    transition: transform 0.45s cubic-bezier(0.165, 0.84, 0.44, 1), 
+                box-shadow 0.45s cubic-bezier(0.165, 0.84, 0.44, 1), 
+                border-color 0.3s ease !important;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    will-change: transform, box-shadow;
+}
+
+.property-card-minimal:hover {
+    transform: translateY(-8px) !important;
+    box-shadow: 0 22px 45px -10px rgba(45, 10, 28, 0.16) !important;
+    border-color: rgba(192, 42, 124, 0.25);
+}
+
+/* Luxury Sheen Sweep Effect across Property Image */
+.property-card-minimal .property-img-top {
+    position: relative;
+    overflow: hidden;
+}
+
+.property-card-minimal .property-img-top::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -130%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0) 0%, 
+        rgba(255, 255, 255, 0.35) 50%, 
+        rgba(255, 255, 255, 0) 100%);
+    transform: skewX(-25deg);
+    transition: left 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 3;
+}
+
+.property-card-minimal:hover .property-img-top::after {
+    left: 150%;
+}
+
+.property-card-minimal .property-img-top img {
+    transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+.property-card-minimal:hover .property-img-top img {
+    transform: scale(1.08) !important;
+}
+
+/* Location Pin Micro-Bounce */
+.property-card-minimal:hover .project-loc-tag i {
+    display: inline-block;
+    animation: pinBounce 0.5s ease-in-out infinite alternate;
+    color: var(--primary-color) !important;
+}
+
+/* Arrow Slide Bounce on Hover */
+.property-card-minimal .project-btn-sharp i {
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.property-card-minimal:hover .project-btn-sharp i {
+    transform: translateX(6px);
+}
+
+/* Trending & Ongoing Badges Accent Glow */
+.project-tag-sharp {
+    box-shadow: 0 4px 12px rgba(192, 42, 124, 0.35);
+    transition: transform 0.3s ease;
+}
+
+.property-card-minimal:hover .project-tag-sharp {
+    transform: scale(1.05);
+}
+
+.project-tag-sharp.bg-accent {
+    animation: accentTagPulse 2.8s infinite;
+}
+
+/* --------------------------------------------------------------------------
+   5. SERVICE CARDS & FEATURE BOXES
+   -------------------------------------------------------------------------- */
+.service-card {
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+                box-shadow 0.4s ease, 
+                border-color 0.4s ease !important;
+    position: relative;
+}
+
+.service-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0%;
+    height: 3.5px;
+    background: linear-gradient(90deg, #c02a7c, #ff85c0);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 4px 4px 0 0;
+}
+
+.service-card:hover {
+    transform: translateY(-10px) !important;
+    box-shadow: 0 20px 45px -10px rgba(192, 42, 124, 0.15) !important;
+    border-color: rgba(192, 42, 124, 0.3) !important;
+}
+
+.service-card:hover::after {
+    width: 100%;
+    left: 0;
+}
+
+.service-icon-box {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                background 0.4s ease, 
+                color 0.4s ease, 
+                box-shadow 0.4s ease !important;
+}
+
+.service-card:hover .service-icon-box {
+    transform: scale(1.15) rotate(10deg) !important;
+    box-shadow: 0 10px 25px rgba(192, 42, 124, 0.35) !important;
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. JAIPUR INVESTMENT & STATS CARDS
+   -------------------------------------------------------------------------- */
+.bg-white-5-blur {
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+                background 0.4s ease, 
+                border-color 0.4s ease, 
+                box-shadow 0.4s ease !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-white-5-blur:hover {
+    transform: translateY(-6px);
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+.bg-white-5-blur:hover i {
+    display: inline-block;
+    animation: iconFloat 1.2s ease-in-out infinite alternate;
+}
+
+/* Experience Floating Badge */
+.experience-floating-badge {
+    animation: floatBadge 3.6s ease-in-out infinite;
+    box-shadow: 0 15px 35px rgba(192, 42, 124, 0.4) !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. NAVBAR & CTA ANIMATIONS
+   -------------------------------------------------------------------------- */
+.navbar-modern .nav-link {
+    position: relative;
+}
+
+.navbar-modern .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0%;
+    height: 2px;
+    background: var(--primary-color);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 2px;
+}
+
+.navbar-modern .nav-link:hover::after {
+    width: 70%;
+    left: 15%;
+}
+
+/* Header Call CTA periodic shimmer shine */
+.btn-outline-primary {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(192, 42, 124, 0.2), transparent);
+    transform: skewX(-25deg);
+    animation: btnShimmerSweep 4.5s infinite;
+}
+
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-25deg);
+    animation: btnShimmerSweep 5s infinite;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(192, 42, 124, 0.35) !important;
+}
+
+/* --------------------------------------------------------------------------
+   8. TESTIMONIAL CARDS
+   -------------------------------------------------------------------------- */
+.testimonialSwiper .card {
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease !important;
+}
+
+.testimonialSwiper .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08) !important;
+}
+
+.testimonialSwiper .card img {
+    transition: transform 0.4s ease, border-color 0.4s ease;
+}
+
+.testimonialSwiper .card:hover img {
+    transform: scale(1.08);
+    border-color: #ff85c0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   9. BACK TO TOP BUTTON
+   -------------------------------------------------------------------------- */
+#ikan-back-to-top {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #c02a7c, #2d0a1c);
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 0 8px 25px rgba(192, 42, 124, 0.35);
+    z-index: 9998;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.9);
+    transition: opacity 0.35s ease, visibility 0.35s ease, transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: none;
+    outline: none;
+}
+
+#ikan-back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+#ikan-back-to-top:hover {
+    background: linear-gradient(135deg, #ff85c0, #c02a7c);
+    transform: translateY(-5px) scale(1.08);
+    box-shadow: 0 12px 30px rgba(192, 42, 124, 0.5);
+    color: #ffffff;
+}
+
+#ikan-back-to-top i {
+    transition: transform 0.3s ease;
+}
+
+#ikan-back-to-top:hover i {
+    transform: translateY(-3px);
+}
+
+/* --------------------------------------------------------------------------
+   10. AMBIENT GLOW ORBS IN DARK SECTIONS
+   -------------------------------------------------------------------------- */
+.ambient-glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 1;
+    animation: floatBlob 10s ease-in-out infinite;
+}
+
+.ambient-glow-orb-pink {
+    width: 350px;
+    height: 350px;
+    background: rgba(192, 42, 124, 0.22);
+}
+
+.ambient-glow-orb-purple {
+    width: 400px;
+    height: 400px;
+    background: rgba(147, 51, 234, 0.15);
+}
+
+/* --------------------------------------------------------------------------
+   11. ACCESSIBILITY: PREFERS-REDUCED-MOTION
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    #ikan-scroll-progress {
+        display: none !important;
+    }
+}

@@ -22,14 +22,14 @@ function getPageNameFromUrl($url) {
 // Categorization Logic for grouped experience
 $categories = [
     'Strategic Services' => [
-        'investment.php', 'land-services.php', 'indus-logi.php', 
-        'commer-retail.php', 'commer-leasing.php', 'joint-venture.php'
+        'investment', 'land-services', 'indus-logi', 
+        'commer-retail', 'commer-leasing', 'joint-venture', 'business-solutions'
     ],
     'Residential Excellence' => [
-        'residential.php', 'sales-marketing.php', 'strat-ad-va.php'
+        'residential', 'ongoing-project', 'complete-project', 'sales-marketing', 'strat-ad-va'
     ],
     'Experience I Kan' => [
-        'about-us.php', 'reward-and-team.php', 'blog.php', 'contact.php'
+        'about-us', 'rewards-&-team', 'blog-grid', 'contact', 'career'
     ]
 ];
 
@@ -223,7 +223,7 @@ foreach ($categories as $list) {
                 <!-- Added these for completeness as they might not be in the XML correctly or as base pages -->
                 <a href="index" class="other-link">Home</a>
                 <a href="privacy-policy" class="other-link">Privacy Policy</a>
-                <a href="terms-conditions" class="other-link">Terms & Conditions</a>
+                <a href="terms" class="other-link">Terms & Conditions</a>
             </div>
         </div>
 

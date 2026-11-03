@@ -14,7 +14,8 @@ if (!$result) {
 $blog = mysqli_fetch_assoc($result);
 
 if (!$blog) {
-    echo "Blog not found!";
+    http_response_code(404);
+    echo "<div style='text-align:center; padding:80px 20px; font-family:sans-serif;'><h2>Article Not Found</h2><p>The requested blog article could not be located. <a href='blog-grid'>Return to Blog</a></p></div>";
     exit;
 }
 
@@ -82,7 +83,7 @@ $latest_result = mysqli_query($con, $latest_query);
                         <h4 class="blog-sidebar-title">Recommended Reading</h4>
                         <div class="latest-post-list">
                             <?php while ($latest = mysqli_fetch_assoc($latest_result)) { ?>
-                                <a href="blog-details?slug=<?php echo $latest['slug']; ?>" class="sidebar-post-item">
+                                <a href="blog/<?php echo $latest['slug']; ?>" class="sidebar-post-item">
                                     <div class="sidebar-post-img">
                                         <img src="uploads/<?php echo htmlspecialchars($latest['image']); ?>" alt="<?php echo htmlspecialchars($latest['name']); ?>">
                                     </div>

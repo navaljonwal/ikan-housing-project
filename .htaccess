@@ -1,29 +1,51 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # 🌐 Universal HTTPS Redirect (Only on Live Server)
-    # Redirects to HTTPS only if it's not localhost and SSL is off
-    RewriteCond %{HTTP_HOST} !^localhost$ [NC]
-    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1$ [NC]
-    RewriteCond %{HTTPS} off
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    # 1. 🌐 Universal Host Normalization: Redirect www to non-www
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 
-    # Handle Property Detail Slugs
-    RewriteRule ^property-detail-for/([a-zA-Z0-9_-]+)$ property-detail-for.php?slug=$1 [L,QSA]
+    # 2. 🌐 Universal HTTPS Redirect (Only on Live Server, bypass localhost & 127.0.0.1)
+    RewriteCond %{HTTP_HOST} !^localhost(?::\d+)?$ [NC]
+    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1(?::\d+)?$ [NC]
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+    # 3. 🧹 Fix Legacy / Typo Dead Routes (e.g., /businesss -> /business-solutions)
+    RewriteRule ^businesss/?$ business-solutions [R=301,L]
+    RewriteRule ^reward-and-team/?$ rewards-&-team [R=301,L]
+    RewriteRule ^rewards-and-team/?$ rewards-&-team [R=301,L]
+
+    # 4. 🔀 301 Redirect Legacy Query Parameter URLs to Clean Canonical Routes
+    # /blog-details.php?slug={slug} OR /blog-details?slug={slug} -> /blog/{slug}
+    RewriteCond %{THE_REQUEST} \s/(?:[^/]+/)*blog-details(?:\.php)?\?slug=([^\s&]+) [NC]
+    RewriteRule ^ blog/%1? [R=301,L]
+
+    # /property-detail-for.php?slug={slug} OR /property-detail-for?slug={slug} -> /property-detail-for/{slug}
+    RewriteCond %{THE_REQUEST} \s/(?:[^/]+/)*property-detail-for(?:\.php)?\?slug=([^\s&]+) [NC]
+    RewriteRule ^ property-detail-for/%1? [R=301,L]
+
+    # 5. 🎯 Internal Rewrites for Clean URLs
+    # Clean blog routing: /blog/{slug} -> blog-details.php?slug={slug}
+    RewriteRule ^blog/([a-zA-Z0-9_.-]+)/?$ blog-details.php?slug=$1 [L,QSA]
+    RewriteRule ^blog/?$ blog-grid.php [L,QSA]
+
+    # Clean property detail routing: /property-detail-for/{slug} -> property-detail-for.php?slug={slug}
+    RewriteRule ^property-detail-for/([a-zA-Z0-9_.-]+)/?$ property-detail-for.php?slug=$1 [L,QSA]
 
     Options -MultiViews
 
-    # 🧹 Remove .php extension from URLs
-    # 1. 301 Redirect any index.php to its directory /
+    # 6. 🧹 Remove .php extension from URLs
+    # 301 Redirect index.php to directory /
     RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s(.*/)?index\.php [NC]
     RewriteRule ^(.*?)index\.php$ ./$1 [R=301,L,NE]
 
-    # 2. 301 Redirect file.php to file (handles subdirectories, excludes POST)
+    # 301 Redirect file.php to clean extensionless file (excludes POST requests)
     RewriteCond %{REQUEST_METHOD} !POST
     RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s(.+/)?([^/.]+)\.php [NC]
     RewriteRule ^ %1%2 [R=301,L,NE]
 
-    # 3. Internal Rewrite /file to /file.php
+    # 7. 🔄 Internal Rewrite /file to /file.php if file exists
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME}.php -f
     RewriteRule ^(.*?)/?$ $1.php [NC,L]

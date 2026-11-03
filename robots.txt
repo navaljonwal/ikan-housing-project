@@ -1,24 +1,23 @@
 User-agent: *
 
-# Global Disallows (Admin, System, and sensitive files)
-
-# Admin & system folders block
+# Disallow admin and internal backend endpoints
+Disallow: /Ikan-Housing-Admin/
 Disallow: /admin/
-Disallow: /config/
-Disallow: /includes/
-Disallow: /assets/
+Disallow: /api/
+Disallow: /contactform/
 Disallow: /uploads/temp/
-Disallow: /vendor/
+Disallow: /config.php
+Disallow: /migrate.php
+Disallow: /scraper.php
 
-# PHP sensitive files block (Blocks all files ending with .php)
-Disallow: /*.php
+# Allow public crawlable assets
+Allow: /css/
+Allow: /js/
+Allow: /img/
+Allow: /rkimg/
+Allow: /uploads/
+Allow: /svg-img/
+Allow: /assets/
 
-# Specific PHP pages that must be blocked (even if the general rule works)
-Disallow: /login.php
-Disallow: /register.php
-
-# Public content is not explicitly 'Allowed' because it is not globally 'Disallowed'.
-# E.g., /property-detail-for/, /projects/, /blog/ are crawlable by default.
-
-# Sitemap location
+# Canonical Sitemap
 Sitemap: https://ikanhousing.com/sitemap.xml

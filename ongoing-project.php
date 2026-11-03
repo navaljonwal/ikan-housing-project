@@ -264,7 +264,7 @@ $found_count = mysqli_num_rows($result);
     </style>
 
     <div class="container">
-      <form method="GET" action="ongoing-project.php" id="unifiedFilterForm">
+      <form method="GET" action="ongoing-project" id="unifiedFilterForm">
         <div class="pf-bar" id="filterBar" data-aos="fade-down">
 
           <span class="pf-label"><i class="bi bi-sliders2 me-1"></i>Filter by</span>
@@ -526,7 +526,7 @@ $found_count = mysqli_num_rows($result);
                 if (localStorage.getItem('mobile_submitted') !== '1') {
                     localStorage.setItem('mobile_submitted', '1');
                 }
-                window.location.href = 'property-detail-for.php?slug=' + encodeURIComponent(slug);
+                window.location.href = 'property-detail-for/' + encodeURIComponent(slug);
                 return;
             }
             const slugInput = document.getElementById('popup-slug');

@@ -39,6 +39,9 @@ include 'component/head.php';
   <section class="hero-modern" style="background-image: url('img/I_kan_Housing_Main_Flats.webp');">
     <div class="hero-overlay"></div>
     <div class="container hero-content text-center" data-aos="zoom-out" data-aos-duration="1200">
+      <div class="hero-floating-badge" data-aos="fade-down" data-aos-delay="100">
+        <i class="fa fa-sparkles"></i> ✨ Jaipur's Premier Real Estate Partner
+      </div>
       <h1 class="hero-title mb-4">
         Find the <span class="text-primary" style="color: #e564b7e0 !important;">Perfect</span> Place to Live <br>
         <span class="fs-2 fw-light">with your Family</span>
@@ -253,7 +256,9 @@ include 'component/head.php';
   </section>
   <!--/ Why Invest in Jaipur Section /-->
   <section class="section-padding position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--secondary-color), #1e293b);">
-    <div class="container text-white" data-aos="fade-up">
+    <div class="ambient-glow-orb ambient-glow-orb-pink" style="top: -100px; right: -50px;"></div>
+    <div class="ambient-glow-orb ambient-glow-orb-purple" style="bottom: -100px; left: -50px;"></div>
+    <div class="container text-white position-relative" style="z-index: 2;" data-aos="fade-up">
       <div class="row align-items-center mb-5">
         <div class="col-lg-6">
           <h2 class="display-5 fw-bold mb-4">Top Reasons to <br>Invest in <span class="text-primary-glow">Jaipur</span></h2>
@@ -263,7 +268,7 @@ include 'component/head.php';
           <div class="row g-3">
             <div class="col-6">
               <div class="p-4 border border-secondary border-opacity-25 rounded-4 text-center bg-white-5-blur">
-                <h4 class="fw-bold mb-0 text-white">11th</h4>
+                <h4 class="fw-bold mb-0 text-white stat-number">11th</h4>
                 <small class="text-white opacity-75">Largest city in India</small>
               </div>
             </div>
@@ -311,8 +316,8 @@ include 'component/head.php';
         <div class="col-lg-6 mb-5 mb-lg-0">
           <div class="position-relative">
             <img src="img/s222.jpg" alt="About I Kan Housing" class="img-fluid rounded-4 shadow-lg">
-            <div class="position-absolute bottom-0 end-0 bg-primary p-4 rounded-4 shadow-lg d-none d-md-block translate-middle-y me-n4">
-              <h3 class="text-white fw-bold mb-0">15+</h3>
+            <div class="position-absolute bottom-0 end-0 bg-primary p-4 rounded-4 shadow-lg d-none d-md-block translate-middle-y me-n4 experience-floating-badge">
+              <h3 class="text-white fw-bold mb-0 stat-number">15+</h3>
               <small class="text-white-50">Years of Experience</small>
             </div>
           </div>
@@ -342,7 +347,7 @@ include 'component/head.php';
         <div class="swiper-wrapper">
           <?php while ($blog = mysqli_fetch_assoc($blog_result)) { ?>
             <div class="swiper-slide h-auto pb-4">
-              <div class="property-card-minimal blog-card-minimal" onclick="location.href='blog-details.php?slug=<?= $blog['slug'] ?>'">
+              <div class="property-card-minimal blog-card-minimal" onclick="location.href='blog/<?= $blog['slug'] ?>'">
                 <div class="property-img-top">
                   <img src="uploads/<?= htmlspecialchars($blog['image']) ?>" 
                        alt="<?= htmlspecialchars($blog['name']) ?>" 
@@ -351,7 +356,7 @@ include 'component/head.php';
                 </div>
                 <div class="property-details-bottom">
                   <h5 class="project-name-sharp mb-3">
-                    <a href="blog-details?slug=<?= $blog['slug'] ?>" class="text-decoration-none text-dark hover-primary">
+                    <a href="blog/<?= $blog['slug'] ?>" class="text-decoration-none text-dark hover-primary">
                       <?= htmlspecialchars($blog['name']) ?>
                     </a>
                   </h5>
@@ -523,7 +528,7 @@ include 'component/head.php';
         if (localStorage.getItem('mobile_submitted') !== '1') {
           localStorage.setItem('mobile_submitted', '1');
         }
-        window.location.href = 'property-detail-for.php?slug=' + encodeURIComponent(slug);
+        window.location.href = 'property-detail-for/' + encodeURIComponent(slug);
         return;
       }
       document.getElementById('popup-slug').value = slug;

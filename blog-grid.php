@@ -48,7 +48,7 @@ if (!$result) {
                                     <i class="fa fa-calendar-alt"></i>
                                     <?php echo date('M d, Y', strtotime($row['created_at'])); ?>
                                 </div>
-                                <a href="blog-details?slug=<?php echo $row['slug']; ?>" class="read-more-link">
+                                <a href="blog/<?php echo $row['slug']; ?>" class="read-more-link">
                                     Read More <i class="fa fa-arrow-right"></i>
                                 </a>
                             </div>

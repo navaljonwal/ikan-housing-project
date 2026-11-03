@@ -93,6 +93,7 @@ if (!$result) {
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="js/animations.js"></script>
 
 <!-- 🎨 Non-Critical CSS (Deferred) -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" media="print" onload="this.media='all'">
@@ -166,9 +167,14 @@ if (!$result) {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Initialize AOS Animations
+    // 1. Initialize AOS Animations with Premium Easing
     if (typeof AOS !== 'undefined') {
-        AOS.init({ duration: 800, once: true });
+        AOS.init({ 
+            duration: 900, 
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 60
+        });
     }
 
     // 2. Global Navbar Scroll Logic (Sticky Header)

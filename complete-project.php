@@ -201,7 +201,7 @@ if (!$result) {
         if (localStorage.getItem('mobile_submitted') !== '1') {
           localStorage.setItem('mobile_submitted', '1');
         }
-        window.location.href = 'property-detail-for.php?slug=' + encodeURIComponent(slug);
+        window.location.href = 'property-detail-for/' + encodeURIComponent(slug);
         return;
       }
       const pSlug = document.getElementById('popup-slug');

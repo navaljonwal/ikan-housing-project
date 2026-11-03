@@ -119,6 +119,46 @@ if (!empty($min_price_display) && !empty($max_price_display)) {
   $price_range_display = 'Price on Request';
 }
 
+// 🧮 Parse numeric prices for EMI Calculator & Range Sliders
+if (!function_exists('parse_price_to_number')) {
+  function parse_price_to_number($priceStr) {
+    if (empty($priceStr)) return 0;
+    $clean = strtolower(trim($priceStr));
+    $clean = str_replace(['₹', ',', 'rs.', 'rs', ' '], '', $clean);
+    if (preg_match('/([0-9.]+)\s*(cr|crore)/i', $priceStr, $m)) {
+      return (int)round(((float)$m[1]) * 10000000);
+    }
+    if (preg_match('/([0-9.]+)\s*(lakh|lakhs|lac|lacs|l)/i', $priceStr, $m)) {
+      return (int)round(((float)$m[1]) * 100000);
+    }
+    $digits = preg_replace('/[^0-9]/', '', $clean);
+    return !empty($digits) ? (int)$digits : 0;
+  }
+}
+
+$prop_min_price_num = !empty($property['min_price_int']) && $property['min_price_int'] > 0 
+  ? (int)$property['min_price_int'] 
+  : parse_price_to_number($property['min_price'] ?? '');
+
+$prop_max_price_num = !empty($property['max_price_int']) && $property['max_price_int'] > 0 
+  ? (int)$property['max_price_int'] 
+  : parse_price_to_number($property['max_price'] ?? '');
+
+$init_loan_amount = 5000000;
+if ($prop_min_price_num > 0) {
+  $calc_loan = round(($prop_min_price_num * 0.8) / 10000) * 10000;
+  if ($calc_loan >= 100000) {
+    $init_loan_amount = $calc_loan;
+  } else {
+    $init_loan_amount = $prop_min_price_num;
+  }
+}
+
+// Starting EMI estimate for Hero Header (80% loan, 8.5% rate, 20 yrs)
+$hero_r = (8.5 / 12) / 100;
+$hero_n = 20 * 12;
+$hero_start_emi = round(($init_loan_amount * $hero_r * pow(1 + $hero_r, $hero_n)) / (pow(1 + $hero_r, $hero_n) - 1));
+
 // Clean RERA ID
 $raw_desc_content = $property['other_key_feature'] ?? '';
 $rera_display = trim($property['rera_no'] ?? '');
@@ -225,7 +265,7 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
             <div class="hero-price-label">Estimated Price</div>
             <div class="hero-price-value"><?= htmlspecialchars($price_range_display) ?></div>
             <div class="hero-price-emi">
-              EMI starts from ₹43,391/mo • <a href="#sectionEmi">Calculate EMI</a>
+              EMI starts from ₹<?= number_format($hero_start_emi) ?>/mo • <a href="#sectionEmi">Calculate EMI</a>
             </div>
           </div>
         </div>
@@ -760,15 +800,6 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
           <?php endif; ?>
 
           <!-- 🧮 7. Interactive Home Loan EMI Calculator -->
-          <?php
-          $init_loan_amount = 5000000;
-          if (!empty($property['min_price_int']) && $property['min_price_int'] > 0) {
-              $calc_loan = round(($property['min_price_int'] * 0.8) / 100000) * 100000;
-              if ($calc_loan >= 500000 && $calc_loan <= 50000000) {
-                  $init_loan_amount = $calc_loan;
-              }
-          }
-          ?>
           <div id="sectionEmi" class="emi-card-premium" data-aos="fade-up" data-aos-duration="800">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 pb-3 border-bottom">
               <div>
@@ -776,7 +807,7 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
                 <h4 class="emi-section-title">
                   <i class="fa-solid fa-calculator" style="color: #c02a7c;"></i> Home Loan EMI Calculator
                 </h4>
-                <p class="emi-section-subtitle">Plan your monthly budget with live bank interest rate estimates.</p>
+                <p class="emi-section-subtitle">Plan your monthly budget with live bank interest rate estimates. You can also type a manual price or custom loan amount below.</p>
               </div>
               <div class="emi-rate-pill">
                 <i class="fa-solid fa-sparkles me-1"></i> Rates from 8.5% p.a.*
@@ -784,18 +815,32 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
             </div>
 
             <div class="row g-4 align-items-stretch">
-              <!-- Left: Sliders -->
+              <!-- Left: Sliders & Manual Inputs -->
               <div class="col-12 col-lg-7">
-                <!-- Loan Amount -->
+                <!-- Loan Amount / Manual Price -->
                 <div class="emi-slider-wrap">
-                  <div class="emi-label-row">
-                    <span class="emi-label-title">Loan Amount</span>
-                    <span id="emiLoanAmountDisplay" class="emi-val-pill">₹<?= number_format($init_loan_amount) ?></span>
+                  <div class="emi-label-row d-flex justify-content-between align-items-center">
+                    <span class="emi-label-title"><i class="fa-solid fa-coins text-primary me-1"></i> Loan Amount / Price</span>
+                    <div class="emi-manual-input-box" title="Click or type to enter custom price / loan amount">
+                      <span class="emi-currency-symbol">₹</span>
+                      <input type="text" id="emiLoanManualInput" class="emi-manual-val-input" value="<?= number_format($init_loan_amount) ?>" placeholder="Enter amount" autocomplete="off" aria-label="Manual Loan Amount">
+                      <i class="fa-solid fa-pen-to-square emi-manual-edit-icon" title="Edit manual price"></i>
+                    </div>
                   </div>
-                  <input type="range" class="emi-slider" id="emiLoanInput" min="500000" max="50000000" step="50000" value="<?= $init_loan_amount ?>">
+                  <input type="range" class="emi-slider" id="emiLoanInput" min="100000" max="50000000" step="25000" value="<?= $init_loan_amount ?>">
                   <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
-                    <span class="text-muted" style="font-size:11px; font-weight:600;">₹5 L</span>
-                    <div class="d-flex gap-1">
+                    <span class="text-muted" style="font-size:11px; font-weight:600;">₹1 L</span>
+                    <div class="d-flex flex-wrap gap-1">
+                      <?php if (!empty($prop_min_price_num) && $prop_min_price_num > 0): 
+                        $min_lbl = ($prop_min_price_num >= 10000000) ? round($prop_min_price_num / 10000000, 2) . ' Cr' : round($prop_min_price_num / 100000, 2) . ' L';
+                      ?>
+                        <button type="button" class="emi-quick-btn emi-quick-btn-prop" onclick="setEmiAmount(<?= $prop_min_price_num ?>)" title="Property Min Price">₹<?= $min_lbl ?> (Min)</button>
+                      <?php endif; ?>
+                      <?php if (!empty($prop_max_price_num) && $prop_max_price_num > 0 && $prop_max_price_num != $prop_min_price_num): 
+                        $max_lbl = ($prop_max_price_num >= 10000000) ? round($prop_max_price_num / 10000000, 2) . ' Cr' : round($prop_max_price_num / 100000, 2) . ' L';
+                      ?>
+                        <button type="button" class="emi-quick-btn emi-quick-btn-prop" onclick="setEmiAmount(<?= $prop_max_price_num ?>)" title="Property Max Price">₹<?= $max_lbl ?> (Max)</button>
+                      <?php endif; ?>
                       <button type="button" class="emi-quick-btn" onclick="setEmiAmount(2500000)">₹25 L</button>
                       <button type="button" class="emi-quick-btn" onclick="setEmiAmount(5000000)">₹50 L</button>
                       <button type="button" class="emi-quick-btn" onclick="setEmiAmount(7500000)">₹75 L</button>
@@ -807,9 +852,13 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
 
                 <!-- Interest Rate -->
                 <div class="emi-slider-wrap">
-                  <div class="emi-label-row">
-                    <span class="emi-label-title">Interest Rate (% p.a.)</span>
-                    <span id="emiRateDisplay" class="emi-val-pill">8.5% p.a.</span>
+                  <div class="emi-label-row d-flex justify-content-between align-items-center">
+                    <span class="emi-label-title"><i class="fa-solid fa-percent text-primary me-1"></i> Interest Rate</span>
+                    <div class="emi-manual-input-box" title="Click or type to enter custom interest rate">
+                      <input type="number" id="emiRateManualInput" class="emi-manual-val-input emi-manual-val-input-sm" value="8.5" step="0.05" min="1" max="25" autocomplete="off" aria-label="Manual Interest Rate">
+                      <span class="emi-unit-symbol">% p.a.</span>
+                      <i class="fa-solid fa-pen-to-square emi-manual-edit-icon"></i>
+                    </div>
                   </div>
                   <input type="range" class="emi-slider" id="emiRateInput" min="6.0" max="15.0" step="0.1" value="8.5">
                   <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
@@ -826,9 +875,13 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
 
                 <!-- Tenure -->
                 <div class="emi-slider-wrap mb-0">
-                  <div class="emi-label-row">
-                    <span class="emi-label-title">Loan Tenure</span>
-                    <span id="emiTenureDisplay" class="emi-val-pill">20 Years (240 M)</span>
+                  <div class="emi-label-row d-flex justify-content-between align-items-center">
+                    <span class="emi-label-title"><i class="fa-solid fa-calendar-days text-primary me-1"></i> Loan Tenure</span>
+                    <div class="emi-manual-input-box" title="Click or type to enter custom tenure in years">
+                      <input type="number" id="emiTenureManualInput" class="emi-manual-val-input emi-manual-val-input-sm" value="20" step="1" min="1" max="35" autocomplete="off" aria-label="Manual Loan Tenure">
+                      <span class="emi-unit-symbol">Years</span>
+                      <i class="fa-solid fa-pen-to-square emi-manual-edit-icon"></i>
+                    </div>
                   </div>
                   <input type="range" class="emi-slider" id="emiTenureInput" min="1" max="30" step="1" value="20">
                   <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 mt-1">
@@ -1424,7 +1477,7 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
       return '₹' + Number(Math.round(val)).toLocaleString('en-IN');
     }
 
-    function calculateEMI() {
+    function calculateEMI(updateManualInputs = true) {
       const loanInput = document.getElementById('emiLoanInput');
       const rateInput = document.getElementById('emiRateInput');
       const tenureInput = document.getElementById('emiTenureInput');
@@ -1450,10 +1503,31 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
       const principalPercent = Math.max(5, Math.min(95, Math.round((P / totalPayment) * 100)));
       const interestPercent = 100 - principalPercent;
 
-      // Update Displays
-      document.getElementById('emiLoanAmountDisplay').textContent = formatINR(P);
-      document.getElementById('emiRateDisplay').textContent = annualRate.toFixed(1) + '% p.a.';
-      document.getElementById('emiTenureDisplay').textContent = years + ' Years (' + N + ' M)';
+      // Update Legacy / Displays if present
+      const loanDisplay = document.getElementById('emiLoanAmountDisplay');
+      if (loanDisplay) loanDisplay.textContent = formatINR(P);
+
+      const rateDisplay = document.getElementById('emiRateDisplay');
+      if (rateDisplay) rateDisplay.textContent = annualRate.toFixed(1) + '% p.a.';
+
+      const tenureDisplay = document.getElementById('emiTenureDisplay');
+      if (tenureDisplay) tenureDisplay.textContent = years + ' Years (' + N + ' M)';
+
+      // Update Manual Inputs if not currently active
+      if (updateManualInputs) {
+        const manualLoan = document.getElementById('emiLoanManualInput');
+        if (manualLoan && document.activeElement !== manualLoan) {
+          manualLoan.value = Math.round(P).toLocaleString('en-IN');
+        }
+        const manualRate = document.getElementById('emiRateManualInput');
+        if (manualRate && document.activeElement !== manualRate) {
+          manualRate.value = annualRate;
+        }
+        const manualTenure = document.getElementById('emiTenureManualInput');
+        if (manualTenure && document.activeElement !== manualTenure) {
+          manualTenure.value = years;
+        }
+      }
 
       document.getElementById('emiMonthlyDisplay').textContent = formatINR(emi);
       document.getElementById('emiSubtext').textContent = 'per month for ' + years + ' years';
@@ -1481,22 +1555,119 @@ $buildup_display = ($buildup_val > 0) ? $buildup_val . ' sq.ft' : 'On Request';
 
     function setEmiAmount(amount) {
       const el = document.getElementById('emiLoanInput');
-      if (el) { el.value = amount; calculateEMI(); }
-    }
-    function setEmiRate(rate) {
-      const el = document.getElementById('emiRateInput');
-      if (el) { el.value = rate; calculateEMI(); }
-    }
-    function setEmiTenure(tenure) {
-      const el = document.getElementById('emiTenureInput');
-      if (el) { el.value = tenure; calculateEMI(); }
+      const manual = document.getElementById('emiLoanManualInput');
+      const val = parseFloat(amount);
+      if (el && !isNaN(val)) {
+        if (val > parseFloat(el.max)) el.max = val;
+        if (val < parseFloat(el.min)) el.min = Math.max(10000, Math.floor(val / 10000) * 10000);
+        el.value = val;
+      }
+      if (manual && !isNaN(val)) {
+        manual.value = Math.round(val).toLocaleString('en-IN');
+      }
+      calculateEMI(true);
     }
 
-    // Attach EMI events
+    function setEmiRate(rate) {
+      const el = document.getElementById('emiRateInput');
+      const manual = document.getElementById('emiRateManualInput');
+      const val = parseFloat(rate);
+      if (el && !isNaN(val)) el.value = val;
+      if (manual && !isNaN(val)) manual.value = val;
+      calculateEMI(true);
+    }
+
+    function setEmiTenure(tenure) {
+      const el = document.getElementById('emiTenureInput');
+      const manual = document.getElementById('emiTenureManualInput');
+      const val = parseInt(tenure, 10);
+      if (el && !isNaN(val)) el.value = val;
+      if (manual && !isNaN(val)) manual.value = val;
+      calculateEMI(true);
+    }
+
+    // Attach Range Sliders events
     ['emiLoanInput', 'emiRateInput', 'emiTenureInput'].forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.addEventListener('input', calculateEMI);
+      if (el) el.addEventListener('input', () => calculateEMI(true));
     });
+
+    // Attach Manual Price / Loan Amount Input events
+    const manualLoan = document.getElementById('emiLoanManualInput');
+    const loanSlider = document.getElementById('emiLoanInput');
+    if (manualLoan && loanSlider) {
+      manualLoan.addEventListener('input', function() {
+        const digits = this.value.replace(/[^\d]/g, '');
+        if (digits === '') return;
+        const val = parseFloat(digits);
+        if (isNaN(val)) return;
+
+        if (val > parseFloat(loanSlider.max)) loanSlider.max = val;
+        if (val < parseFloat(loanSlider.min)) loanSlider.min = Math.max(10000, Math.floor(val / 10000) * 10000);
+        loanSlider.value = val;
+        calculateEMI(false);
+      });
+
+      manualLoan.addEventListener('blur', function() {
+        const digits = this.value.replace(/[^\d]/g, '');
+        let val = parseFloat(digits);
+        if (isNaN(val) || val <= 0) {
+          val = parseFloat(loanSlider.value) || 5000000;
+        }
+        this.value = Math.round(val).toLocaleString('en-IN');
+        loanSlider.value = val;
+        calculateEMI(true);
+      });
+
+      manualLoan.addEventListener('focus', function() {
+        this.select();
+      });
+    }
+
+    // Attach Manual Rate Input events
+    const manualRate = document.getElementById('emiRateManualInput');
+    const rateSlider = document.getElementById('emiRateInput');
+    if (manualRate && rateSlider) {
+      manualRate.addEventListener('input', function() {
+        const val = parseFloat(this.value);
+        if (isNaN(val) || val <= 0) return;
+        if (val > parseFloat(rateSlider.max)) rateSlider.max = val;
+        if (val < parseFloat(rateSlider.min)) rateSlider.min = val;
+        rateSlider.value = val;
+        calculateEMI(false);
+      });
+      manualRate.addEventListener('blur', function() {
+        let val = parseFloat(this.value);
+        if (isNaN(val) || val < 1) val = 8.5;
+        this.value = val;
+        rateSlider.value = val;
+        calculateEMI(true);
+      });
+    }
+
+    // Attach Manual Tenure Input events
+    const manualTenure = document.getElementById('emiTenureManualInput');
+    const tenureSlider = document.getElementById('emiTenureInput');
+    if (manualTenure && tenureSlider) {
+      manualTenure.addEventListener('input', function() {
+        const val = parseInt(this.value, 10);
+        if (isNaN(val) || val <= 0) return;
+        if (val > parseInt(tenureSlider.max, 10)) tenureSlider.max = val;
+        if (val < parseInt(tenureSlider.min, 10)) tenureSlider.min = val;
+        tenureSlider.value = val;
+        calculateEMI(false);
+      });
+      manualTenure.addEventListener('blur', function() {
+        let val = parseInt(this.value, 10);
+        if (isNaN(val) || val < 1) val = 20;
+        this.value = val;
+        tenureSlider.value = val;
+        calculateEMI(true);
+      });
+    }
+
+    // Trigger initial calculation
+    calculateEMI(true);
 
     // --- 2. LOCALSTORAGE WISHLIST / SAVE LOGIC ---
     function getSavedProperties() {

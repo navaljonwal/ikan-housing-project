@@ -222,6 +222,89 @@ $propertyCatSql = "CREATE TABLE IF NOT EXISTS `property_category` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
 runMigrationStep("Create table 'property_category' IF NOT EXISTS", $propertyCatSql, $results, $con);
+
+
+// --- TABLE: seo_pages (Sync Production Metadata) ---
+$seoPagesTableSql = "CREATE TABLE IF NOT EXISTS `seo_pages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `page_name` varchar(255) NOT NULL,
+  `meta_title` varchar(255) NOT NULL,
+  `meta_description` text NOT NULL,
+  `meta_keywords` text NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci";
+runMigrationStep("Create table 'seo_pages' IF NOT EXISTS", $seoPagesTableSql, $results, $con);
+
+$seoDataToSync = [
+    'index' => [
+        'title' => 'I Kan Housing | Trusted Real Estate Company in Jaipur',
+        'desc'  => 'Explore residential, commercial, and land projects in Jaipur with I Kan Housing. Find verified properties, investment opportunities, and expert real estate guidance.',
+        'keys'  => 'Real Estate Jaipur, Property in Jaipur, Buy Flat in Jaipur, Luxury Apartments Jaipur, Real Estate Agent Jaipur'
+    ],
+    'about-us' => [
+        'title' => 'About I Kan Housing | Jaipur Real Estate Experts',
+        'desc'  => 'Learn about I Kan Housing, a Jaipur real estate company helping buyers and investors discover residential, commercial, and land opportunities.',
+        'keys'  => 'About I Kan Housing, Real Estate Company Jaipur, Property Consultants Jaipur, Real Estate Team Jaipur'
+    ],
+    'ongoing-project' => [
+        'title' => 'Ongoing Residential Projects in Jaipur | I Kan Housing',
+        'desc'  => 'Explore ongoing residential and commercial projects in Jaipur, including project locations, configurations, amenities, prices, and enquiry details.',
+        'keys'  => 'Ongoing Projects Jaipur, Under Construction Flats Jaipur, Residential Projects Jaipur, New Housing Projects Jaipur'
+    ],
+    'complete-project' => [
+        'title' => 'Completed Real Estate Projects in Jaipur | I Kan Housing',
+        'desc'  => 'View completed residential and commercial projects in Jaipur with project details, locations, configurations, and enquiry information.',
+        'keys'  => 'Completed Projects Jaipur, Ready to Move Flats Jaipur, Delivered Real Estate Projects Jaipur'
+    ],
+    'services' => [
+        'title' => 'Real Estate Services in Jaipur | I Kan Housing',
+        'desc'  => 'Explore I Kan Housing services for residential sales, land, commercial property, investment, leasing, post-sales support, and real estate advisory in Jaipur.',
+        'keys'  => 'Real Estate Services Jaipur, Property Advisory Jaipur, Commercial Leasing Jaipur, Residential Sales Jaipur'
+    ],
+    'residential' => [
+        'title' => 'Residential Properties and Projects in Jaipur | I Kan Housing',
+        'desc'  => 'Find residential apartments, homes, and housing projects in Jaipur with project details, locations, configurations, amenities, and enquiry options.',
+        'keys'  => 'Residential Property Jaipur, Apartments in Jaipur, Flats for Sale Jaipur, Luxury Homes Jaipur'
+    ],
+    'land-services' => [
+        'title' => 'Land Investment and Development Services in Jaipur | I Kan Housing',
+        'desc'  => 'Find land investment, development, and advisory opportunities in Jaipur with I Kan Housing’s local real estate expertise.',
+        'keys'  => 'Land Investment Jaipur, Plots in Jaipur, Real Estate Land Acquisition, Land Development Jaipur'
+    ],
+    'contact' => [
+        'title' => 'Contact I Kan Housing | Jaipur Real Estate Enquiries',
+        'desc'  => 'Contact I Kan Housing for residential, commercial, land, investment, and property enquiries in Jaipur.',
+        'keys'  => 'Contact I Kan Housing, Real Estate Office Jaipur, Property Enquiry Jaipur, Real Estate Agent Contact'
+    ],
+    'career' => [
+        'title' => 'Careers at I Kan Housing | Real Estate Jobs in Jaipur',
+        'desc'  => 'Explore career opportunities at I Kan Housing and join a growing real estate team serving buyers and investors in Jaipur.',
+        'keys'  => 'Real Estate Jobs Jaipur, Careers at I Kan Housing, Property Sales Jobs Jaipur, Real Estate Hiring'
+    ],
+    'rewards-&-team' => [
+        'title' => 'I Kan Housing Leadership Team and Achievements | Jaipur Real Estate',
+        'desc'  => 'Meet the I Kan Housing team and learn about the company’s achievements, experience, and real estate work in Jaipur.',
+        'keys'  => 'I Kan Housing Team, Real Estate Leadership Jaipur, Real Estate Awards, Real Estate Management'
+    ]
+];
+
+if ($con) {
+    foreach ($seoDataToSync as $page => $d) {
+        $p = mysqli_real_escape_string($con, $page);
+        $t = mysqli_real_escape_string($con, $d['title']);
+        $de = mysqli_real_escape_string($con, $d['desc']);
+        $k = mysqli_real_escape_string($con, $d['keys']);
+        $check = mysqli_query($con, "SELECT id FROM seo_pages WHERE page_name = '$p' LIMIT 1");
+        if ($check && mysqli_num_rows($check) > 0) {
+            $row = mysqli_fetch_assoc($check);
+            mysqli_query($con, "UPDATE seo_pages SET meta_title = '$t', meta_description = '$de', meta_keywords = '$k', status = 1 WHERE id = " . (int)$row['id']);
+        } else {
+            mysqli_query($con, "INSERT INTO seo_pages (page_name, meta_title, meta_description, meta_keywords, status) VALUES ('$p', '$t', '$de', '$k', 1)");
+        }
+    }
+    $results[] = ['title' => 'Sync Production SEO Metadata in seo_pages', 'status' => 'success', 'message' => 'Cleaned placeholder strings and synced 10 production pages'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
